@@ -42,7 +42,7 @@ class WFlowStepList extends StatelessWidget {
 
   // Genera la peticion de datos al servidor
   Future<List<SoWFlowStep>> fetchSoWFlowSteps(http.Client client) async {
-    final response = await client.get(Uri.parse('http://localhost:8080/flexwm-js/restwflowstep;' + params.jSessionIdQuery + '=' + params.jSessionId));
+    final response = await client.get(Uri.parse(params.getAppUrl(params.instance) + 'restwflowstep;' + params.jSessionIdQuery + '=' + params.jSessionId));
 
     // Use the compute function to run parsePhotos in a separate isolate.
     return compute(parseSoWFlowSteps, response.body);

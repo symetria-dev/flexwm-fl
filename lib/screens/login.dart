@@ -1,6 +1,4 @@
-// Copyright 2020 The Flutter team. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// Copyright FlexWM Web-Based Management
 
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -22,13 +20,15 @@ class LoginForm extends StatefulWidget {
 // Forma de wflowstep con estado
 class LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
+  final instanceController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   SoLogin soLogin = SoLogin.empty();
 
   @override
   void dispose() {
-    // Clean up the controller when the widget is disposed.
+    // Limpia controladores al eliminar pantalla
+    instanceController.dispose();
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
@@ -37,6 +37,7 @@ class LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
     SharedPreferences.setMockInitialValues({});
+    doLogout();
 
     return Scaffold(
       body: Center(
@@ -63,12 +64,27 @@ class LoginFormState extends State<LoginForm> {
 
   // Prepara la forma
   Widget getLoginForm() {
-    previousEmail();
+    previousData();
 
     return Form(
       key: _formKey,
       child: Column(
         children: <Widget>[
+          TextFormField(
+            //initialValue: soWFlowStep.name,
+            // The validator receives the text that the user has entered.
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Ingresar Instancia';
+              }
+              return null;
+            },
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              labelText: 'Instancia',
+            ),
+            controller: instanceController,
+          ),
           TextFormField(
             //initialValue: soWFlowStep.name,
             // The validator receives the text that the user has entered.
@@ -97,6 +113,7 @@ class LoginFormState extends State<LoginForm> {
               border: UnderlineInputBorder(),
               labelText: 'Password',
             ),
+            obscureText: true,
             controller: passwordController,
           ),
           Padding(
@@ -123,13 +140,24 @@ class LoginFormState extends State<LoginForm> {
     );
   }
 
+  // Envia datos de logout al servidor
+  void doLogout() async {
+    // Si hay sesion abierta
+    if (params.instance != '') {
+      final response = await http.Client().get(Uri.parse(
+          params.getAppUrl(params.instance) + 'restlogout;' +
+              params.jSessionIdQuery + '=' + params.jSessionId));
+    }
+  }
+
   // Envia datos de login al servidor
   void doLogin() async {
+    soLogin.email = emailController.text;
     soLogin.email = emailController.text;
     soLogin.password = passwordController.text;
 
     final response = await http.post(
-      Uri.parse('http://localhost:8080/flexwm-js/restlogin'),
+      Uri.parse(params.getAppUrl(instanceController.text) + 'restlogin'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Access-Control-Allow-Origin': '*',
@@ -154,29 +182,37 @@ class LoginFormState extends State<LoginForm> {
     }
   }
 
-  // Obtiene email de persistencia
-  void previousEmail() async {
-    // Obtain shared preferences.
+  // Obtiene instancia y email de persistencia
+  void previousData() async {
     final prefs = await SharedPreferences.getInstance();
-    // set value
+
+    String instance = prefs.getString('instance') ?? '';
     String email = prefs.getString('email') ?? '';
+
+    if (instance != '') {
+      instanceController.text = instance;
+    } else {
+      instanceController.text = '_flexwm-js';
+    }
 
     if (email != '') {
       emailController.text = email;
     } else {
-      emailController.text = 'mlopez@flexwm.com!';
+      emailController.text = 'mlopez@flexwm.com';
       passwordController.text = 'Viruliento99';
     }
   }
 
   // Asigna email y nombres a persistencia
   void doContinue() async {
-    // Obtain shared preferences.
+    // Obtiene datos de persistencia
     final prefs = await SharedPreferences.getInstance();
-    // set value
+    // Asigna valores persistentes
+    prefs.setString('instance', instanceController.text);
     prefs.setString('email', soLogin.email);
 
     params.jSessionId = soLogin.jSessionId;
+    params.instance = instanceController.text;
     params.firstname = soLogin.firstname;
     params.lastname = soLogin.lastname;
     params.email = soLogin.email;

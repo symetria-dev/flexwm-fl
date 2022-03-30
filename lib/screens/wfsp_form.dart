@@ -65,7 +65,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
 
   // Obtiene los datos del registro
   Future<SoWFlowStep> fetchWFlowStep(int id) async {
-    final response = await http.get(Uri.parse('http://localhost:8080/flexwm-js/restwflowstep;' + params.jSessionIdQuery + '=' + params.jSessionId + '?id=' + id.toString()));
+    final response = await http.get(Uri.parse(params.getAppUrl(params.instance) + 'restwflowstep;' + params.jSessionIdQuery + '=' + params.jSessionId + '?id=' + id.toString()));
 
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
