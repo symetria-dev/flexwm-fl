@@ -141,13 +141,6 @@ class WFlowStepFormState extends State<WFlowStepForm> {
             controller: descriptionController,
           ),
           getProgressComboBox(),
-          CupertinoDatePicker(
-            mode: CupertinoDatePickerMode.date,
-            initialDateTime: DateTime(1969, 1, 1),
-            onDateTimeChanged: (DateTime newDateTime) {
-              // Do something
-            },
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: ElevatedButton(
