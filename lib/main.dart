@@ -1,6 +1,5 @@
-// Copyright 2019 The Flutter team. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// Copyright 2022 FlexWM Web Based Management. Derechos Reservados
+// Author: Mauricio Lopez Barba
 
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -74,7 +73,6 @@ class MyApp extends StatelessWidget {
           '/cart': (context) => const MyCart(),
           '/photos': (context) => const MyPhotos(),
           '/wflowsteps': (context) => const WFlowStepList(),
-          '/wflowstep': (context) => const WFlowStepForm(),
         },
       ),
     );

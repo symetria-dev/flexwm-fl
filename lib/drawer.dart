@@ -1,3 +1,6 @@
+// Copyright 2022 FlexWM Web Based Management. Derechos Reservados
+// Author: Mauricio Lopez Barba
+
 import 'package:flutter/material.dart';
 import 'package:flexwm/common/params.dart' as params;
 

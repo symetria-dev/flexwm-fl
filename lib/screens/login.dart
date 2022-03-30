@@ -1,4 +1,5 @@
-// Copyright FlexWM Web-Based Management
+// Copyright 2022 FlexWM Web Based Management. Derechos Reservados
+// Author: Mauricio Lopez Barba
 
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -37,6 +38,8 @@ class LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
     SharedPreferences.setMockInitialValues({});
+
+    // Primero libera la sesion existente
     doLogout();
 
     return Scaffold(
@@ -48,7 +51,7 @@ class LoginFormState extends State<LoginForm> {
             children: [
               Image.asset('images/logo.png'),
               Text(
-                'Welcome',
+                'App FlexWM',
                 style: Theme.of(context).textTheme.headline1,
               ),
               getLoginForm(),
@@ -64,7 +67,8 @@ class LoginFormState extends State<LoginForm> {
 
   // Prepara la forma
   Widget getLoginForm() {
-    previousData();
+    // Asigna datos previos de persistencia
+    setPrevData();
 
     return Form(
       key: _formKey,
@@ -183,7 +187,7 @@ class LoginFormState extends State<LoginForm> {
   }
 
   // Obtiene instancia y email de persistencia
-  void previousData() async {
+  void setPrevData() async {
     final prefs = await SharedPreferences.getInstance();
 
     String instance = prefs.getString('instance') ?? '';

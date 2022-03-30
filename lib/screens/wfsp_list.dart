@@ -1,5 +1,9 @@
+// Copyright 2022 FlexWM Web Based Management. Derechos Reservados
+// Author: Mauricio Lopez Barba
+
 import 'dart:async';
 import 'dart:convert';
+import 'package:flexwm/screens/wfsp_form.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -73,9 +77,19 @@ class SoWFlowStepList extends StatelessWidget {
         final item = sOWFlowSteps[index];
         return Card(
           child: ListTile(
-            onTap: () {Navigator.pushNamed(context, '/wflowstep', arguments: {'id': item.id});},
+            //onTap: () {Navigator.pushNamed(context, '/wflowstep', arguments: {'id': item.id});},
+            //onTap: { Navigator.push(
+            //    context,
+            //    MaterialPageRoute(
+            //      builder: (_) => WFlowStepForm(requiredAttrib: item.id),
+            //    ),
+            //  );},
             leading: IconButton(
-              onPressed: () {Navigator.pushNamed(context, '/wflowstep', arguments: {'id': item.id});},
+              //onPressed: () {Navigator.pushNamed(context, '/wflowstep', arguments: {'id': item.id});},
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => WFlowStepForm(requiredAttrib: item.id.toString())
+                  ),
+              ),
               icon: const Icon(Icons.task),
             ),
             title: Text(item.name),

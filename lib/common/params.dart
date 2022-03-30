@@ -1,3 +1,6 @@
+// Copyright 2022 FlexWM Web Based Management. Derechos Reservados
+// Author: Mauricio Lopez Barba
+
 library flexwm.params;
 
 // Constantes

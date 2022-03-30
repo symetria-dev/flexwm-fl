@@ -1,3 +1,5 @@
+// Copyright 2022 FlexWM Web Based Management. Derechos Reservados
+// Author: Mauricio Lopez Barba
 
 // Modelo de clase tarea
 class SoWFlowStep {
