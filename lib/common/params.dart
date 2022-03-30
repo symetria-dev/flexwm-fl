@@ -5,6 +5,7 @@ library flexwm.params;
 
 // Constantes
 const String jSessionIdQuery = 'jsessionid';
+const String uploadFiles = 'uploadfiles';
 
 // Variables
 String instance = '';
@@ -13,6 +14,7 @@ String email = '';
 String firstname = '';
 String lastname = '';
 String jSessionId = '';
+String photoUrl = '';
 
 // Obtiene el servidor a utilizar
 String getAppUrl(String instance) {

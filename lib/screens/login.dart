@@ -37,7 +37,7 @@ class LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    SharedPreferences.setMockInitialValues({});
+    // SharedPreferences.setMockInitialValues({});
 
     // Primero libera la sesion existente
     doLogout();
@@ -148,7 +148,7 @@ class LoginFormState extends State<LoginForm> {
   void doLogout() async {
     // Si hay sesion abierta
     if (params.instance != '') {
-      final response = await http.Client().get(Uri.parse(
+      await http.Client().get(Uri.parse(
           params.getAppUrl(params.instance) + 'restlogout;' +
               params.jSessionIdQuery + '=' + params.jSessionId));
     }
@@ -220,5 +220,6 @@ class LoginFormState extends State<LoginForm> {
     params.firstname = soLogin.firstname;
     params.lastname = soLogin.lastname;
     params.email = soLogin.email;
+    params.photoUrl = soLogin.photoUrl;
   }
 }

@@ -26,20 +26,20 @@ Widget getDrawer(BuildContext context) {
               color: Colors.white,
             ),
           ),
-          currentAccountPicture: CircleAvatar(
-            backgroundColor: Colors.white,
-            backgroundImage: AssetImage("images/person.jpg"),
+          currentAccountPicture: Image.network(
+            params.getAppUrl(params.instance) + params.uploadFiles + '/' + params.photoUrl,
+            fit: BoxFit.contain,
           ),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             image: DecorationImage(
               image: AssetImage('images/bg.jpeg'),
               fit: BoxFit.fill,
             ),
           ),
           otherAccountsPictures: [
-            CircleAvatar(
+            const CircleAvatar(
               backgroundColor: Colors.white,
-              backgroundImage: AssetImage('images/isotipo.png'),
+              backgroundImage: const AssetImage('images/isotipo.png'),
             ),
           ],
         ),

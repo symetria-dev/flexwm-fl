@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/models/wfsp.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flexwm/common/params.dart' as params;
 
 // Create a Form widget.
@@ -53,7 +52,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detalle Tarea'),
+        title: Text('Tarea', style: Theme.of(context).textTheme.headline1),
       ),
       body: Center(
         child: FutureBuilder<SoWFlowStep>(
@@ -87,78 +86,118 @@ class WFlowStepFormState extends State<WFlowStepForm> {
 
     return Form(
       key: _formKey,
-      child: Column(
-        children: <Widget>[
-          const Divider(
-            height: 20,
-            thickness: 5,
-            indent: 0,
-            endIndent: 0,
-            color: Colors.white,
-          ),
-          Text(
-            soWFlowStep.header,
-            style: const TextStyle(
-              fontSize: 18,
-              color: Colors.black,
-            ),
-          ),
-          const Divider(
-            height: 20,
-            thickness: 5,
-            indent: 0,
-            endIndent: 0,
-            color: Colors.black54,
-          ),
-          TextFormField(
-            //initialValue: soWFlowStep.name,
-            // The validator receives the text that the user has entered.
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter some text';
-              }
-              return null;
-            },
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              labelText: 'Nombre',
-            ),
-            controller: nameController,
-          ),
-          TextFormField(
-            //initialValue: soWFlowStep.description,
-            // The validator receives the text that the user has entered.
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter some text';
-              }
-              return null;
-            },
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              labelText: 'Descripcion',
-            ),
-            controller: descriptionController,
-          ),
-          getProgressComboBox(),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: ElevatedButton(
-              onPressed: () {
-                // Valida la forma, si regresa verdadero actua
-                if (_formKey.currentState!.validate()) {
-                  // Actualiza registro
-                  updateWFlowStep();
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: <Widget>[
+            getTitle(soWFlowStep),
+            TextFormField(
+              //initialValue: soWFlowStep.name,
+              // The validator receives the text that the user has entered.
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter some text';
                 }
+                return null;
               },
-              child: const Text(
-                'Guardar',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white,
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: 'Nombre',
+              ),
+              controller: nameController,
+            ),
+            TextFormField(
+              //initialValue: soWFlowStep.description,
+              // The validator receives the text that the user has entered.
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter some text';
+                }
+                return null;
+              },
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: 'Descripcion',
+              ),
+              controller: descriptionController,
+            ),
+            getProgressComboBox(),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  // Valida la forma, si regresa verdadero actua
+                  if (_formKey.currentState!.validate()) {
+                    // Actualiza registro
+                    updateWFlowStep();
+                  }
+                },
+                child: const Text(
+                  'Guardar',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Widget del titulo
+  Widget getTitle(SoWFlowStep soWFlowStep) {
+    print('Si se va a cargar la imagen: ' + soWFlowStep.customerLogo);
+
+    return Container(
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    soWFlowStep.wFlowCode,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    soWFlowStep.wFlowName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Text(
+                  soWFlowStep.customerCode +
+                      ' ' +
+                      soWFlowStep.customerDisplayName,
+                  style: TextStyle(
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Image.network(
+            params.getAppUrl(params.instance) +
+                params.uploadFiles +
+                '/' +
+                soWFlowStep.customerLogo,
+            width: 100,
+            height: 100,
+            errorBuilder: (context, error, stackTrace) {
+              print(error); //do something
+              return Text('');
+            },
           ),
         ],
       ),
@@ -187,19 +226,6 @@ class WFlowStepFormState extends State<WFlowStepForm> {
         );
       }).toList(),
     );
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: selectedDate,
-        firstDate: DateTime(2015, 8),
-        lastDate: DateTime(2101));
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-      });
-    }
   }
 
   // Obtiene los datos del registro

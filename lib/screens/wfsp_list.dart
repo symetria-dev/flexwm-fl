@@ -19,7 +19,7 @@ class WFlowStepList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tareas'),
+        title: Text('Tareas', style: Theme.of(context).textTheme.headline1),
       ),
       body: FutureBuilder<List<SoWFlowStep>>(
         future: fetchSoWFlowSteps(http.Client()),
@@ -78,7 +78,10 @@ class SoWFlowStepList extends StatelessWidget {
         return Card(
           child: ListTile(
             //onTap: () {Navigator.pushNamed(context, '/wflowstep', arguments: {'id': item.id});},
-            //onTap: { Navigator.push(
+            onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => WFlowStepForm(requiredAttrib: item.id.toString())
+              ),
+            ),
             //    context,
             //    MaterialPageRoute(
             //      builder: (_) => WFlowStepForm(requiredAttrib: item.id),
@@ -93,7 +96,7 @@ class SoWFlowStepList extends StatelessWidget {
               icon: const Icon(Icons.task),
             ),
             title: Text(item.name),
-            subtitle: Text(item.header),
+            subtitle: Text(item.wFlowCode + ' ' + item.wFlowName),
             trailing: Text(item.progress.toString() + '%'),
           ),
         );
@@ -101,5 +104,3 @@ class SoWFlowStepList extends StatelessWidget {
     );
   }
 }
-
-
