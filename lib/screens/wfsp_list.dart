@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flexwm/screens/wfsp_form.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/drawer.dart';
@@ -40,6 +39,12 @@ class _WFlowStepListState extends State<WFlowStepList> {
             params.jSessionIdQuery +
             '=' +
             params.jSessionId));
+
+    // Si no es exitoso envia a login
+    if (response.statusCode != 200) {
+      Navigator.pushNamed(context, '/');
+    }
+
     final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
     return parsed
         .map<SoWFlowStep>((json) => SoWFlowStep.fromJson(json))
@@ -51,7 +56,8 @@ class _WFlowStepListState extends State<WFlowStepList> {
     return Scaffold(
       backgroundColor: params.bgColor,
       appBar: AppBar(
-        title: Text('Tareas', style: Theme.of(context).textTheme.headline6),
+        title: Text('Tareas Activas',
+            style: Theme.of(context).textTheme.headline6),
         backgroundColor: params.appBarBgColor,
       ),
       body: FutureBuilder<List<SoWFlowStep>>(
@@ -77,6 +83,7 @@ class _WFlowStepListState extends State<WFlowStepList> {
     );
   }
 
+  // Obtiene el listado con formato
   Widget getListWidget(List<SoWFlowStep> soWFlowStepList) {
     return ListView.builder(
       itemCount: soWFlowStepList.length,
@@ -102,7 +109,8 @@ class _WFlowStepListState extends State<WFlowStepList> {
             ),
             title: Text(item.name),
             subtitle: Text(item.wFlowCode + ' ' + item.wFlowName),
-            trailing: Text(item.progress.toString() + '%', style: const TextStyle(color: Colors.indigo)),
+            trailing: Text(item.progress.toString() + '%',
+                style: const TextStyle(color: Colors.indigo)),
           ),
         );
       },

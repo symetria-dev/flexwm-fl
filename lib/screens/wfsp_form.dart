@@ -32,6 +32,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
   // Variables auxiliares de campos
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
+  final remindDateController = TextEditingController();
   String progress = '';
   DateTime selectedDate = DateTime.now();
 
@@ -46,6 +47,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
     // Clean up the controller when the widget is disposed.
     nameController.dispose();
     descriptionController.dispose();
+    remindDateController.dispose();
     super.dispose();
   }
 
@@ -85,6 +87,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
     soWFlowStep = getSoWFlowStep;
     nameController.text = soWFlowStep.name;
     descriptionController.text = soWFlowStep.description;
+    remindDateController.text = soWFlowStep.remindDate;
     progress = soWFlowStep.progress.toString();
 
     return Form(
@@ -109,20 +112,13 @@ class WFlowStepFormState extends State<WFlowStepForm> {
               controller: nameController,
             ),
             TextFormField(
-              //initialValue: soWFlowStep.description,
-              // The validator receives the text that the user has entered.
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
               decoration: const InputDecoration(
                 border: UnderlineInputBorder(),
                 labelText: 'Descripcion',
               ),
               controller: descriptionController,
             ),
+            getDatePicker(),
             getProgressComboBox(),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -155,7 +151,11 @@ class WFlowStepFormState extends State<WFlowStepForm> {
       child: ListTile(
         leading: params.getProperIcon(soWFlowStep.wFlowCallerCode),
         title: Text(soWFlowStep.wFlowCode),
-        subtitle: Text(soWFlowStep.wFlowName + '\n' + soWFlowStep.customerCode + ' ' + soWFlowStep.customerDisplayName),
+        subtitle: Text(soWFlowStep.wFlowName +
+            '\n' +
+            soWFlowStep.customerCode +
+            ' ' +
+            soWFlowStep.customerDisplayName),
         trailing: Image.network(
           params.getAppUrl(params.instance) +
               params.uploadFiles +
@@ -167,58 +167,6 @@ class WFlowStepFormState extends State<WFlowStepForm> {
             return Text('');
           },
         ),
-      ),
-    );
-  }
-
-  // Widget del titulo
-  Widget getTitle(SoWFlowStep soWFlowStep) {
-    return Container(
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    soWFlowStep.wFlowCode,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    soWFlowStep.wFlowName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Text(soWFlowStep.customerCode + ' ' + soWFlowStep.customerDisplayName,
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Image.network(
-            params.getAppUrl(params.instance) +
-                params.uploadFiles +
-                '/' +
-                soWFlowStep.customerLogo,
-            width: 100,
-            height: 100,
-            errorBuilder: (context, error, stackTrace) {
-              print(error); //do something
-              return Text('');
-            },
-          ),
-        ],
       ),
     );
   }
@@ -247,6 +195,31 @@ class WFlowStepFormState extends State<WFlowStepForm> {
     );
   }
 
+  // Obtiene picker de fecha
+  Widget getDatePicker() {
+    return TextFormField(
+      controller: remindDateController,
+      decoration: const InputDecoration(
+        labelText: "Fecha Recordatorio",
+        hintText: "Cuando debe completarse la tarea?",
+      ),
+      onTap: () async {
+        DateTime? date = DateTime(1900);
+        FocusScope.of(context).requestFocus(new FocusNode());
+
+        date = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(1900),
+            lastDate: DateTime(2100));
+
+        setState(){
+          remindDateController.text = date.toString();
+        };
+      },
+    );
+  }
+
   // Obtiene los datos del registro
   Future<SoWFlowStep> fetchWFlowStep(String id) async {
     final response = await http.get(Uri.parse(
@@ -258,16 +231,12 @@ class WFlowStepFormState extends State<WFlowStepForm> {
             '?id=' +
             id.toString()));
 
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      return SoWFlowStep.fromJson(jsonDecode(response.body));
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception(
-          'Error al obtener registro: ' + response.statusCode.toString());
+    // Si no es exitoso envia a login
+    if (response.statusCode != 200) {
+      Navigator.pushNamed(context, '/');
     }
+
+    return SoWFlowStep.fromJson(jsonDecode(response.body));
   }
 
   // Actualiza el wflowstep en el servidor
@@ -277,7 +246,9 @@ class WFlowStepFormState extends State<WFlowStepForm> {
     soWFlowStep.progress = int.parse(progress);
 
     final response = await http.post(
-      Uri.parse(params.getAppUrl(params.instance) + 'restwflowstep;' + params.jSessionIdQuery),
+      Uri.parse(params.getAppUrl(params.instance) +
+          'restwflowstep;' +
+          params.jSessionIdQuery),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Access-Control-Allow-Origin': '*',

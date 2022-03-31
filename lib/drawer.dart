@@ -56,17 +56,6 @@ Widget getDrawer(BuildContext context) {
           },
         ),
         ListTile(
-          leading: const Icon(Icons.browse_gallery),
-          title: const Text('Catalog'),
-          onTap: () {
-            // Update the state of the app
-            Navigator.pop(context);
-            Navigator.pushNamed(context, '/catalog');
-            // Then close the drawer
-            //Navigator.pop(context);
-          },
-        ),
-        ListTile(
           leading: const Icon(Icons.image),
           title: const Text('Fotos'),
           onTap: () {
@@ -79,7 +68,7 @@ Widget getDrawer(BuildContext context) {
         ),
         ListTile(
           leading: const Icon(Icons.task),
-          title: const Text('Tareas'),
+          title: const Text('Tareas Activas'),
           onTap: () {
             // Update the state of the app
             Navigator.pop(context);
