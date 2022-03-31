@@ -38,9 +38,9 @@ Widget getDrawer(BuildContext context) {
             ),
           ),
           otherAccountsPictures: [
-            const CircleAvatar(
+            CircleAvatar(
               backgroundColor: Colors.white,
-              backgroundImage: const AssetImage('images/isotipo.png'),
+              backgroundImage: AssetImage('images/isotipo.png'),
             ),
           ],
         ),
