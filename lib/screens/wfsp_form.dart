@@ -52,8 +52,10 @@ class WFlowStepFormState extends State<WFlowStepForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: params.bgColor,
       appBar: AppBar(
-        title: Text('Tarea', style: Theme.of(context).textTheme.headline1),
+        title: Text('Tarea', style: Theme.of(context).textTheme.headline6),
+        backgroundColor: params.appBarBgColor,
       ),
       body: Center(
         child: FutureBuilder<SoWFlowStep>(
@@ -91,10 +93,9 @@ class WFlowStepFormState extends State<WFlowStepForm> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: <Widget>[
-            getTitle(soWFlowStep),
+            getHeader(soWFlowStep),
             TextFormField(
-              //initialValue: soWFlowStep.name,
-              // The validator receives the text that the user has entered.
+              enabled: false,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';
@@ -103,7 +104,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
               },
               decoration: const InputDecoration(
                 border: UnderlineInputBorder(),
-                labelText: 'Nombre',
+                labelText: 'Nombre Tarea',
               ),
               controller: nameController,
             ),
@@ -148,6 +149,28 @@ class WFlowStepFormState extends State<WFlowStepForm> {
     );
   }
 
+  // Widget de header
+  Widget getHeader(SoWFlowStep soWFlowStep) {
+    return Card(
+      child: ListTile(
+        leading: params.getProperIcon(soWFlowStep.wFlowCallerCode),
+        title: Text(soWFlowStep.wFlowCode),
+        subtitle: Text(soWFlowStep.wFlowName + '\n' + soWFlowStep.customerCode + ' ' + soWFlowStep.customerDisplayName),
+        trailing: Image.network(
+          params.getAppUrl(params.instance) +
+              params.uploadFiles +
+              '/' +
+              soWFlowStep.customerLogo,
+          width: 100,
+          height: 100,
+          errorBuilder: (context, error, stackTrace) {
+            return Text('');
+          },
+        ),
+      ),
+    );
+  }
+
   // Widget del titulo
   Widget getTitle(SoWFlowStep soWFlowStep) {
     return Container(
@@ -175,10 +198,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
                     ),
                   ),
                 ),
-                Text(
-                  soWFlowStep.customerCode +
-                      ' ' +
-                      soWFlowStep.customerDisplayName,
+                Text(soWFlowStep.customerCode + ' ' + soWFlowStep.customerDisplayName,
                   style: TextStyle(
                     color: Colors.grey[500],
                   ),
@@ -215,7 +235,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
       },
       decoration: const InputDecoration(
         border: UnderlineInputBorder(),
-        labelText: 'Avance',
+        labelText: '% Avance',
       ),
       items: <String>['0', '25', '50', '75', '100']
           .map<DropdownMenuItem<String>>((String value) {

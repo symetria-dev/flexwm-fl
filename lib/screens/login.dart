@@ -44,6 +44,7 @@ class LoginFormState extends State<LoginForm> {
     doLogout();
 
     return Scaffold(
+      backgroundColor: params.bgColor,
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(60.0),

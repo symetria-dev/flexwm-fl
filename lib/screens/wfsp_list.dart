@@ -49,11 +49,12 @@ class _WFlowStepListState extends State<WFlowStepList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: params.bgColor,
       appBar: AppBar(
-        title: Text('Tareas', style: Theme.of(context).textTheme.headline1),
+        title: Text('Tareas', style: Theme.of(context).textTheme.headline6),
+        backgroundColor: params.appBarBgColor,
       ),
       body: FutureBuilder<List<SoWFlowStep>>(
-        //initialData: [],
         future: _futureSoWFlowSteps,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
@@ -83,7 +84,6 @@ class _WFlowStepListState extends State<WFlowStepList> {
         final item = soWFlowStepList[index];
         return Card(
           child: ListTile(
-            //onTap: () {Navigator.pushNamed(context, '/wflowstep', arguments: {'id': item.id});},
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
@@ -98,33 +98,22 @@ class _WFlowStepListState extends State<WFlowStepList> {
                     builder: (_) =>
                         WFlowStepForm(requiredAttrib: item.id.toString())),
               ),
-              icon: Icon(getProperIcon(item.wFlowCallerCode)),
+              icon: params.getProperIcon(item.wFlowCallerCode),
             ),
             title: Text(item.name),
             subtitle: Text(item.wFlowCode + ' ' + item.wFlowName),
-            trailing: Text(item.progress.toString() + '%'),
+            trailing: Text(item.progress.toString() + '%', style: const TextStyle(color: Colors.indigo)),
           ),
         );
       },
     );
   }
 
+  // Actualiza al arrastrar hacia abajo
   Future<void> _pullRefresh() async {
     List<SoWFlowStep> freshFutureSoWFlowSteps = await fetchSoWFlowSteps();
     setState(() {
       _futureSoWFlowSteps = Future.value(freshFutureSoWFlowSteps);
     });
-  }
-  
-  IconData getProperIcon(String wFlowCallerCode) {
-    if (wFlowCallerCode == 'OPPO') {
-      return Icons.adjust;
-    } else if (wFlowCallerCode == 'ORDE') {
-      return Icons.add_shopping_cart;
-    } else if (wFlowCallerCode == 'ACTI') {
-      return Icons.alt_route_sharp;
-    } else {
-      return Icons.task;
-    }
   }
 }
