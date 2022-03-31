@@ -1,5 +1,6 @@
-// Copyright 2022 FlexWM Web Based Management. Derechos Reservados
-// Author: Mauricio Lopez Barba
+// FlexWM-FL Derechos Reservados 2022
+// Este software es propiedad de Mauricio Lopez Barba y Alonso Ibarra Barba
+// No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
 library flexwm.params;
 

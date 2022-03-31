@@ -1,11 +1,13 @@
-// Copyright 2022 FlexWM Web Based Management. Derechos Reservados
-// Author: Mauricio Lopez Barba
+// FlexWM-FL Derechos Reservados 2022
+// Este software es propiedad de Mauricio Lopez Barba y Alonso Ibarra Barba
+// No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
 // Modelo de clase tarea
 class SoWFlowStep {
   int id = -1;
   String wFlowCode = "";
   String wFlowName = "";
+  String wFlowCallerCode = "";
   String customerCode = "";
   String customerDisplayName = "";
   String customerLogo = "";
@@ -16,14 +18,15 @@ class SoWFlowStep {
 
   SoWFlowStep.empty();
 
-  SoWFlowStep(this.id, this.wFlowCode, this.wFlowName, this.customerCode,
-      this.customerDisplayName, this.customerLogo, this.name,
-      this.description, this.progress, this.remindDate);
+  SoWFlowStep(this.id, this.wFlowCode, this.wFlowName, this.wFlowCallerCode,
+      this.customerCode, this.customerDisplayName, this.customerLogo,
+      this.name, this.description, this.progress, this.remindDate);
 
   factory SoWFlowStep.fromJson(Map<String, dynamic> json) {
     return SoWFlowStep(json['id'] as int,
         json['wFlowCode'] as String,
         json['wFlowName'] as String,
+        json['wFlowCallerCode'] as String,
         json['customerCode'] as String,
         json['customerDisplayName'] as String,
         json['customerLogo'] as String,
@@ -39,6 +42,7 @@ class SoWFlowStep {
       'id': id,
       'wFlowCode': wFlowCode,
       'wFlowName': wFlowName,
+      'wFlowCallerCode': wFlowCallerCode,
       'customerCode': customerCode,
       'customerDisplayName': customerDisplayName,
       'customerLogo': customerLogo,

@@ -76,23 +76,6 @@ class _WFlowStepListState extends State<WFlowStepList> {
     );
   }
 
-  /*Widget _listView(AsyncSnapshot snapshot) {
-    if (snapshot.hasData) {
-      return ListView.builder(
-        itemCount: snapshot.data.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(snapshot.data[index].asPascalCase),
-          );
-        },);
-    }
-    else {
-      return Center(
-        child: Text('Loading data...'),
-      );
-    }
-  }*/
-
   Widget getListWidget(List<SoWFlowStep> soWFlowStepList) {
     return ListView.builder(
       itemCount: soWFlowStepList.length,
@@ -115,7 +98,7 @@ class _WFlowStepListState extends State<WFlowStepList> {
                     builder: (_) =>
                         WFlowStepForm(requiredAttrib: item.id.toString())),
               ),
-              icon: const Icon(Icons.task),
+              icon: Icon(getProperIcon(item.wFlowCallerCode)),
             ),
             title: Text(item.name),
             subtitle: Text(item.wFlowCode + ' ' + item.wFlowName),
@@ -131,5 +114,17 @@ class _WFlowStepListState extends State<WFlowStepList> {
     setState(() {
       _futureSoWFlowSteps = Future.value(freshFutureSoWFlowSteps);
     });
+  }
+  
+  IconData getProperIcon(String wFlowCallerCode) {
+    if (wFlowCallerCode == 'OPPO') {
+      return Icons.adjust;
+    } else if (wFlowCallerCode == 'ORDE') {
+      return Icons.add_shopping_cart;
+    } else if (wFlowCallerCode == 'ACTI') {
+      return Icons.alt_route_sharp;
+    } else {
+      return Icons.task;
+    }
   }
 }
