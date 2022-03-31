@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/http.dart';
@@ -13,7 +10,7 @@ class MyPhotos extends StatelessWidget {
   Widget build(BuildContext context) {
     const appTitle = 'Isolate Demo';
 
-    return MyPhotosPage(title: appTitle);
+    return const MyPhotosPage(title: appTitle);
   }
 }
 

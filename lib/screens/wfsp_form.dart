@@ -164,7 +164,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
           width: 100,
           height: 100,
           errorBuilder: (context, error, stackTrace) {
-            return Text('');
+            return const Text('');
           },
         ),
       ),
@@ -205,7 +205,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
       ),
       onTap: () async {
         DateTime? date = DateTime(1900);
-        FocusScope.of(context).requestFocus(new FocusNode());
+        FocusScope.of(context).requestFocus(FocusNode());
 
         date = await showDatePicker(
             context: context,
@@ -213,9 +213,9 @@ class WFlowStepFormState extends State<WFlowStepForm> {
             firstDate: DateTime(1900),
             lastDate: DateTime(2100));
 
-        setState(){
+        //setState(){
           remindDateController.text = date.toString();
-        };
+        //};
       },
     );
   }
