@@ -1,5 +1,6 @@
-// Copyright 2022 FlexWM Web Based Management. Derechos Reservados
-// Author: Mauricio Lopez Barba
+// FlexWM-FL Derechos Reservados 2022
+// Este software es propiedad de Mauricio Lopez Barba y Alonso Ibarra Barba
+// No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -14,7 +15,6 @@ import 'package:flexwm/screens/catalog.dart';
 import 'package:flexwm/screens/login.dart';
 import 'package:flexwm/screens/photos.dart';
 import 'package:flexwm/screens/wfsp_list.dart';
-import 'package:flexwm/screens/wfsp_form.dart';
 
 void main() {
   setupWindow();

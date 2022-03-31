@@ -1,5 +1,6 @@
-// Copyright 2022 FlexWM Web Based Management. Derechos Reservados
-// Author: Mauricio Lopez Barba
+// FlexWM-FL Derechos Reservados 2022
+// Este software es propiedad de Mauricio Lopez Barba y Alonso Ibarra Barba
+// No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
 import 'dart:async';
 import 'dart:convert';
@@ -149,8 +150,6 @@ class WFlowStepFormState extends State<WFlowStepForm> {
 
   // Widget del titulo
   Widget getTitle(SoWFlowStep soWFlowStep) {
-    print('Si se va a cargar la imagen: ' + soWFlowStep.customerLogo);
-
     return Container(
       child: Row(
         children: [
@@ -258,7 +257,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
     soWFlowStep.progress = int.parse(progress);
 
     final response = await http.post(
-      Uri.parse('http://localhost:8080/flexwm-js/restwflowstep'),
+      Uri.parse(params.getAppUrl(params.instance) + 'restwflowstep;' + params.jSessionIdQuery),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Access-Control-Allow-Origin': '*',

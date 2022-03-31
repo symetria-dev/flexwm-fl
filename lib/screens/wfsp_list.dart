@@ -1,5 +1,6 @@
-// Copyright 2022 FlexWM Web Based Management. Derechos Reservados
-// Author: Mauricio Lopez Barba
+// FlexWM-FL Derechos Reservados 2022
+// Este software es propiedad de Mauricio Lopez Barba y Alonso Ibarra Barba
+// No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
 import 'dart:async';
 import 'dart:convert';
@@ -11,9 +12,39 @@ import 'package:flexwm/drawer.dart';
 import 'package:flexwm/models/wfsp.dart';
 import 'package:flexwm/common/params.dart' as params;
 
-// Clase que genera el widget contenedor de wflowsteps
-class WFlowStepList extends StatelessWidget {
+// Create a Form widget.
+class WFlowStepList extends StatefulWidget {
   const WFlowStepList({Key? key}) : super(key: key);
+
+  @override
+  _WFlowStepListState createState() {
+    return _WFlowStepListState();
+  }
+}
+
+// Clase de estado
+class _WFlowStepListState extends State<WFlowStepList> {
+  late Future<List<SoWFlowStep>> _futureSoWFlowSteps;
+
+  @override
+  void initState() {
+    super.initState();
+    _futureSoWFlowSteps = fetchSoWFlowSteps();
+  }
+
+  // Genera la peticion de datos al servidor
+  Future<List<SoWFlowStep>> fetchSoWFlowSteps() async {
+    final response = await http.Client().get(Uri.parse(
+        params.getAppUrl(params.instance) +
+            'restwflowstep;' +
+            params.jSessionIdQuery +
+            '=' +
+            params.jSessionId));
+    final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
+    return parsed
+        .map<SoWFlowStep>((json) => SoWFlowStep.fromJson(json))
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,18 +53,19 @@ class WFlowStepList extends StatelessWidget {
         title: Text('Tareas', style: Theme.of(context).textTheme.headline1),
       ),
       body: FutureBuilder<List<SoWFlowStep>>(
-        future: fetchSoWFlowSteps(http.Client()),
+        //initialData: [],
+        future: _futureSoWFlowSteps,
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            // Error al obtener los datos
-            return Center(
-              child: Text('An error has occurred: ' + snapshot.error.toString()),
+          if (snapshot.hasData) {
+            return RefreshIndicator(
+              child: getListWidget(snapshot.data!),
+              onRefresh: _pullRefresh,
             );
-          } else if (snapshot.hasData) {
-            // Prepara la clase que genera el widget de la lista
-            return SoWFlowStepList(sOWFlowSteps: snapshot.data!);
+          } else if (snapshot.hasError) {
+            // Hay errores los muestra
+            return Text('${snapshot.error}');
           } else {
-            // No ha llegado la informacion muestra indicador de progreso
+            // Muestra icono avance
             return const Center(
               child: CircularProgressIndicator(),
             );
@@ -44,54 +76,44 @@ class WFlowStepList extends StatelessWidget {
     );
   }
 
-  // Genera la peticion de datos al servidor
-  Future<List<SoWFlowStep>> fetchSoWFlowSteps(http.Client client) async {
-    final response = await client.get(Uri.parse(params.getAppUrl(params.instance) + 'restwflowstep;' + params.jSessionIdQuery + '=' + params.jSessionId));
+  /*Widget _listView(AsyncSnapshot snapshot) {
+    if (snapshot.hasData) {
+      return ListView.builder(
+        itemCount: snapshot.data.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(snapshot.data[index].asPascalCase),
+          );
+        },);
+    }
+    else {
+      return Center(
+        child: Text('Loading data...'),
+      );
+    }
+  }*/
 
-    // Use the compute function to run parsePhotos in a separate isolate.
-    return compute(parseSoWFlowSteps, response.body);
-  }
-
-  // A function that converts a response body into a List<Photo>.
-  List<SoWFlowStep> parseSoWFlowSteps(String responseBody) {
-    final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
-
-    return parsed.map<SoWFlowStep>((json) => SoWFlowStep.fromJson(json)).toList();
-  }
-}
-
-// Clase que genera el widget de la lista
-class SoWFlowStepList extends StatelessWidget {
-  // Variables
-  final List<SoWFlowStep> sOWFlowSteps;
-
-  // Constructor
-  const SoWFlowStepList({Key? key, required this.sOWFlowSteps}) : super(key: key);
-
-  // Genera el widget de lista, por cada elemento de la lista
-  @override
-  Widget build(BuildContext context) {
+  Widget getListWidget(List<SoWFlowStep> soWFlowStepList) {
     return ListView.builder(
-      itemCount: sOWFlowSteps.length,
+      itemCount: soWFlowStepList.length,
       itemBuilder: (context, index) {
-        final item = sOWFlowSteps[index];
+        final item = soWFlowStepList[index];
         return Card(
           child: ListTile(
             //onTap: () {Navigator.pushNamed(context, '/wflowstep', arguments: {'id': item.id});},
-            onTap: () => Navigator.push(context,
-              MaterialPageRoute(builder: (_) => WFlowStepForm(requiredAttrib: item.id.toString())
-              ),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) =>
+                      WFlowStepForm(requiredAttrib: item.id.toString())),
             ),
-            //    context,
-            //    MaterialPageRoute(
-            //      builder: (_) => WFlowStepForm(requiredAttrib: item.id),
-            //    ),
-            //  );},
             leading: IconButton(
               //onPressed: () {Navigator.pushNamed(context, '/wflowstep', arguments: {'id': item.id});},
-              onPressed: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => WFlowStepForm(requiredAttrib: item.id.toString())
-                  ),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) =>
+                        WFlowStepForm(requiredAttrib: item.id.toString())),
               ),
               icon: const Icon(Icons.task),
             ),
@@ -102,5 +124,12 @@ class SoWFlowStepList extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _pullRefresh() async {
+    List<SoWFlowStep> freshFutureSoWFlowSteps = await fetchSoWFlowSteps();
+    setState(() {
+      _futureSoWFlowSteps = Future.value(freshFutureSoWFlowSteps);
+    });
   }
 }

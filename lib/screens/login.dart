@@ -1,5 +1,6 @@
-// Copyright 2022 FlexWM Web Based Management. Derechos Reservados
-// Author: Mauricio Lopez Barba
+// FlexWM-FL Derechos Reservados 2022
+// Este software es propiedad de Mauricio Lopez Barba y Alonso Ibarra Barba
+// No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -45,7 +46,7 @@ class LoginFormState extends State<LoginForm> {
     return Scaffold(
       body: Center(
         child: Container(
-          padding: const EdgeInsets.all(80.0),
+          padding: const EdgeInsets.all(60.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
