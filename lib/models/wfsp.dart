@@ -5,22 +5,23 @@
 // Modelo de clase tarea
 class SoWFlowStep {
   int id = -1;
-  String wFlowCode = "";
-  String wFlowName = "";
-  String wFlowCallerCode = "";
-  String customerCode = "";
-  String customerDisplayName = "";
-  String customerLogo = "";
-  String name = "";
-  String description = "";
+  String wFlowCode = '';
+  String wFlowName = '';
+  String wFlowCallerCode = '';
+  String customerCode = '';
+  String customerDisplayName = '';
+  String customerLogo = '';
+  String name = '';
+  String description = '';
+  String comments = '';
   int progress = 0;
-  String remindDate = "";
+  String remindDate = '';
 
   SoWFlowStep.empty();
 
   SoWFlowStep(this.id, this.wFlowCode, this.wFlowName, this.wFlowCallerCode,
       this.customerCode, this.customerDisplayName, this.customerLogo,
-      this.name, this.description, this.progress, this.remindDate);
+      this.name, this.description, this.comments, this.progress, this.remindDate);
 
   factory SoWFlowStep.fromJson(Map<String, dynamic> json) {
     return SoWFlowStep(json['id'] as int,
@@ -32,6 +33,7 @@ class SoWFlowStep {
         json['customerLogo'] as String,
         json['name'] as String,
         json['description'] as String,
+        json['comments'] as String,
         json['progress'] as int,
         json['remindDate'] as String,
     );
@@ -48,6 +50,7 @@ class SoWFlowStep {
       'customerLogo': customerLogo,
       'name': name,
       'description': description,
+      'comments': comments,
       'progress': progress,
       'remindDate': remindDate,
     };

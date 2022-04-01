@@ -205,7 +205,7 @@ class LoginFormState extends State<LoginForm> {
       passwordController.text = 'Viruliento99';
     } else {
       emailController.text = 'mlopez@flexwm.com';
-      passwordController.text = 'Viruliento99';
+      passwordController.text = 'Viruliento99\$';
     }
   }
 

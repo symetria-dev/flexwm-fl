@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:flexwm/models/wfsp.dart';
 import 'package:flexwm/common/params.dart' as params;
 
@@ -30,11 +31,11 @@ class WFlowStepFormState extends State<WFlowStepForm> {
   late Future<SoWFlowStep> _futureSoWFlowStep;
 
   // Variables auxiliares de campos
-  final nameController = TextEditingController();
   final descriptionController = TextEditingController();
+  final commentsController = TextEditingController();
   final remindDateController = TextEditingController();
   String progress = '';
-  DateTime selectedDate = DateTime.now();
+  DateTime? selectedDate;
 
   @override
   void initState() {
@@ -44,9 +45,9 @@ class WFlowStepFormState extends State<WFlowStepForm> {
 
   @override
   void dispose() {
-    // Clean up the controller when the widget is disposed.
-    nameController.dispose();
+    // Libera los controladores
     descriptionController.dispose();
+    commentsController.dispose();
     remindDateController.dispose();
     super.dispose();
   }
@@ -66,7 +67,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
             if (snapshot.hasData) {
               // Tiene datos prepara forma,
               // pone exclamacion ! porque ya valido que no es nulo
-              return getForm(snapshot.data!);
+              return getForm(context, snapshot.data!);
             } else if (snapshot.hasError) {
               // Hay errores los muestra
               return Text('${snapshot.error}');
@@ -83,12 +84,12 @@ class WFlowStepFormState extends State<WFlowStepForm> {
   }
 
   // Prepara la forma
-  Widget getForm(SoWFlowStep getSoWFlowStep) {
+  Widget getForm(BuildContext context, SoWFlowStep getSoWFlowStep) {
     soWFlowStep = getSoWFlowStep;
-    nameController.text = soWFlowStep.name;
     descriptionController.text = soWFlowStep.description;
     remindDateController.text = soWFlowStep.remindDate;
     progress = soWFlowStep.progress.toString();
+    selectedDate = DateTime.parse(soWFlowStep.remindDate);
 
     return Form(
       key: _formKey,
@@ -98,27 +99,20 @@ class WFlowStepFormState extends State<WFlowStepForm> {
           children: <Widget>[
             getHeader(soWFlowStep),
             TextFormField(
-              enabled: false,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
-                labelText: 'Nombre Tarea',
-              ),
-              controller: nameController,
-            ),
-            TextFormField(
               decoration: const InputDecoration(
                 border: UnderlineInputBorder(),
                 labelText: 'Descripcion',
               ),
               controller: descriptionController,
             ),
-            getDatePicker(),
+            TextFormField(
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: 'Agregar Comentario',
+              ),
+              controller: commentsController,
+            ),
+            remindDateDateField(context),
             getProgressComboBox(),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -150,10 +144,10 @@ class WFlowStepFormState extends State<WFlowStepForm> {
     return Card(
       child: ListTile(
         leading: params.getProperIcon(soWFlowStep.wFlowCallerCode),
-        title: Text(soWFlowStep.wFlowCode),
-        subtitle: Text(soWFlowStep.wFlowName +
+        title: Text(soWFlowStep.name),
+        subtitle: Text(soWFlowStep.wFlowCode + ' ' + soWFlowStep.wFlowName +
             '\n' +
-            soWFlowStep.customerCode +
+            '' + soWFlowStep.customerCode +
             ' ' +
             soWFlowStep.customerDisplayName),
         trailing: Image.network(
@@ -195,27 +189,29 @@ class WFlowStepFormState extends State<WFlowStepForm> {
     );
   }
 
-  // Obtiene picker de fecha
-  Widget getDatePicker() {
+  // Widget de fecha
+  remindDateDateField(BuildContext context) {
+    DateFormat formatter = DateFormat(params.dateFormat);
+
     return TextFormField(
-      controller: remindDateController,
       decoration: const InputDecoration(
-        labelText: "Fecha Recordatorio",
-        hintText: "Cuando debe completarse la tarea?",
+        border: UnderlineInputBorder(),
+        labelText: 'Fecha recordatorio',
       ),
-      onTap: () async {
-        DateTime? date = DateTime(1900);
-        FocusScope.of(context).requestFocus(FocusNode());
-
-        date = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: DateTime(1900),
-            lastDate: DateTime(2100));
-
-        //setState(){
-          remindDateController.text = date.toString();
-        //};
+      controller: remindDateController,
+      onTap: () {
+        showDatePicker(
+          context: context,
+          initialDate: selectedDate == null ? DateTime.now() : selectedDate!,
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2222),
+        ).then((date) {
+          //setState(() {
+          selectedDate = date;
+          String fDate = formatter.format(date!);
+          remindDateController.text = fDate;
+          //});
+        });
       },
     );
   }
@@ -241,8 +237,9 @@ class WFlowStepFormState extends State<WFlowStepForm> {
 
   // Actualiza el wflowstep en el servidor
   Future<SoWFlowStep> updateWFlowStep() async {
-    soWFlowStep.name = nameController.text;
     soWFlowStep.description = descriptionController.text;
+    soWFlowStep.comments = commentsController.text;
+    soWFlowStep.remindDate = remindDateController.text;
     soWFlowStep.progress = int.parse(progress);
 
     final response = await http.post(
@@ -252,6 +249,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Access-Control-Allow-Origin': '*',
+        'Cookie': params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
       },
       body: jsonEncode(soWFlowStep),
     );
