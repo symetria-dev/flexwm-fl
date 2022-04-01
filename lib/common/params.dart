@@ -6,9 +6,16 @@ library flexwm.params;
 import 'package:flutter/material.dart';
 
 // Constantes
+const double windowWidth = 400;
+const double windowHeight = 800;
 const String jSessionIdQuery = 'jsessionid';
 const String uploadFiles = 'uploadfiles';
 const String dateFormat = 'yyyy-MM-dd';
+
+const int servletResponse_Sc_Ok = 200;
+const int servletResponse_Sc_NotAcceptable = 406;
+const int servletResponse_Sc_Forbidden = 403;
+const int servletResponse_Sc_InternalServerError = 500;
 
 // Diseño
 const Color bgColor = Colors.white;

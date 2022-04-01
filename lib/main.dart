@@ -15,31 +15,32 @@ import 'package:flexwm/screens/catalog.dart';
 import 'package:flexwm/screens/login.dart';
 import 'package:flexwm/screens/photos.dart';
 import 'package:flexwm/screens/wfsp_list.dart';
+import 'package:flexwm/common/params.dart' as params;
 
+// Metodo de arranque inicial
 void main() {
   setupWindow();
   runApp(const MyApp());
 }
 
-const double windowWidth = 400;
-const double windowHeight = 800;
-
+// Asigna tamaños default
 void setupWindow() {
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     WidgetsFlutterBinding.ensureInitialized();
     setWindowTitle('FlexWM App');
-    setWindowMinSize(const Size(windowWidth, windowHeight));
-    setWindowMaxSize(const Size(windowWidth, windowHeight));
+    setWindowMinSize(const Size(params.windowWidth, params.windowHeight));
+    setWindowMaxSize(const Size(params.windowWidth, params.windowHeight));
     getCurrentScreen().then((screen) {
       setWindowFrame(Rect.fromCenter(
         center: screen!.frame.center,
-        width: windowWidth,
-        height: windowHeight,
+        width: params.windowWidth,
+        height: params.windowHeight,
       ));
     });
   }
 }
 
+// Inicio clase base
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 

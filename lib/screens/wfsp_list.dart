@@ -41,7 +41,7 @@ class _WFlowStepListState extends State<WFlowStepList> {
             params.jSessionId));
 
     // Si no es exitoso envia a login
-    if (response.statusCode != 200) {
+    if (response.statusCode != params.servletResponse_Sc_Ok) {
       Navigator.pushNamed(context, '/');
     }
 

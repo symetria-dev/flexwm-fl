@@ -19,13 +19,13 @@ class WFlowStepForm extends StatefulWidget {
       : super(key: key);
 
   @override
-  WFlowStepFormState createState() {
-    return WFlowStepFormState();
+  _WFlowStepFormState createState() {
+    return _WFlowStepFormState();
   }
 }
 
 // Forma de wflowstep con estado
-class WFlowStepFormState extends State<WFlowStepForm> {
+class _WFlowStepFormState extends State<WFlowStepForm> {
   final _formKey = GlobalKey<FormState>();
   SoWFlowStep soWFlowStep = SoWFlowStep.empty();
   late Future<SoWFlowStep> _futureSoWFlowStep;
@@ -89,7 +89,10 @@ class WFlowStepFormState extends State<WFlowStepForm> {
     descriptionController.text = soWFlowStep.description;
     remindDateController.text = soWFlowStep.remindDate;
     progress = soWFlowStep.progress.toString();
-    selectedDate = DateTime.parse(soWFlowStep.remindDate);
+
+    if (soWFlowStep.remindDate.toString() != '') {
+      selectedDate = DateTime.parse(soWFlowStep.remindDate);
+    }
 
     return Form(
       key: _formKey,
@@ -145,9 +148,12 @@ class WFlowStepFormState extends State<WFlowStepForm> {
       child: ListTile(
         leading: params.getProperIcon(soWFlowStep.wFlowCallerCode),
         title: Text(soWFlowStep.name),
-        subtitle: Text(soWFlowStep.wFlowCode + ' ' + soWFlowStep.wFlowName +
+        subtitle: Text(soWFlowStep.wFlowCode +
+            ' ' +
+            soWFlowStep.wFlowName +
             '\n' +
-            '' + soWFlowStep.customerCode +
+            '' +
+            soWFlowStep.customerCode +
             ' ' +
             soWFlowStep.customerDisplayName),
         trailing: Image.network(
@@ -190,7 +196,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
   }
 
   // Widget de fecha
-  remindDateDateField(BuildContext context) {
+  Widget remindDateDateField(BuildContext context) {
     DateFormat formatter = DateFormat(params.dateFormat);
 
     return TextFormField(
@@ -202,15 +208,15 @@ class WFlowStepFormState extends State<WFlowStepForm> {
       onTap: () {
         showDatePicker(
           context: context,
-          initialDate: selectedDate == null ? DateTime.now() : selectedDate!,
+          initialDate: (selectedDate == null || selectedDate.toString() == '')
+              ? DateTime.now()
+              : selectedDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2222),
         ).then((date) {
-          //setState(() {
           selectedDate = date;
           String fDate = formatter.format(date!);
           remindDateController.text = fDate;
-          //});
         });
       },
     );
@@ -228,7 +234,7 @@ class WFlowStepFormState extends State<WFlowStepForm> {
             id.toString()));
 
     // Si no es exitoso envia a login
-    if (response.statusCode != 200) {
+    if (response.statusCode != params.servletResponse_Sc_Ok) {
       Navigator.pushNamed(context, '/');
     }
 
@@ -236,12 +242,13 @@ class WFlowStepFormState extends State<WFlowStepForm> {
   }
 
   // Actualiza el wflowstep en el servidor
-  Future<SoWFlowStep> updateWFlowStep() async {
+  void updateWFlowStep() async {
     soWFlowStep.description = descriptionController.text;
     soWFlowStep.comments = commentsController.text;
     soWFlowStep.remindDate = remindDateController.text;
     soWFlowStep.progress = int.parse(progress);
 
+    // Envia la sesion como Cookie, con el nombre en UpperCase
     final response = await http.post(
       Uri.parse(params.getAppUrl(params.instance) +
           'restwflowstep;' +
@@ -249,31 +256,35 @@ class WFlowStepFormState extends State<WFlowStepForm> {
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Access-Control-Allow-Origin': '*',
-        'Cookie': params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
+        'Cookie':
+            params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
       },
       body: jsonEncode(soWFlowStep),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == params.servletResponse_Sc_Ok) {
+      // Si fue exitoso obtiene la respuesta
+      soWFlowStep = SoWFlowStep.fromJson(jsonDecode(response.body));
+
+      // Muestra mensaje
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Almacenado Exitosamente')),
+        SnackBar(content: Text('Tarea "' + soWFlowStep.name + '" actualizada')),
       );
 
-      // Update the state of the app
+      // Regresa al listado
       Navigator.pop(context);
       Navigator.pushNamed(context, '/wflowsteps');
-
-      // If the server did return a 201 CREATED response,
-      // then parse the JSON.
-      return SoWFlowStep.fromJson(jsonDecode(response.body));
-    } else {
+    } else if (response.statusCode == params.servletResponse_Sc_NotAcceptable ||
+        response.statusCode == params.servletResponse_Sc_Forbidden) {
+      // Error al guardar
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error al Guardar')),
       );
-      // If the server did not return a 201 CREATED response,
-      // then throw an exception.
-      throw Exception(
-          'Failed to create album. ' + response.statusCode.toString());
+    } else {
+      // Aun no se recibe respuesta del servidor
+      const Center(
+        child: CircularProgressIndicator(),
+      );
     }
   }
 }
