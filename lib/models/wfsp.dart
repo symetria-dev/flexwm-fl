@@ -4,6 +4,8 @@
 
 // Modelo de clase WFlowStep
 class SoWFlowStep {
+  static const String programCode = 'WFSP';
+
   int id = -1;
   String wFlowCode = '';
   String wFlowName = '';

@@ -234,7 +234,7 @@ class _WFlowStepFormState extends State<WFlowStepForm> {
             id.toString()));
 
     // Si no es exitoso envia a login
-    if (response.statusCode != params.servletResponse_Sc_Ok) {
+    if (response.statusCode != params.servletResponseScOk) {
       Navigator.pushNamed(context, '/');
     }
 
@@ -262,7 +262,7 @@ class _WFlowStepFormState extends State<WFlowStepForm> {
       body: jsonEncode(soWFlowStep),
     );
 
-    if (response.statusCode == params.servletResponse_Sc_Ok) {
+    if (response.statusCode == params.servletResponseScOk) {
       // Si fue exitoso obtiene la respuesta
       soWFlowStep = SoWFlowStep.fromJson(jsonDecode(response.body));
 
@@ -273,9 +273,9 @@ class _WFlowStepFormState extends State<WFlowStepForm> {
 
       // Regresa al listado
       Navigator.pop(context);
-      Navigator.pushNamed(context, '/wflowsteps');
-    } else if (response.statusCode == params.servletResponse_Sc_NotAcceptable ||
-        response.statusCode == params.servletResponse_Sc_Forbidden) {
+      Navigator.pushNamed(context, '/wfsp_list');
+    } else if (response.statusCode == params.servletResponseScNotAcceptable ||
+        response.statusCode == params.servletResponseScForbidden) {
       // Error al guardar
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error al Guardar')),

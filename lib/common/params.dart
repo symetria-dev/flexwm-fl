@@ -12,10 +12,12 @@ const String jSessionIdQuery = 'jsessionid';
 const String uploadFiles = 'uploadfiles';
 const String dateFormat = 'yyyy-MM-dd';
 
-const int servletResponse_Sc_Ok = 200;
-const int servletResponse_Sc_NotAcceptable = 406;
-const int servletResponse_Sc_Forbidden = 403;
-const int servletResponse_Sc_InternalServerError = 500;
+const String searchQuery = 's';
+
+const int servletResponseScOk = 200;
+const int servletResponseScNotAcceptable = 406;
+const int servletResponseScForbidden = 403;
+const int servletResponseScInternalServerError = 500;
 
 // Diseño
 const Color bgColor = Colors.white;

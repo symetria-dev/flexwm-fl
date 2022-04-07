@@ -4,6 +4,8 @@
 
 // Modelo de clase Customer
 class SoCustomer {
+  static const String programCode = 'CUST';
+
   int id = -1;
   String code = '';
   String displayName = '';

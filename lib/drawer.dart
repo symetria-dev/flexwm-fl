@@ -2,6 +2,8 @@
 // Este software es propiedad de Mauricio Lopez Barba y Alonso Ibarra Barba
 // No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
+import 'package:flexwm/models/cust.dart';
+import 'package:flexwm/models/wfsp.dart';
 import 'package:flutter/material.dart';
 import 'package:flexwm/common/params.dart' as params;
 
@@ -67,7 +69,7 @@ Widget getDrawer(BuildContext context) {
           },
         ),
         ListTile(
-          leading: params.getProperIcon('WFSP'),
+          leading: params.getProperIcon(SoWFlowStep.programCode),
           title: const Text('Tareas Activas'),
           onTap: () {
             // Update the state of the app
@@ -78,7 +80,7 @@ Widget getDrawer(BuildContext context) {
           },
         ),
         ListTile(
-          leading: params.getProperIcon('CUST'),
+          leading: params.getProperIcon(SoCustomer.programCode),
           title: const Text('Clientes'),
           onTap: () {
             // Update the state of the app

@@ -125,8 +125,8 @@ class _CustomerFormState extends State<CustomerForm> {
   Widget getHeader(SoCustomer soCustomer) {
     return Card(
       child: ListTile(
-        leading: params.getProperIcon(soCustomer.code),
-        title: Text(soCustomer.displayName),
+        leading: params.getProperIcon(SoCustomer.programCode),
+        title: Text(soCustomer.code + ' ' + soCustomer.displayName),
         subtitle: Text(soCustomer.phone +
             ' ' +
             soCustomer.email),
@@ -157,7 +157,7 @@ class _CustomerFormState extends State<CustomerForm> {
             id.toString()));
 
     // Si no es exitoso envia a login
-    if (response.statusCode != params.servletResponse_Sc_Ok) {
+    if (response.statusCode != params.servletResponseScOk) {
       Navigator.pushNamed(context, '/');
     }
 
@@ -182,7 +182,7 @@ class _CustomerFormState extends State<CustomerForm> {
       body: jsonEncode(soCustomer),
     );
 
-    if (response.statusCode == params.servletResponse_Sc_Ok) {
+    if (response.statusCode == params.servletResponseScOk) {
       // Si fue exitoso obtiene la respuesta
       soCustomer = SoCustomer.fromJson(jsonDecode(response.body));
 
@@ -193,9 +193,9 @@ class _CustomerFormState extends State<CustomerForm> {
 
       // Regresa al listado
       Navigator.pop(context);
-      Navigator.pushNamed(context, '/cust');
-    } else if (response.statusCode == params.servletResponse_Sc_NotAcceptable ||
-        response.statusCode == params.servletResponse_Sc_Forbidden) {
+      Navigator.pushNamed(context, '/cust_list');
+    } else if (response.statusCode == params.servletResponseScNotAcceptable ||
+        response.statusCode == params.servletResponseScForbidden) {
       // Error al guardar
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error al Guardar')),

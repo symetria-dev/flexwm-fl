@@ -25,30 +25,43 @@ class CustomerList extends StatefulWidget {
 class _CustomerListState extends State<CustomerList> {
   late Future<List<SoCustomer>> _futureSoCustomers;
 
+  // Variables auxiliares de campos
+  final searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _futureSoCustomers = fetchSoCustomers();
   }
 
+  @override
+  void dispose() {
+    // Libera los controladores
+    searchController.dispose();
+    super.dispose();
+  }
+
   // Genera la peticion de datos al servidor
   Future<List<SoCustomer>> fetchSoCustomers() async {
     final response = await http.Client().get(Uri.parse(
         params.getAppUrl(params.instance) +
-            'restcust;' +
+            'restcust' +
+            '?' +
+            params.searchQuery +
+            '=' +
+            searchController.text +
+            '&;' +
             params.jSessionIdQuery +
             '=' +
             params.jSessionId));
 
     // Si no es exitoso envia a login
-    if (response.statusCode != params.servletResponse_Sc_Ok) {
+    if (response.statusCode != params.servletResponseScOk) {
       Navigator.pushNamed(context, '/');
     }
 
     final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
-    return parsed
-        .map<SoCustomer>((json) => SoCustomer.fromJson(json))
-        .toList();
+    return parsed.map<SoCustomer>((json) => SoCustomer.fromJson(json)).toList();
   }
 
   @override
@@ -59,15 +72,35 @@ class _CustomerListState extends State<CustomerList> {
         title: getHeader(context),
         backgroundColor: params.appBarBgColor,
       ),
-      body: Column (
-        children: [
-          TextFormField(
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              labelText: 'Comentario Referencias',
+      body: Column(children: [
+        Row(children: [
+          Expanded(
+            child: TextFormField(
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: 'Buscar en Clientes',
+              ),
+              controller: searchController,
             ),
           ),
-          FutureBuilder<List<SoCustomer>>(
+          ElevatedButton(
+            onPressed: () {
+              // Valida la forma, si regresa verdadero actua
+              setState(() {
+                _futureSoCustomers = fetchSoCustomers();
+              });
+            },
+            child: const Text(
+              'Buscar',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ]),
+        Expanded(
+          child: FutureBuilder<List<SoCustomer>>(
             future: _futureSoCustomers,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
@@ -86,8 +119,8 @@ class _CustomerListState extends State<CustomerList> {
               }
             },
           ),
-        ]
-      ),
+        ),
+      ]),
       drawer: getDrawer(context),
     );
   }
@@ -97,7 +130,6 @@ class _CustomerListState extends State<CustomerList> {
     return Row(
       children: [
         const Text('Clientes'),
-
       ],
     );
   }
@@ -124,7 +156,7 @@ class _CustomerListState extends State<CustomerList> {
                     builder: (_) =>
                         CustomerForm(requiredAttrib: item.id.toString())),
               ),
-              icon: params.getProperIcon('CUST'),
+              icon: params.getProperIcon(SoCustomer.programCode),
             ),
             title: Text(item.code + ' ' + item.displayName),
             subtitle: Text(item.email),
