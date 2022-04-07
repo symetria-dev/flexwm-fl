@@ -35,7 +35,7 @@ class _WFlowStepListState extends State<WFlowStepList> {
   Future<List<SoWFlowStep>> fetchSoWFlowSteps() async {
     final response = await http.Client().get(Uri.parse(
         params.getAppUrl(params.instance) +
-            'restwflowstep;' +
+            'restwfsp;' +
             params.jSessionIdQuery +
             '=' +
             params.jSessionId));

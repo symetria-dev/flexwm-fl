@@ -67,12 +67,23 @@ Widget getDrawer(BuildContext context) {
           },
         ),
         ListTile(
-          leading: const Icon(Icons.task),
+          leading: params.getProperIcon('WFSP'),
           title: const Text('Tareas Activas'),
           onTap: () {
             // Update the state of the app
             Navigator.pop(context);
-            Navigator.pushNamed(context, '/wflowsteps');
+            Navigator.pushNamed(context, '/wfsp_list');
+            // Then close the drawer
+            //Navigator.pop(context);
+          },
+        ),
+        ListTile(
+          leading: params.getProperIcon('CUST'),
+          title: const Text('Clientes'),
+          onTap: () {
+            // Update the state of the app
+            Navigator.pop(context);
+            Navigator.pushNamed(context, '/cust_list');
             // Then close the drawer
             //Navigator.pop(context);
           },

@@ -176,7 +176,7 @@ class LoginFormState extends State<LoginForm> {
     if (response.statusCode == 200) {
       soLogin = SoLogin.fromJson(jsonDecode(response.body));
       doContinue();
-      Navigator.pushReplacementNamed(context, '/wflowsteps');
+      Navigator.pushReplacementNamed(context, '/wfsp_list');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error de Login')),
