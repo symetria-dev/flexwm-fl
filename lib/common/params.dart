@@ -57,8 +57,8 @@ Icon getProperIcon(String wFlowCallerCode) {
   } else if (wFlowCallerCode == 'RFQU') {
     return const Icon(Icons.request_page_outlined, color: Colors.green);
   } else if (wFlowCallerCode == 'CUST') {
-    return const Icon(Icons.person, color: Colors.green);
+    return const Icon(Icons.group, color: Colors.green);
   }else {
-    return const Icon(Icons.task);
+    return const Icon(Icons.task, color: Colors.blueAccent);
   }
 }

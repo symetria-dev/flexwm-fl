@@ -9,6 +9,7 @@ class SoCustomer {
   int id = -1;
   String code = '';
   String displayName = '';
+  String legalName = '';
   String logo = '';
   String phone = '';
   String email = '';
@@ -17,13 +18,14 @@ class SoCustomer {
 
   SoCustomer.empty();
 
-  SoCustomer(this.id, this.code, this.displayName, this.logo,
+  SoCustomer(this.id, this.code, this.displayName, this.legalName, this.logo,
       this.phone, this.email, this.referralId, this.referralComments);
 
   factory SoCustomer.fromJson(Map<String, dynamic> json) {
     return SoCustomer(json['id'] as int,
         json['code'] as String,
         json['displayName'] as String,
+        json['legalName'] as String,
         json['logo'] as String,
         json['phone'] as String,
         json['email'] as String,
@@ -37,6 +39,7 @@ class SoCustomer {
       'id': id,
       'code': code,
       'displayName': displayName,
+      'legalName': legalName,
       'logo': logo,
       'phone': phone,
       'email': email,

@@ -6,10 +6,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flexwm/screens/cust_form.dart';
 import 'package:flutter/material.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:flexwm/drawer.dart';
 import 'package:flexwm/models/cust.dart';
 import 'package:flexwm/common/params.dart' as params;
+import 'package:flexwm/common/utils.dart' as utils;
 
 // Create a Form widget.
 class CustomerList extends StatefulWidget {
@@ -43,9 +45,16 @@ class _CustomerListState extends State<CustomerList> {
 
   // Genera la peticion de datos al servidor
   Future<List<SoCustomer>> fetchSoCustomers() async {
-    String url = params.getAppUrl(params.instance) + 'restcust'
-        ';' + params.jSessionIdQuery + '=' + params.jSessionId +
-        '?' + params.searchQuery + '=' + searchController.text;
+    String url = params.getAppUrl(params.instance) +
+        'restcust'
+            ';' +
+        params.jSessionIdQuery +
+        '=' +
+        params.jSessionId +
+        '?' +
+        params.searchQuery +
+        '=' +
+        searchController.text;
     final response = await http.Client().get(Uri.parse(url));
 
     // Si no es exitoso envia a login
@@ -145,20 +154,26 @@ class _CustomerListState extends State<CustomerList> {
                   builder: (_) =>
                       CustomerForm(requiredAttrib: item.id.toString())),
             ),
-            leading: IconButton(
-              //onPressed: () {Navigator.pushNamed(context, '/Customer', arguments: {'id': item.id});},
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) =>
-                        CustomerForm(requiredAttrib: item.id.toString())),
-              ),
-              icon: params.getProperIcon(SoCustomer.programCode),
+            leading: Image.network(
+              params.getAppUrl(params.instance) +
+                  params.uploadFiles +
+                  '/' +
+                  item.logo,
+              width: 75,
+              height: 50,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.person, color: Colors.green);
+              },
             ),
             title: Text(item.code + ' ' + item.displayName),
-            subtitle: Text(item.email),
-            trailing: Text(item.phone.toString(),
-                style: const TextStyle(color: Colors.indigo)),
+            subtitle: Text(item.legalName),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(onPressed: () {utils.makeMail(item.email);}, icon: const Icon(Icons.email)),
+                IconButton(onPressed: () {utils.makePhoneCall(item.phone);}, icon: const Icon(Icons.phone)),
+              ],
+            ),
           ),
         );
       },

@@ -34,21 +34,18 @@ class _WFlowStepListState extends State<WFlowStepList> {
   // Genera la peticion de datos al servidor
   Future<List<SoWFlowStep>> fetchSoWFlowSteps() async {
     final response = await http.Client().get(Uri.parse(
-        params.getAppUrl(params.instance) +
-            'restwfsp;' +
-            params.jSessionIdQuery +
-            '=' +
-            params.jSessionId));
+        params.getAppUrl(params.instance) + 'restwfsp;' +
+            params.jSessionIdQuery + '=' + params.jSessionId));
 
     // Si no es exitoso envia a login
-    if (response.statusCode != params.servletResponseScOk) {
+    if (response.statusCode == params.servletResponseScForbidden) {
       Navigator.pushNamed(context, '/');
+    } else if (response.statusCode != params.servletResponseScOk) {
+      print('Error listado: ' + response.toString());
     }
 
     final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
-    return parsed
-        .map<SoWFlowStep>((json) => SoWFlowStep.fromJson(json))
-        .toList();
+    return parsed.map<SoWFlowStep>((json) => SoWFlowStep.fromJson(json)).toList();
   }
 
   @override
