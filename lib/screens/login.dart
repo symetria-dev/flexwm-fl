@@ -51,7 +51,9 @@ class LoginFormState extends State<LoginForm> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('images/logo.png'),
+              Flexible(
+                child:Image.asset('images/logo.png'),
+              ),
               Text(
                 'App FlexWM',
                 style: Theme.of(context).textTheme.headline1,
