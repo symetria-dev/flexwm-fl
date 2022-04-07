@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flexwm/common/theme.dart';
+import 'package:flexwm/common/params.dart' as params;
 import 'package:flexwm/models/cart.dart';
 import 'package:flexwm/models/catalog.dart';
 import 'package:window_size/window_size.dart';
@@ -15,7 +16,8 @@ import 'package:flexwm/screens/catalog.dart';
 import 'package:flexwm/screens/login.dart';
 import 'package:flexwm/screens/photos.dart';
 import 'package:flexwm/screens/wfsp_list.dart';
-import 'package:flexwm/common/params.dart' as params;
+import 'package:flexwm/screens/cust_list.dart';
+
 
 // Metodo de arranque inicial
 void main() {
@@ -73,7 +75,8 @@ class MyApp extends StatelessWidget {
           '/catalog': (context) => const MyCatalog(),
           '/cart': (context) => const MyCart(),
           '/photos': (context) => const MyPhotos(),
-          '/wflowsteps': (context) => const WFlowStepList(),
+          '/wfsp_list': (context) => const WFlowStepList(),
+          '/cust_list': (context) => const CustomerList(),
         },
       ),
     );
