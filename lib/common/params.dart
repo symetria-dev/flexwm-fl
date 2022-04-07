@@ -21,7 +21,7 @@ const int servletResponse_Sc_InternalServerError = 500;
 const Color bgColor = Colors.white;
 const Color appBarBgColor = Colors.white;
 
-// Variables
+// Variables de login
 String instance = '';
 bool isLoggedIn = false;
 String email = '';
