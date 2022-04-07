@@ -2,7 +2,7 @@
 // Este software es propiedad de Mauricio Lopez Barba y Alonso Ibarra Barba
 // No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
-// Modelo de clase tarea
+// Modelo de clase WFlowStep
 class SoWFlowStep {
   int id = -1;
   String wFlowCode = '';
