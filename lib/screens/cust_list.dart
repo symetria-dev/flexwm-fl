@@ -43,21 +43,16 @@ class _CustomerListState extends State<CustomerList> {
 
   // Genera la peticion de datos al servidor
   Future<List<SoCustomer>> fetchSoCustomers() async {
-    final response = await http.Client().get(Uri.parse(
-        params.getAppUrl(params.instance) +
-            'restcust' +
-            '?' +
-            params.searchQuery +
-            '=' +
-            searchController.text +
-            '&;' +
-            params.jSessionIdQuery +
-            '=' +
-            params.jSessionId));
+    String url = params.getAppUrl(params.instance) + 'restcust'
+        ';' + params.jSessionIdQuery + '=' + params.jSessionId +
+        '?' + params.searchQuery + '=' + searchController.text;
+    final response = await http.Client().get(Uri.parse(url));
 
     // Si no es exitoso envia a login
-    if (response.statusCode != params.servletResponseScOk) {
+    if (response.statusCode == params.servletResponseScForbidden) {
       Navigator.pushNamed(context, '/');
+    } else if (response.statusCode != params.servletResponseScOk) {
+      print('Error listado: ' + response.toString());
     }
 
     final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
@@ -81,11 +76,17 @@ class _CustomerListState extends State<CustomerList> {
                 labelText: 'Buscar en Clientes',
               ),
               controller: searchController,
+              onFieldSubmitted: (value) {
+                // Accion al presionar enter
+                setState(() {
+                  _futureSoCustomers = fetchSoCustomers();
+                });
+              },
             ),
           ),
           ElevatedButton(
             onPressed: () {
-              // Valida la forma, si regresa verdadero actua
+              // Accion al presionar
               setState(() {
                 _futureSoCustomers = fetchSoCustomers();
               });
@@ -127,11 +128,7 @@ class _CustomerListState extends State<CustomerList> {
 
   // Obtiene el encabezado con busqueda
   Widget getHeader(BuildContext context) {
-    return Row(
-      children: [
-        const Text('Clientes'),
-      ],
-    );
+    return const Text('Clientes');
   }
 
   // Obtiene el listado con formato
