@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/models/cust.dart';
 import 'package:flexwm/common/params.dart' as params;
+import 'package:flexwm/common/utils.dart' as utils;
 
 // Create a Form widget.
 class CustomerForm extends StatefulWidget {
@@ -124,21 +125,25 @@ class _CustomerFormState extends State<CustomerForm> {
   Widget getHeader(SoCustomer soCustomer) {
     return Card(
       child: ListTile(
-        leading: params.getProperIcon(SoCustomer.programCode),
-        title: Text(soCustomer.code + ' ' + soCustomer.displayName),
-        subtitle: Text(soCustomer.phone +
-            ' ' +
-            soCustomer.email),
-        trailing: Image.network(
+        leading: Image.network(
           params.getAppUrl(params.instance) +
               params.uploadFiles +
               '/' +
               soCustomer.logo,
-          width: 100,
-          height: 100,
+          width: 75,
+          height: 50,
           errorBuilder: (context, error, stackTrace) {
-            return const Text('');
+            return const Icon(Icons.person, color: Colors.green);
           },
+        ),
+        title: Text(soCustomer.code + ' ' + soCustomer.displayName),
+        subtitle: Text(soCustomer.legalName),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(onPressed: () {utils.makeMail(soCustomer.email);}, icon: const Icon(Icons.email)),
+            IconButton(onPressed: () {utils.makePhoneCall(soCustomer.phone);}, icon: const Icon(Icons.phone)),
+          ],
         ),
       ),
     );

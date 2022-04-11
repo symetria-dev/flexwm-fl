@@ -67,7 +67,7 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Provider Demo',
+        title: 'FlexWM App',
         theme: appTheme,
         initialRoute: '/',
         routes: {

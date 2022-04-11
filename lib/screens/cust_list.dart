@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flexwm/screens/cust_form.dart';
 import 'package:flutter/material.dart';
-
 import 'package:http/http.dart' as http;
 import 'package:flexwm/drawer.dart';
 import 'package:flexwm/models/cust.dart';
