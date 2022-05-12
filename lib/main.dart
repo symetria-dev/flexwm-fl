@@ -74,7 +74,7 @@ class MyApp extends StatelessWidget {
           '/': (context) => const LoginForm(),
           '/catalog': (context) => const MyCatalog(),
           '/cart': (context) => const MyCart(),
-          '/photos': (context) => const MyPhotos(),
+          '/photos': (context) => const MyPhotosPage(),
           '/wfsp_list': (context) => const WFlowStepList(),
           '/cust_list': (context) => const CustomerList(),
         },

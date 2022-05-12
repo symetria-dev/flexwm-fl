@@ -11,6 +11,7 @@ const double windowHeight = 800;
 const String jSessionIdQuery = 'jsessionid';
 const String uploadFiles = 'uploadfiles';
 const String dateFormat = 'yyyy-MM-dd';
+const String offsetQuery = 'offsqry';
 
 const String searchQuery = 's';
 

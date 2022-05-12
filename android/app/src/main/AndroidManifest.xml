@@ -1,7 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.flexwm.flexwm">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
    <application
-        android:label="flexwm"
+        android:label="FlexWM"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

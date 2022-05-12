@@ -53,7 +53,11 @@ class _CustomerListState extends State<CustomerList> {
         '?' +
         params.searchQuery +
         '=' +
-        searchController.text;
+        searchController.text +
+        '&' +
+        params.offsetQuery +
+        '=' +
+        '-1';
     final response = await http.Client().get(Uri.parse(url));
 
     // Si no es exitoso envia a login
@@ -164,7 +168,7 @@ class _CustomerListState extends State<CustomerList> {
                 return const Icon(Icons.person, color: Colors.green);
               },
             ),
-            title: Text(item.code + ' ' + item.displayName),
+            title: Text(index.toString() + ':' + item.code + ' ' + item.displayName),
             subtitle: Text(item.legalName),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
