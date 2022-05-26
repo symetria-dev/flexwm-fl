@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flexwm/screens/cust_form.dart';
-import 'package:flexwm/screens/cust_new_form.dart';
 import 'package:flexwm/screens/cust_steps_form.dart';
 import 'package:flexwm/ui/appbar_flexwm.dart';
 import 'package:flutter/material.dart';
