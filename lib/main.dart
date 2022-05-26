@@ -3,8 +3,7 @@
 // No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
 import 'dart:io';
-import 'package:flexwm/screens/cust_steps_form.dart';
-import 'package:flexwm/screens/user_list.dart';
+import 'package:flexwm/routes/app_routes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,13 +12,6 @@ import 'package:flexwm/common/params.dart' as params;
 import 'package:flexwm/models/cart.dart';
 import 'package:flexwm/models/catalog.dart';
 import 'package:window_size/window_size.dart';
-import 'package:flexwm/screens/cart.dart';
-import 'package:flexwm/screens/catalog.dart';
-import 'package:flexwm/screens/login.dart';
-import 'package:flexwm/screens/photos.dart';
-import 'package:flexwm/screens/wfsp_list.dart';
-import 'package:flexwm/screens/cust_list.dart';
-
 
 // Metodo de arranque inicial
 void main() {
@@ -72,15 +64,8 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'FlexWM App',
         theme: appTheme,
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const LoginForm(),
-          '/users': (context) => const UserList(),
-          '/cart': (context) => const MyCart(),
-          '/photos': (context) => CustStepsForm(),
-          '/wfsp_list': (context) => const WFlowStepList(),
-          '/cust_list': (context) => const CustomerList(),
-        },
+        initialRoute: AppRoutes.initialRoute,
+        routes: AppRoutes.getAppRoutes(),
       ),
     );
   }
