@@ -2,7 +2,7 @@ import 'package:flexwm/common/params.dart' as params;
 import 'package:flexwm/routes/routes.dart';
 
 class AppRoutes {
-  static const initialRoute = 'home';
+  static const initialRoute = '/';
   static final menuOptions = <MenuOption>[
     MenuOption(
         route: '/catalog',
