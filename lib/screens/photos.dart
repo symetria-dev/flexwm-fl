@@ -139,7 +139,7 @@ class DemoItem extends StatelessWidget {
                 ],
               ),
               Text(
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sed vulputate orci. Proin id scelerisque velit. Fusce at ligula ligula. Donec fringilla sapien odio, et faucibus tortor finibus sed. Aenean rutrum ipsum in sagittis auctor. Pellentesque mattis luctus consequat. Sed eget sapien ut nibh rhoncus cursus. Donec eget nisl aliquam, ornare sapien sit amet, lacinia quam."),
+                  "Lorem ipsum re sapien sit amet, lacinia quam."),
             ],
           ),
         ),

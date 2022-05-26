@@ -5,6 +5,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flexwm/screens/cust_form.dart';
+import 'package:flexwm/screens/cust_new_form.dart';
+import 'package:flexwm/screens/cust_steps_form.dart';
+import 'package:flexwm/ui/appbar_flexwm.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/drawer.dart';
@@ -74,11 +77,8 @@ class _CustomerListState extends State<CustomerList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: params.bgColor,
-      appBar: AppBar(
-        title: getHeader(context),
-        backgroundColor: params.appBarBgColor,
-      ),
+      // backgroundColor: params.bgColor,
+      appBar: AppBarStyle.authAppBarFlex(title: 'Clientes'),
       body: Column(children: [
         Row(children: [
           Expanded(
@@ -135,6 +135,28 @@ class _CustomerListState extends State<CustomerList> {
         ),
       ]),
       drawer: getDrawer(context),
+      floatingActionButton: FloatingActionButton(
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          child: const Icon(Icons.add, color: Colors.white,),
+          decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                  colors: [
+                    Color.fromRGBO(0, 130, 146, 1),
+                    Color.fromRGBO(112, 169, 179, 1.0)
+                  ]
+              )
+          ),
+        ),
+        onPressed: (){
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CustStepsForm()),
+          );
+        },
+      ),
     );
   }
 
@@ -150,6 +172,9 @@ class _CustomerListState extends State<CustomerList> {
       itemBuilder: (context, index) {
         final item = soCustomerList[index];
         return Card(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25)
+          ),
           child: ListTile(
             onTap: () => Navigator.push(
               context,

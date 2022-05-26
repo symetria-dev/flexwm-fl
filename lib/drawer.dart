@@ -48,11 +48,11 @@ Widget getDrawer(BuildContext context) {
         ),
         ListTile(
           leading: const Icon(Icons.home),
-          title: const Text('Principal'),
+          title: const Text('Usuarios'),
           onTap: () {
             // Update the state of the app
             Navigator.pop(context);
-            Navigator.pushNamed(context, '/catalog');
+            Navigator.pushNamed(context, '/users');
             // Then close the drawer
             //Navigator.pop(context);
           },

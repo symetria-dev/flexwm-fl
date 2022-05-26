@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flexwm/screens/wfsp_form.dart';
+import 'package:flexwm/ui/appbar_flexwm.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/drawer.dart';
@@ -51,12 +52,8 @@ class _WFlowStepListState extends State<WFlowStepList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: params.bgColor,
-      appBar: AppBar(
-        title: Text('Tareas Activas',
-            style: Theme.of(context).textTheme.headline6),
-        backgroundColor: params.appBarBgColor,
-      ),
+      // backgroundColor: params.bgColor,
+      appBar: AppBarStyle.authAppBarFlex(title: 'Tareas Activas'),
       body: FutureBuilder<List<SoWFlowStep>>(
         future: _futureSoWFlowSteps,
         builder: (context, snapshot) {

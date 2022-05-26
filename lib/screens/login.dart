@@ -2,12 +2,16 @@
 // Este software es propiedad de Mauricio Lopez Barba y Alonso Ibarra Barba
 // No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/models/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flexwm/common/params.dart' as params;
+
+import 'cust_steps_form.dart';
+import 'new_user_form.dart';
 
 // Create a Form widget.
 class LoginForm extends StatefulWidget {
@@ -143,6 +147,30 @@ class LoginFormState extends State<LoginForm> {
               ),
             ),
           ),
+           Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  const TextSpan(
+                      text: '¿No tienes una cuenta?',
+                      style: TextStyle(color: Colors.black,fontSize: 16)
+                  ),
+                  TextSpan(
+                      text: 'Regístrate',
+                      style: const TextStyle(color: Colors.blue,fontSize: 16),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => NewUserForm())
+                          );
+                        }
+                  )
+                ],
+              ),
+            )
+          )
         ],
       ),
     );
@@ -204,10 +232,10 @@ class LoginFormState extends State<LoginForm> {
 
     if (email != '') {
       emailController.text = email;
-      passwordController.text = 'Viruliento99';
+      passwordController.text = '2020Cris+';
     } else {
       emailController.text = 'mlopez@flexwm.com';
-      passwordController.text = 'Viruliento99\$';
+      passwordController.text = '2020Cris+';
     }
   }
 

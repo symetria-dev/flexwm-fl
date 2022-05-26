@@ -3,6 +3,8 @@
 // No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
 import 'dart:io';
+import 'package:flexwm/screens/cust_steps_form.dart';
+import 'package:flexwm/screens/user_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -67,14 +69,15 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'FlexWM App',
         theme: appTheme,
         initialRoute: '/',
         routes: {
           '/': (context) => const LoginForm(),
-          '/catalog': (context) => const MyCatalog(),
+          '/users': (context) => const UserList(),
           '/cart': (context) => const MyCart(),
-          '/photos': (context) => const MyPhotosPage(),
+          '/photos': (context) => CustStepsForm(),
           '/wfsp_list': (context) => const WFlowStepList(),
           '/cust_list': (context) => const CustomerList(),
         },
