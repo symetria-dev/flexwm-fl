@@ -123,7 +123,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
             ),
             UploadFile(
                 programCode: 'USER',
-                fielName: 'cust_photo',
+                fielName: 'user_photo',
                 label: 'Foto',
                 id: userData.id.toString()),
             Padding(

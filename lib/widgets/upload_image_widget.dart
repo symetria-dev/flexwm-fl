@@ -6,6 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flexwm/common/params.dart' as params;
 import 'package:http/http.dart' as http;
 
+import 'alert_diaog.dart';
+
 class UploadImage extends StatefulWidget {
   final String? initialruta;
   final String programCode;
@@ -125,9 +127,12 @@ class _uploadImage extends State<UploadImage> {
     var response = await request.send();
 
     if (response.statusCode == params.servletResponseScOk) {
+      resultMessage('Subido con exito', context);
       setState(() {
         _hasUpload = false;
       });
+    } else {
+      resultMessage(response.toString(), context);
     }
   }
 
@@ -166,27 +171,34 @@ class _uploadImage extends State<UploadImage> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            content: Column(
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                Text(
-                  'Completar usando : ',
-                  style: TextStyle(fontSize: 20),
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Camara'),
+                    IconButton(
+                      iconSize: 40,
+                      onPressed: () => openCamera(),
+                      icon: const Icon(Icons.camera_alt),
+                    ),
+                  ],
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Galeria'),
+                    IconButton(
+                      iconSize: 40,
+                      onPressed: () => openGallery(),
+                      icon: const Icon(Icons.image),
+                    ),
+                  ],
                 ),
               ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => openCamera(),
-                child: const Text(
-                  'Camara',
-                ),
-              ),
-              TextButton(
-                onPressed: () => openGallery(),
-                child: const Text('Galaeria'),
-              ),
-            ],
           );
         });
   }
@@ -198,26 +210,37 @@ class _uploadImage extends State<UploadImage> {
         context: context,
         builder: (context) {
           return CupertinoAlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Text(
-                  'Completar usando : ',
-                  style: TextStyle(fontSize: 20),
-                ),
-              ],
+            content: Material(
+              color: const Color.fromRGBO(255, 255, 255, 0.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('Camara'),
+                      IconButton(
+                        iconSize: 40,
+                        onPressed: () => openCamera(),
+                        icon: const Icon(Icons.camera_alt),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('Galeria'),
+                      IconButton(
+                        iconSize: 40,
+                        onPressed: () => openGallery(),
+                        icon: const Icon(Icons.image),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => openCamera(),
-                child:
-                    const Text('Camara', style: TextStyle(color: Colors.red)),
-              ),
-              TextButton(
-                onPressed: () => openGallery(),
-                child: const Text('Galaeria'),
-              ),
-            ],
           );
         });
   }
