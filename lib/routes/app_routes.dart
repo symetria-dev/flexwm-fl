@@ -1,5 +1,6 @@
 import 'package:flexwm/common/params.dart' as params;
 import 'package:flexwm/routes/routes.dart';
+import 'package:flexwm/widgets/upload_image_widget.dart';
 
 class AppRoutes {
   static const initialRoute = '/';
@@ -10,11 +11,6 @@ class AppRoutes {
         name: 'Principal',
         screen: const MyCatalog()),
     MenuOption(
-        route: '/photos',
-        leadingWidget: const Icon(Icons.image),
-        name: 'Fotos',
-        screen: const MyPhotosPage()),
-    MenuOption(
         route: '/wfsp_list',
         name: 'Tareas Activas',
         leadingWidget: params.getProperIcon(SoWFlowStep.programCode),
@@ -24,6 +20,11 @@ class AppRoutes {
         name: 'Clientes',
         leadingWidget: params.getProperIcon(SoCustomer.programCode),
         screen: const CustomerList()),
+    MenuOption(
+        route: '/user',
+        name: 'Usuarios',
+        leadingWidget: params.getProperIcon(SoUser.programCode),
+        screen: const UserList()),
     MenuOption(
         route: '/',
         name: 'Salir',
