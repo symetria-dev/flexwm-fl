@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flexwm/drawer.dart';
 import 'package:flexwm/screens/new_user_form.dart';
+import 'package:flexwm/screens/user_form.dart';
 import 'package:flexwm/ui/appbar_flexwm.dart';
-import 'package:flexwm/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/common/params.dart' as params;
@@ -27,8 +27,10 @@ class _UserList extends State<UserList> {
   @override
   void initState() {
     // _loadMoreVertical();
-    fetchSoCustomers(userListData.length);
+    //fetchSoCustomers(userListData.length);
     super.initState();
+    fetchSoCustomers(userListData.length);
+    _loadMoreVertical();
   }
 
   // Traer mas datos
@@ -69,8 +71,8 @@ class _UserList extends State<UserList> {
     }
 
     final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
-    userListData.addAll(
-        parsed.map<SoUser>((json) => SoUser.fromJson(json)).toList());
+    userListData
+        .addAll(parsed.map<SoUser>((json) => SoUser.fromJson(json)).toList());
     return parsed.map<SoUser>((json) => SoUser.fromJson(json)).toList();
   }
 
@@ -91,8 +93,7 @@ class _UserList extends State<UserList> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: userListData.length,
                   itemBuilder: (context, int index) =>
-                      _UserInfo(userListData[index], index)
-              ),
+                      _UserInfo(userListData[index], index)),
             ],
           ),
         ),
@@ -101,18 +102,18 @@ class _UserList extends State<UserList> {
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          child: const Icon(Icons.add, color: Colors.white,),
-            decoration: const BoxDecoration(
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+          decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  Color.fromRGBO(0, 130, 146, 1),
-                  Color.fromRGBO(112, 169, 179, 1.0)
-                ]
-              )
-            ),
+              gradient: LinearGradient(colors: [
+                Color.fromRGBO(0, 130, 146, 1),
+                Color.fromRGBO(112, 169, 179, 1.0)
+              ])),
         ),
-        onPressed: (){
+        onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => NewUserForm()),
@@ -124,40 +125,46 @@ class _UserList extends State<UserList> {
 }
 
 class _UserInfo extends StatelessWidget {
-
   final SoUser user;
   final int index;
   const _UserInfo(this.user, this.index);
 
   @override
   Widget build(BuildContext context) {
-
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(25)
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       child: ListTile(
-        leading: Image.network(
-          params.getAppUrl(params.instance) +
-              params.uploadFiles +
-              '/' ,
-          // + item.logo,
-          width: 75,
-          height: 50,
-          errorBuilder: (context, error, stackTrace) {
-            return const Icon(Icons.person, color: Colors.green);
-          },
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => UserFormScreen(id: user.id.toString()),
+          ),
         ),
-        title: Text('$index :' + user.firstname ),
+        leading: (user.photo.isEmpty)
+            ? const CircleAvatar(
+                child: Icon(Icons.person, color: Colors.green),
+              )
+            : CircleAvatar(
+                backgroundImage: NetworkImage(
+                  params.getAppUrl(params.instance) +
+                      params.uploadFiles +
+                      '/' +
+                      user.photo,
+                ),
+              ),
+        title: Text('$index :' + user.firstname),
         subtitle: Text(user.email),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(onPressed: () {utils.makeMail(user.email);}, icon: const Icon(Icons.email)),
+            IconButton(
+                onPressed: () {
+                  utils.makeMail(user.email);
+                },
+                icon: const Icon(Icons.email)),
           ],
         ),
       ),
     );
   }
 }
-

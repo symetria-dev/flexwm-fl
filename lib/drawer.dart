@@ -2,12 +2,13 @@
 // Este software es propiedad de Mauricio Lopez Barba y Alonso Ibarra Barba
 // No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
-import 'package:flexwm/models/cust.dart';
-import 'package:flexwm/models/wfsp.dart';
+import 'package:flexwm/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flexwm/common/params.dart' as params;
 
 Widget getDrawer(BuildContext context) {
+  //Listar menus
+  final menuOptions = AppRoutes.menuOptions;
   return Drawer(
     // Add a ListView to the drawer. This ensures the user can scroll
     child: ListView(
@@ -30,7 +31,10 @@ Widget getDrawer(BuildContext context) {
             ),
           ),
           currentAccountPicture: Image.network(
-            params.getAppUrl(params.instance) + params.uploadFiles + '/' + params.photoUrl,
+            params.getAppUrl(params.instance) +
+                params.uploadFiles +
+                '/' +
+                params.photoUrl,
             fit: BoxFit.contain,
           ),
           decoration: const BoxDecoration(
@@ -39,67 +43,28 @@ Widget getDrawer(BuildContext context) {
               fit: BoxFit.fill,
             ),
           ),
-          otherAccountsPictures: [
+          otherAccountsPictures: const [
             CircleAvatar(
               backgroundColor: Colors.white,
               backgroundImage: AssetImage('images/isotipo.png'),
             ),
           ],
         ),
-        ListTile(
-          leading: const Icon(Icons.home),
-          title: const Text('Usuarios'),
-          onTap: () {
-            // Update the state of the app
-            Navigator.pop(context);
-            Navigator.pushNamed(context, '/users');
-            // Then close the drawer
-            //Navigator.pop(context);
-          },
-        ),
-        ListTile(
-          leading: const Icon(Icons.image),
-          title: const Text('Fotos'),
-          onTap: () {
-            // Update the state of the app
-            Navigator.pop(context);
-            Navigator.pushNamed(context, '/photos');
-            // Then close the drawer
-            //Navigator.pop(context);
-          },
-        ),
-        ListTile(
-          leading: params.getProperIcon(SoWFlowStep.programCode),
-          title: const Text('Tareas Activas'),
-          onTap: () {
-            // Update the state of the app
-            Navigator.pop(context);
-            Navigator.pushNamed(context, '/wfsp_list');
-            // Then close the drawer
-            //Navigator.pop(context);
-          },
-        ),
-        ListTile(
-          leading: params.getProperIcon(SoCustomer.programCode),
-          title: const Text('Clientes'),
-          onTap: () {
-            // Update the state of the app
-            Navigator.pop(context);
-            Navigator.pushNamed(context, '/cust_list');
-            // Then close the drawer
-            //Navigator.pop(context);
-          },
-        ),
-        ListTile(
-          leading: const Icon(Icons.exit_to_app),
-          title: const Text('Salir'),
-          onTap: () {
-            // Update the state of the app
-            Navigator.pop(context);
-            Navigator.pushNamed(context, '/');
-            // Then close the drawer
-            //Navigator.pop(context);
-          },
+        ListView.builder(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(5),
+          itemCount: menuOptions.length,
+          itemBuilder: (context, i) => ListTile(
+            leading: menuOptions[i].leadingWidget,
+            title: Text(menuOptions[i].name),
+            onTap: () {
+              // Update the state of the app
+              Navigator.pop(context);
+              Navigator.pushNamed(context, menuOptions[i].route);
+              // Then close the drawer
+              //Navigator.pop(context);
+            },
+          ),
         ),
       ],
     ),

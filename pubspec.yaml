@@ -49,6 +49,8 @@ dependencies:
       path: plugins/window_size
       ref: 03d957e8b5c99fc83cd4a781031b154ab3de8753
   backdrop: ^0.7.2
+  image_picker: ^0.8.5+3
+  file_picker: ^4.6.0
 
 dev_dependencies:
   flutter_test:
