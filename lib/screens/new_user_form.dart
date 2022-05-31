@@ -45,7 +45,7 @@ class NewUserForm extends StatelessWidget {
                     const SizedBox( height: 20 ),
                     
                     ChangeNotifierProvider(
-                      create: ( _ ) => LoginFormProvider(),
+                      create: ( _ ) => UserFormProvider(),
                       child: _NewUSerForm()
                     )
 
@@ -73,7 +73,7 @@ class _NewUSerForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final newUserForm = Provider.of<LoginFormProvider>(context);
+    final newUserForm = Provider.of<UserFormProvider>(context);
 
     return Container(
       child: Form(
@@ -218,7 +218,7 @@ class _NewUSerForm extends StatelessWidget {
   }
 
   // Actualiza el wflowstep en el servidor
-  void addUSer(BuildContext context, LoginFormProvider loginForm) async {
+  void addUSer(BuildContext context, UserFormProvider loginForm) async {
     soUser.email = loginForm.email;
     soUser.password = loginForm.password;
     soUser.passwordConf = loginForm.passwordConf;

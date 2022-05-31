@@ -3,6 +3,8 @@
 // No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
 // Modelo de clase Customer
+import 'package:flutter/material.dart';
+
 class SoCustomer {
   static const String programCode = 'CUST';
 
@@ -16,10 +18,21 @@ class SoCustomer {
   int referralId = 0;
   String referralComments = '';
 
+  String customerType = '';
+  String rfc = '';
+  String firstName = '';
+  String fatherLastName = '';
+  int salesManId = 0;
+  String nss = '';
+  String stablishMentDate = '';
+
+
   SoCustomer.empty();
 
   SoCustomer(this.id, this.code, this.displayName, this.legalName, this.logo,
-      this.phone, this.email, this.referralId, this.referralComments);
+      this.phone, this.email, this.referralId, this.referralComments
+      ,this.customerType,this.rfc,this.firstName,this.fatherLastName,
+      this.salesManId,this.nss,this.stablishMentDate);
 
   factory SoCustomer.fromJson(Map<String, dynamic> json) {
     return SoCustomer(json['id'] as int,
@@ -31,6 +44,13 @@ class SoCustomer {
         json['email'] as String,
         json['referralId'] as int,
         json['referralComments'] as String,
+        json['customerType'] as String,
+        json['rfc'] as String,
+        json['firstName'] as String,
+        json['fatherLastName'] as String,
+        json['salesManId'] as int,
+        json['nss'] as String,
+        json['stablishMentDate'] as String,
     );
   }
 
@@ -45,6 +65,34 @@ class SoCustomer {
       'email': email,
       'referralId': referralId,
       'referralComments': referralComments,
+      'customerType' : customerType,
+      'rfc' : rfc,
+      'firstName' : firstName,
+      'fatherLastName' : fatherLastName,
+      'salesManId' : salesManId,
+      'nss' : nss,
+      'stablishMentDate' : stablishMentDate,
     };
   }
+}
+
+class SoCustType {
+  String value = '';
+  String label = '';
+  String icon = '';
+
+  SoCustType.empty();
+
+  SoCustType(this.value,this.label,this.icon);
+
+}
+
+class SoCustLead {
+  int value = 0;
+  String label = '';
+
+  SoCustLead.empty();
+
+  SoCustLead(this.value,this.label);
+
 }

@@ -3,7 +3,9 @@
 // No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
 import 'dart:io';
+import 'package:flexwm/providers/cust_provider.dart';
 import 'package:flexwm/screens/cust_steps_form.dart';
+import 'package:flexwm/screens/cust_tabs_form.dart';
 import 'package:flexwm/screens/user_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -67,6 +69,7 @@ class MyApp extends StatelessWidget {
             return cart;
           },
         ),
+        ChangeNotifierProvider(create: (_) => CustFormProvider(),child: TabsScrollableDemo(), )
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

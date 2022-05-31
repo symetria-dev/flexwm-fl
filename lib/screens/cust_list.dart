@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flexwm/screens/cust_form.dart';
 import 'package:flexwm/screens/cust_steps_form.dart';
+import 'package:flexwm/screens/cust_tabs_form.dart';
 import 'package:flexwm/ui/appbar_flexwm.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -13,6 +14,9 @@ import 'package:flexwm/drawer.dart';
 import 'package:flexwm/models/cust.dart';
 import 'package:flexwm/common/params.dart' as params;
 import 'package:flexwm/common/utils.dart' as utils;
+import 'package:provider/provider.dart';
+
+import '../providers/cust_provider.dart';
 
 // Create a Form widget.
 class CustomerList extends StatefulWidget {
@@ -152,7 +156,7 @@ class _CustomerListState extends State<CustomerList> {
         onPressed: (){
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => CustStepsForm()),
+            MaterialPageRoute(builder: (context) => TabsScrollableDemo()),
           );
         },
       ),
