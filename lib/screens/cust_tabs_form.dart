@@ -64,7 +64,7 @@ class _TabsScrollableDemoState extends State<TabsScrollableDemo>
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
-        title: Text("TabsScroll"),
+        title: Text("Registro de Clientes"),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
@@ -88,36 +88,6 @@ class _TabsScrollableDemoState extends State<TabsScrollableDemo>
                   ],
                 ),
               ),
-            /*SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
-                  CardContainer(
-                    child: _NewCustContactForm(newCustProv),
-                  ),
-                ],
-              ),
-            ),
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
-                  CardContainer(
-                    child: _NewCustAddForm(newCustProv),
-                  ),
-                ],
-              ),
-            ),
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
-                  CardContainer(
-                    child: _NewCustRefForm(newCustProv),
-                  ),
-                ],
-              ),
-            )*/
           ],
         ),
       ),
