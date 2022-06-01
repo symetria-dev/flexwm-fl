@@ -9,6 +9,7 @@ import 'package:flexwm/screens/cust_steps_form.dart';
 import 'package:flexwm/screens/cust_tabs_form.dart';
 import 'package:flexwm/ui/appbar_flexwm.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/drawer.dart';
 import 'package:flexwm/models/cust.dart';
@@ -138,28 +139,97 @@ class _CustomerListState extends State<CustomerList> {
         ),
       ]),
       drawer: getDrawer(context),
-      floatingActionButton: FloatingActionButton(
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          child: const Icon(Icons.add, color: Colors.white,),
-          decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                  colors: [
-                    Color.fromRGBO(0, 130, 146, 1),
-                    Color.fromRGBO(112, 169, 179, 1.0)
-                  ]
-              )
-          ),
-        ),
-        onPressed: (){
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => TabsScrollableDemo()),
-          );
-        },
+      floatingActionButton:  SpeedDial(
+        animatedIcon: AnimatedIcons.menu_close,
+        animatedIconTheme: const IconThemeData(size: 22),
+        backgroundColor: Colors.blueGrey,
+        visible: true,
+        curve: Curves.bounceIn,
+        children: [
+          // FAB 1
+          SpeedDialChild(
+              child: const Icon(Icons.add, color: Colors.white,),
+              backgroundColor: Colors.blueGrey,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CustStepsForm()),
+                );
+              },
+              label: 'Steps',
+              labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                  fontSize: 16.0),
+              labelBackgroundColor: Colors.blueGrey),
+          // FAB 2
+          SpeedDialChild(
+              child: const Icon(Icons.add, color: Colors.white,),
+              backgroundColor: Colors.blueGrey,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NewCustTabs()),
+                );
+              },
+              label: 'Tabs',
+              labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                  fontSize: 16.0),
+              labelBackgroundColor: Colors.blueGrey)
+        ],
       ),
+      /*floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              child: const Icon(Icons.add, color: Colors.white,),
+              decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                      colors: [
+                        Color.fromRGBO(0, 130, 146, 1),
+                        Color.fromRGBO(112, 169, 179, 1.0)
+                      ]
+                  )
+              ),
+            ),
+            onPressed: (){
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TabsScrollableDemo()),
+              );
+            },
+          ),
+          const SizedBox(height: 10,),
+          FloatingActionButton(
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              child: const Icon(Icons.add, color: Colors.white,),
+              decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                      colors: [
+                        Color.fromRGBO(0, 130, 146, 1),
+                        Color.fromRGBO(112, 169, 179, 1.0)
+                      ]
+                  )
+              ),
+            ),
+            onPressed: (){
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TabsScrollableDemo()),
+              );
+            },
+          ),
+        ],
+      ),*/
     );
   }
 

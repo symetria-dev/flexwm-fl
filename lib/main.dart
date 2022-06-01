@@ -63,7 +63,8 @@ class MyApp extends StatelessWidget {
             return cart;
           },
         ),
-        ChangeNotifierProvider(create: (_) => CustFormProvider(),child: TabsScrollableDemo(), )
+        ChangeNotifierProvider(create: (_) => CustFormProvider(),child: NewCustTabs(), ),
+        ChangeNotifierProvider(create: (_) => CustFormProvider(),child: const CustStepsForm(), )
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

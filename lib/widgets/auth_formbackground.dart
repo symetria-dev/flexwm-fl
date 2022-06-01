@@ -20,7 +20,6 @@ class AuthFormBackground extends StatelessWidget {
         child: Stack(
           children: [
             _PurpleBox(),
-            _HeaderIcon(),
 
             this.child,
 

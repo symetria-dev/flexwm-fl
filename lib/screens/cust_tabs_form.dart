@@ -11,13 +11,16 @@ import '../ui/input_decorations.dart';
 import 'package:flexwm/common/params.dart' as params;
 import 'package:http/http.dart' as http;
 
-class TabsScrollableDemo extends StatefulWidget {
+
+class NewCustTabs extends StatefulWidget {
+  const NewCustTabs({Key? key}) : super(key: key);
+
 
   @override
-  _TabsScrollableDemoState createState() => _TabsScrollableDemoState();
+  _NewCustTabsState createState() => _NewCustTabsState();
 }
 
-class _TabsScrollableDemoState extends State<TabsScrollableDemo>
+class _NewCustTabsState extends State<NewCustTabs>
     with SingleTickerProviderStateMixin, RestorationMixin {
   late TabController _tabController;
   final RestorableInt tabIndex = RestorableInt(0);
@@ -62,9 +65,26 @@ class _TabsScrollableDemoState extends State<TabsScrollableDemo>
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
-        title: Text("Registro de Clientes"),
+      appBar:  AppBar(
+        title: const Text('Registro de Clientes', style: TextStyle(color: Colors.white),),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                  colors: [
+                    Color.fromRGBO(0, 130, 146, 1),
+                    Color.fromRGBO(112, 169, 179, 1.0)
+                  ]
+              )
+          ),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: (){
+            newCustProv.vaciar();
+            Navigator.pop(context);
+          },
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
@@ -96,15 +116,16 @@ class _TabsScrollableDemoState extends State<TabsScrollableDemo>
         backgroundColor: Colors.blueGrey.shade50,
         onPressed: (){
           if(newCustProv.isValidForm()){
-            print('valid papa');
+            print('valido');
             addCust(context, newCustProv);
           }else{
-            print('no valid');
+            print('no valido');
           }
         },
       ),
     );
   }
+
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {

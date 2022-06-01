@@ -38,7 +38,6 @@ class CustFormProvider extends ChangeNotifier{
     referralComments = '';
     phone = '';
     referralLabel = '';
-    print("Se supone");
   }
 
   final List<SoCustType> custTypeList = <SoCustType>[
@@ -62,6 +61,8 @@ class CustFormProvider extends ChangeNotifier{
   }
 
   bool isValidForm(){
+    print(customerType+' $salesManId '+firstName+' '+fatherLastName+' '+
+        email+' $referralId');
     if(customerType != '' && salesManId > 0 && firstName != '' && fatherLastName != '' &&
         email != '' && referralId > 0){
       return true;
