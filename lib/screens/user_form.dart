@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flexwm/routes/app_routes.dart';
 import 'package:flexwm/routes/routes.dart';
 import 'package:flexwm/common/params.dart' as params;
+import 'package:flexwm/widgets/dropdown_widget.dart';
 import 'package:flexwm/widgets/upload_file_widget.dart';
 import 'package:flexwm/widgets/upload_image_widget.dart';
 import 'dart:async';
@@ -9,6 +10,7 @@ import 'package:http/http.dart' as http;
 
 class UserFormScreen extends StatefulWidget {
   final String id;
+
   const UserFormScreen({Key? key, required this.id}) : super(key: key);
 
   @override
@@ -16,11 +18,14 @@ class UserFormScreen extends StatefulWidget {
 }
 
 class _UserFormScreenState extends State<UserFormScreen> {
+  final _formKey = GlobalKey<FormState>();
   SoUser soUser = SoUser.empty();
   late Future<SoUser> _futureSoUser;
 
   final textFirstNameController = TextEditingController();
   final textEmailControler = TextEditingController();
+  late int locationId = 0;
+  late int areaId = 0;
 
   @override
   void initState() {
@@ -58,7 +63,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
               future: _futureSoUser,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return getForm(snapshot.data!);
+                  return SingleChildScrollView(child: getForm(snapshot.data!));
                 } else if (snapshot.hasError) {
                   return Text(snapshot.error.toString());
                 } else {
@@ -91,10 +96,16 @@ class _UserFormScreenState extends State<UserFormScreen> {
 
 //Formulario
   Widget getForm(SoUser userData) {
+    soUser = userData;
     textFirstNameController.text = userData.firstname;
     textEmailControler.text = userData.email;
+    locationId = userData.locationId;
+    areaId = userData.areaId;
+
     return Form(
+      key: _formKey,
       child: Container(
+        margin: const EdgeInsets.only(top: 0),
         padding: const EdgeInsets.all(16),
         child: Column(
           children: <Widget>[
@@ -126,11 +137,33 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 fielName: 'user_photo',
                 label: 'Foto',
                 id: userData.id.toString()),
+            DropdownWidget(
+              callback: (String id) {
+                locationId = int.parse(id);
+              },
+              dropdownValue: userData.locationId.toString(),
+              programCode: 'LOCT',
+              label: 'Ubicación',
+            ),
+            DropdownWidget(
+              callback: (String id) {
+                setState(() {
+                  areaId = int.parse(id);
+                });
+              },
+              dropdownValue: userData.areaId.toString(),
+              programCode: 'AREA',
+              label: 'Area',
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: ElevatedButton(
                 onPressed: () {
-                  // Valida la forma, si regresa verdadero actua
+                  if (_formKey.currentState!.validate()) {
+                    // Actualiza registro
+
+                    updateCustomer();
+                  }
                 },
                 child: const Text(
                   'Guardar',
@@ -145,6 +178,49 @@ class _UserFormScreenState extends State<UserFormScreen> {
         ),
       ),
     );
+  }
+
+  void updateCustomer() async {
+    soUser.firstname = textFirstNameController.text;
+    soUser.email = textEmailControler.text;
+    soUser.locationId = locationId;
+    soUser.areaId = areaId;
+
+    final response = await http.post(
+      Uri.parse(params.getAppUrl(params.instance) +
+          'restuser;' +
+          params.jSessionIdQuery),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Access-Control-Allow-Origin': '*',
+        'Cookie':
+            params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
+      },
+      body: jsonEncode(soUser),
+    );
+
+    if (response.statusCode == params.servletResponseScOk) {
+      // Muestra mensaje
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Registro actualizado')),
+      );
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UserList()),
+      );
+    } else if (response.statusCode == params.servletResponseScNotAcceptable ||
+        response.statusCode == params.servletResponseScForbidden) {
+      // Error al guardar
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error al Guardar')),
+      );
+    } else {
+      // Aun no se recibe respuesta del servidor
+      const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
   }
 
   Widget getPhoto(SoUser soUser) {

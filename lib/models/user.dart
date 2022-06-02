@@ -1,14 +1,14 @@
 class SoUser {
   static const String programCode = 'USER';
 
-  int id = 0;
+  int id = -1;
   String firstname = "";
   String email = "";
   String password = "";
   String passwordConf = "";
   String photo = "";
-  int locationId = 5;
-  int areaId = 12;
+  int locationId = -1;
+  int areaId = -1;
 
   SoUser.empty();
 
@@ -37,6 +37,7 @@ class SoUser {
       'passwordConf': passwordConf,
       'locationId': locationId,
       'areaId': areaId,
+     
     };
   }
 }

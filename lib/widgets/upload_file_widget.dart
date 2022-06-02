@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flexwm/widgets/alert_diaog.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flexwm/common/params.dart' as params;
 import 'package:http/http.dart' as http;
@@ -29,7 +26,6 @@ class UploadFile extends StatefulWidget {
 // ignore: camel_case_types
 class _uploadFile extends State<UploadFile> {
   String? _ruta;
-  String? _initialruta;
   late String _programCode;
   late String _fielName;
   late String _label;
@@ -38,7 +34,7 @@ class _uploadFile extends State<UploadFile> {
 
   @override
   void initState() {
-    _initialruta = widget.initialruta;
+   
     _programCode = widget.programCode;
     _fielName = widget.fielName;
     _id = widget.id;
@@ -74,7 +70,7 @@ class _uploadFile extends State<UploadFile> {
                     setState(() {
                       _ruta = file.path;
                       if (_ruta != null) _hasUpload = true;
-                      _initialruta = null;
+                     
                     });
                   },
                   child: const Text("Seleccionar Archivo"),
