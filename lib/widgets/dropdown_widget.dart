@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flexwm/common/filters.dart';
 import 'package:flutter/material.dart';
 import 'package:flexwm/common/params.dart' as params;
 import 'package:http/http.dart' as http;
@@ -8,6 +9,7 @@ class DropdownWidget extends StatefulWidget {
   final String dropdownValue;
   final String programCode;
   final String label;
+  final List<SoFilters>? filterList;
 
   const DropdownWidget({
     Key? key,
@@ -15,6 +17,7 @@ class DropdownWidget extends StatefulWidget {
     required this.dropdownValue,
     required this.programCode,
     required this.label,
+    this.filterList,
   }) : super(key: key);
 
   @override
@@ -56,7 +59,7 @@ class _DropdownWidgetState extends State<DropdownWidget> {
                       Icons.arrow_drop_down_circle_outlined,
                       color: Colors.blueGrey,
                     ),
-                    value: _dropdownValue,
+                    value: getValue(_dropdownValue),
                     onChanged: (String? newValue) {
                       setState(() {
                         _dropdownValue = newValue!;
@@ -79,19 +82,34 @@ class _DropdownWidgetState extends State<DropdownWidget> {
     );
   }
 
+  // se hace esta validación porque si no hay un item con id manda un error
+  String getValue(String value) {
+    int index = -1;
+
+    for (int i = 0; i < dataList.length; i++) {
+      if (dataList[i]['id'].toString() == value) {
+        index = 1;
+      }
+    }
+
+    if (index < 0) value = '-1';
+
+    return value;
+  }
+
   Future getData() async {
     final response = await http.post(
-      Uri.parse(params.getAppUrl(params.instance) +
-          'dropdownlist;' +
-          params.jSessionIdQuery),
-      headers: <String, String>{
-        'programCode': widget.programCode,
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Access-Control-Allow-Origin': '*',
-        'Cookie':
-            params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
-      },
-    );
+        Uri.parse(params.getAppUrl(params.instance) +
+            'dropdownlist;' +
+            params.jSessionIdQuery),
+        headers: <String, String>{
+          'programCode': widget.programCode,
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Access-Control-Allow-Origin': '*',
+          'Cookie':
+              params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
+        },
+        body: json.encode(widget.filterList));
 
     setState(() {
       dataList = json.decode(response.body);
