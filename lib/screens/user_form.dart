@@ -2,11 +2,18 @@ import 'dart:convert';
 import 'package:flexwm/routes/app_routes.dart';
 import 'package:flexwm/routes/routes.dart';
 import 'package:flexwm/common/params.dart' as params;
+import 'package:flexwm/screens/pdf_view.dart';
 import 'package:flexwm/widgets/dropdown_widget.dart';
 import 'package:flexwm/widgets/upload_file_widget.dart';
 import 'package:flexwm/widgets/upload_image_widget.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+
+import '../ui/appbar_flexwm.dart';
+
 
 class UserFormScreen extends StatefulWidget {
   final String id;
@@ -21,6 +28,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
   final _formKey = GlobalKey<FormState>();
   SoUser soUser = SoUser.empty();
   late Future<SoUser> _futureSoUser;
+  // late PDFDocument doc;
+  // bool _isLoading = true;
 
   final textFirstNameController = TextEditingController();
   final textEmailControler = TextEditingController();
@@ -30,8 +39,10 @@ class _UserFormScreenState extends State<UserFormScreen> {
   @override
   void initState() {
     super.initState();
+    // loadDocument();
     _futureSoUser = fetchUser(widget.id);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +112,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
     textEmailControler.text = userData.email;
     locationId = userData.locationId;
     areaId = userData.areaId;
-
+    String urlDoc = params.getAppUrl(params.instance)+'/'+
+            params.uploadFiles+'/'+soUser.photo;
     return Form(
       key: _formKey,
       child: Container(
@@ -132,11 +144,54 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 labelText: 'Email',
               ),
             ),
-            UploadFile(
-                programCode: 'USER',
-                fielName: 'user_photo',
-                label: 'Foto',
-                id: userData.id.toString()),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                UploadFile(
+                    programCode: 'USER',
+                    fielName: 'user_photo',
+                    label: 'Foto',
+                    id: userData.id.toString()),
+                const SizedBox(width: 10,),
+                if(soUser.photo != '')
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      10,
+                      10,
+                      0,
+                      5,
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        String file = soUser.photo;
+                        final dot = file.indexOf('.');
+                        String type = file.substring(dot, file.length);
+                        print('type '+type+' urlDoc '+urlDoc);
+                        if(type == '.pdf'){
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                              builder: (_) => PdfView(url: urlDoc,),
+                              ),
+                          );
+                          // _showModalPdf(context,urlDoc);
+                        }else{
+                          showImageUser(context, urlDoc);
+                        }
+                      },
+                      child: const Text(
+                        'Ver archivo',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
             DropdownWidget(
               callback: (String id) {
                 locationId = int.parse(id);
@@ -177,6 +232,46 @@ class _UserFormScreenState extends State<UserFormScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  /*void _loadDocument(String url) async {
+    setState(() => _isLoading = true);
+    print('ante');
+    doc = await PDFDocument.fromURL(url);
+    print('despue');
+    setState(() => _isLoading = false);
+  }
+*/
+ /*Future<Scaffold> _showModalPdf(BuildContext context, String url) async {
+      return Scaffold(
+        appBar: AppBarStyle.authAppBarFlex(
+            title: 'Documento'
+        ),
+        body: SfPdfViewer.network('https://www.kindacode.com/wp-content/uploads/2021/07/test.pdf')
+      );
+  }*/
+
+  void showImageUser(BuildContext context, String url) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Center(
+          child: AlertDialog(
+            backgroundColor: Colors.transparent,
+            contentPadding: EdgeInsets.zero, //this right here
+            content: ClipRRect(
+              borderRadius: BorderRadius.circular(20.0),
+              child: SizedBox(
+                height: 400,
+                child: Image.network(
+                  url,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
