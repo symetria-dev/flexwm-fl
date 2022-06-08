@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flexwm/ui/appbar_flexwm.dart';
+import 'package:flexwm/screens/autocomplete_example.dart';
 import 'package:flexwm/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -34,6 +34,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _activeStepIndex = 0;
   bool _valid = false;
+  late int salesManId = 0;
 //fomr 3
   final leadController = TextEditingController();
   final notasRefController = TextEditingController();
@@ -114,6 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+
     final newCustForm = Provider.of<CustFormProvider>(context);
     //form 0
     if(newCustForm.customerType != '') custTypeController.text = newCustForm.customerTypeName;
@@ -181,7 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onChanged: ( value ) => newCustForm.legalName = value,
             ),
             const SizedBox(height: 10),
-            TextFormField(
+            /*TextFormField(
               autocorrect: false,
               readOnly: true,
               initialValue: "Cristian : Hernández",
@@ -198,8 +200,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     : 'Por favor ingrese un nombre valido';
 
               },
-            ),
-
+            ),*/
+            AutocompleteExampleApp(
+              label: 'Vendedor',
+              programCode: 'USER',
+              callback: (int id){
+                salesManId = id;
+              },
+              autoValue: salesManId,
+            )
           ],
         ),
       ),
@@ -486,6 +495,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           backgroundColor: Colors.blueGrey.shade50,
           onPressed: () {
+            newCustForm.salesManId = salesManId;
             if (newCustForm.isValidForm()) {
               addCust(context, newCustForm);
             } else {
