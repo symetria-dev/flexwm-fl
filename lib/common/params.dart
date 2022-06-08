@@ -14,6 +14,7 @@ const String dateFormat = 'yyyy-MM-dd';
 const String offsetQuery = 'offsqry';
 
 const String searchQuery = 's';
+const String forceFilter = 'ff';
 
 const int servletResponseScOk = 200;
 const int servletResponseScNotAcceptable = 406;

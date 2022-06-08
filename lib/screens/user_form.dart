@@ -1,9 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flexwm/common/filters.dart';
+import 'package:flexwm/models/usem.dart';
 import 'package:flexwm/routes/app_routes.dart';
 import 'package:flexwm/routes/routes.dart';
 import 'package:flexwm/common/params.dart' as params;
+import 'package:flexwm/screens/usem_screen.dart';
 import 'package:flexwm/screens/pdf_view.dart';
 import 'package:flexwm/widgets/dropdown_widget.dart';
+import 'package:flexwm/widgets/sub_catalog_widget.dart';
 import 'package:flexwm/widgets/upload_file_widget.dart';
 import 'package:flexwm/widgets/upload_image_widget.dart';
 import 'dart:async';
@@ -68,7 +73,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
               );
             },
           ),
-        ),
+        ),   
         body: Center(
           child: FutureBuilder<SoUser>(
               future: _futureSoUser,
@@ -104,6 +109,17 @@ class _UserFormScreenState extends State<UserFormScreen> {
 
     return SoUser.fromJson(jsonDecode(response.body));
   }
+
+  /*showExtra() {
+    if (emailExpanded) {
+      _heightEmailContainer = 0;
+      emailExpanded = false;
+    } else {
+      _heightEmailContainer = 100;
+      emailExpanded = true;
+    }
+    setState(() {});
+  }*/
 
 //Formulario
   Widget getForm(SoUser userData) {
@@ -199,6 +215,18 @@ class _UserFormScreenState extends State<UserFormScreen> {
               dropdownValue: userData.locationId.toString(),
               programCode: 'LOCT',
               label: 'Ubicación',
+              filterList: [
+                SoFilters(
+                    field: 'loct_name',
+                    kind: SoUserEmail.kind,
+                    value: 'GDL',
+                    filterMethod: SoFilters.METHOD_SETVALUELABELFILTER),
+                SoFilters(
+                    field: 'loct_name',
+                    kind: SoUserEmail.kind,
+                    value: 'CDMX',
+                    filterMethod: SoFilters.METHOD_SETVALUELABELFILTER),
+              ],
             ),
             DropdownWidget(
               callback: (String id) {
@@ -210,6 +238,14 @@ class _UserFormScreenState extends State<UserFormScreen> {
               programCode: 'AREA',
               label: 'Area',
             ),
+            SubCatalogContainerWidget(
+              title: 'Correos',
+              child: UserEmail(
+                forceFilter: userData.id,
+              ),
+            ),
+            
+            
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: ElevatedButton(
