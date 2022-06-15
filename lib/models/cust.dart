@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 class SoCustomer {
   static const String programCode = 'CUST';
 
+  static const String TYPE_PERSON = 'P';
+  static const String TYPE_COMPANY = 'C';
+
   int id = -1;
   String code = '';
   String displayName = '';
@@ -26,13 +29,18 @@ class SoCustomer {
   String nss = '';
   String stablishMentDate = '';
 
+  String birthdate = "";
+  String passw = "";
+  String passwconf = "";
+
 
   SoCustomer.empty();
 
   SoCustomer(this.id, this.code, this.displayName, this.legalName, this.logo,
       this.phone, this.email, this.referralId, this.referralComments
       ,this.customerType,this.rfc,this.firstName,this.fatherLastName,
-      this.salesManId,this.nss,this.stablishMentDate);
+      this.salesManId,this.nss,this.stablishMentDate, this.birthdate
+      ,this.passw, this.passwconf);
 
   factory SoCustomer.fromJson(Map<String, dynamic> json) {
     return SoCustomer(json['id'] as int,
@@ -51,6 +59,10 @@ class SoCustomer {
         json['salesManId'] as int,
         json['nss'] as String,
         json['stablishMentDate'] as String,
+
+        json['birthdate'] as String,
+        json['passw'] as String,
+        json['passwconf'] as String,
     );
   }
 
@@ -72,6 +84,9 @@ class SoCustomer {
       'salesManId' : salesManId,
       'nss' : nss,
       'stablishMentDate' : stablishMentDate,
+      'birthdate' : birthdate,
+      'passw' : passw,
+      'passwconf' : passwconf,
     };
   }
 }

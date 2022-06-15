@@ -152,18 +152,14 @@ class LoginFormState extends State<LoginForm> {
             child: RichText(
               text: TextSpan(
                 children: [
-                  const TextSpan(
-                      text: '¿No tienes una cuenta?',
-                      style: TextStyle(color: Colors.black,fontSize: 16)
-                  ),
                   TextSpan(
-                      text: 'Regístrate',
+                      text: 'Registro Cliente Nuevo',
                       style: const TextStyle(color: Colors.blue,fontSize: 16),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => NewUserForm())
+                            MaterialPageRoute(builder: (context) => const NewUserForm(step1: true,))
                           );
                         }
                   )

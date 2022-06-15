@@ -7,6 +7,9 @@ class CustFormProvider extends ChangeNotifier{
 
   final formGrlKey = GlobalKey<FormState>();
 
+  final firstFormKey = GlobalKey<FormState>();
+  final secondFormKey = GlobalKey<FormState>();
+
   String customerType = '';
   String customerTypeName = '';
   String? displayName = '';
@@ -21,6 +24,10 @@ class CustFormProvider extends ChangeNotifier{
   String? referralComments = '';
   String phone = '';
   String referralLabel = '';
+
+  String birthdate = "";
+  String passw = "";
+  String passwconf = "";
 
   void vaciar(){
     print("Vaciando");
@@ -38,6 +45,10 @@ class CustFormProvider extends ChangeNotifier{
     referralComments = '';
     phone = '';
     referralLabel = '';
+
+    birthdate = "";
+    passw = "";
+    passwconf = "";
   }
 
   final List<SoCustType> custTypeList = <SoCustType>[
@@ -69,6 +80,14 @@ class CustFormProvider extends ChangeNotifier{
     }else{
       return false;
     }
+  }
+
+  bool isValidFirstForm(){
+    return firstFormKey.currentState?.validate() ?? false;
+  }
+
+  bool isValidSecondForm(){
+    return secondFormKey.currentState?.validate() ?? false;
   }
 
 }

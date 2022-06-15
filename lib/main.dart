@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:flexwm/providers/cust_provider.dart';
 import 'package:flexwm/screens/cust_steps_form.dart';
 import 'package:flexwm/screens/cust_tabs_form.dart';
-import 'package:flexwm/screens/user_list.dart';
+import 'package:flexwm/screens/new_user_form.dart';
 import 'package:flexwm/routes/app_routes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -63,8 +63,9 @@ class MyApp extends StatelessWidget {
             return cart;
           },
         ),
-        ChangeNotifierProvider(create: (_) => CustFormProvider(),child: NewCustTabs(), ),
-        ChangeNotifierProvider(create: (_) => CustFormProvider(),child: const CustStepsForm(), )
+        ChangeNotifierProvider(create: (_) => CustFormProvider(),child: const NewCustTabs(), ),
+        ChangeNotifierProvider(create: (_) => CustFormProvider(),child: const CustStepsForm(), ),
+        ChangeNotifierProvider(create: (_) => CustFormProvider(),child: const NewUserForm(step1: true), )
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
