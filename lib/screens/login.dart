@@ -2,6 +2,7 @@
 // Este software es propiedad de Mauricio Lopez Barba y Alonso Ibarra Barba
 // No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
+import 'package:flexwm/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -11,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flexwm/common/params.dart' as params;
 
 import 'cust_steps_form.dart';
-import 'new_user_form.dart';
+import 'new_cust_form.dart';
 
 // Create a Form widget.
 class LoginForm extends StatefulWidget {
@@ -49,22 +50,33 @@ class LoginFormState extends State<LoginForm> {
 
     return Scaffold(
       backgroundColor: params.bgColor,
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(60.0),
+      body: AuthBackground(
+        child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Flexible(
-                child:Image.asset('images/logo.png'),
-              ),
-              Text(
-                'App FlexWM',
-                style: Theme.of(context).textTheme.headline1,
-              ),
-              getLoginForm(),
-              const SizedBox(
-                height: 24,
+              const SizedBox(height: 250,),
+
+              CardContainer(
+                child: Column(
+
+                  // mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox( height: 10 ),
+                    const Text('Inicio de Sesión', style: TextStyle(color: Colors.grey, fontSize: 20)),
+                    const SizedBox( height: 20 ),
+/*                Flexible(
+                      child:Image.asset('images/logo.png'),
+                    ),*/
+/*                Text(
+                      'App FlexWM',
+                      style: Theme.of(context).textTheme.headline1,
+                    ),*/
+                    getLoginForm(),
+                    const SizedBox(
+                      height: 24,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -159,7 +171,7 @@ class LoginFormState extends State<LoginForm> {
                         ..onTap = () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const NewUserForm(step1: true,))
+                            MaterialPageRoute(builder: (context) => const NewCustForm(step1: true,))
                           );
                         }
                   )

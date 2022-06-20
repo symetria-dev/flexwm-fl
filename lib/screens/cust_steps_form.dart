@@ -499,7 +499,9 @@ class _MyHomePageState extends State<MyHomePage> {
             if (newCustForm.isValidForm()) {
               addCust(context, newCustForm);
             } else {
-              _valid = true;
+              setState(() {
+                _valid = true;
+              });
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                     content: Text('Favor de llenar los campos obligatorios')),

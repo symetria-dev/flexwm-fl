@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:flexwm/providers/cust_provider.dart';
+import 'package:flexwm/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -13,11 +14,11 @@ import 'package:http/http.dart' as http;
 
 import '../models/cust.dart';
 
-class NewUserForm extends StatelessWidget {
+class NewCustForm extends StatelessWidget {
 
   final bool step1;
 
-  const NewUserForm({
+  const NewCustForm({
     Key? key,
     required this.step1
   }) : super(key: key);
@@ -196,7 +197,7 @@ class _NewUSerForm extends StatelessWidget {
                 }
                 Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const NewUserForm(step1: false,))
+                    MaterialPageRoute(builder: (context) => const NewCustForm(step1: false,))
                 );
               }
             )
@@ -251,7 +252,7 @@ class _NewUSerForm2 extends StatelessWidget {
 
     final newCustForm = Provider.of<CustFormProvider>(context);
 
-    if(newCustForm.birthdate != '') dateContr.text = newCustForm.birthdate!;
+    if(newCustForm.birthdate != '') dateContr.text = newCustForm.birthdate;
     if(newCustForm.legalName != '') legalNameCtrll.text = newCustForm.legalName!;
     if(newCustForm.email != '') emailCtrll.text = newCustForm.email;
     if(newCustForm.phone != '') phonCtrll.text = newCustForm.phone;
@@ -412,8 +413,7 @@ void addCust(BuildContext context, CustFormProvider custFormProv) async {
   soUser.fatherLastName = custFormProv.fatherLastName;
   soUser.email = custFormProv.email;
   soUser.phone = custFormProv.phone;
-  soUser.birthdate = custFormProv.birthdate!;
-  soUser.salesManId = 97;
+  soUser.birthdate = custFormProv.birthdate;
 
 
   // Envia la sesion como Cookie, con el nombre en UpperCase
@@ -439,9 +439,12 @@ void addCust(BuildContext context, CustFormProvider custFormProv) async {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Cliente "' + soUser.email + '" regitrado')),
     );
-    // Regresa al listado
+    // Regresa al login
     //Navigator.pop(context);
-     Navigator.pushNamed(context, '/login');
+    Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginForm())
+    );
   } else if (response.statusCode == params.servletResponseScNotAcceptable ||
       response.statusCode == params.servletResponseScForbidden) {
     // Error al guardar

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flexwm/drawer.dart';
-import 'package:flexwm/screens/new_user_form.dart';
 import 'package:flexwm/screens/user_form.dart';
 import 'package:flexwm/ui/appbar_flexwm.dart';
 import 'package:flutter/material.dart';
@@ -98,7 +97,7 @@ class _UserList extends State<UserList> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+     /* floatingActionButton: FloatingActionButton(
         child: Container(
           width: double.infinity,
           height: double.infinity,
@@ -114,12 +113,12 @@ class _UserList extends State<UserList> {
               ])),
         ),
         onPressed: () {
-/*          Navigator.push(
+*//*          Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => NewUserForm()),
-          );*/
+          );*//*
         },
-      ),
+      ),*/
     );
   }
 }
