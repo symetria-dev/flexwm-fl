@@ -18,6 +18,8 @@ class CustFormProvider extends ChangeNotifier{
   String fatherLastName = '';
   String email = '';
   int salesManId = 0;
+  String salesManName = '';
+
   String? nss = '';
   String? stablishMentDate = '';
   int referralId = 0;
@@ -75,7 +77,7 @@ class CustFormProvider extends ChangeNotifier{
     print(customerType+' $salesManId '+firstName+' '+fatherLastName+' '+
         email+' $referralId');
     if(customerType != '' && salesManId > 0 && firstName != '' && fatherLastName != '' &&
-        email != '' && referralId > 0){
+        email != ''){
       return true;
     }else{
       return false;

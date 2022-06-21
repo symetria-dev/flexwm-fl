@@ -13,6 +13,7 @@ import 'package:flexwm/common/params.dart' as params;
 import 'package:http/http.dart' as http;
 
 import '../ui/input_decorations_invalid.dart';
+/*
 
 class CustStepsForm extends StatelessWidget {
   const CustStepsForm({Key? key}) : super(key: key);
@@ -23,17 +24,18 @@ class CustStepsForm extends StatelessWidget {
     return const MyHomePage();
   }
 }
+*/
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+class CustStepsForm extends StatefulWidget {
+  const CustStepsForm({Key? key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _CustStepsFormState createState() => _CustStepsFormState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _CustStepsFormState extends State<CustStepsForm> {
   int _activeStepIndex = 0;
-  bool _valid = false;
+  bool _inValid = false;
   late int salesManId = 0;
 //fomr 3
   final leadController = TextEditingController();
@@ -50,6 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
   //form 2
   final nssController = TextEditingController();
   final dateContr = TextEditingController();
+  final salesManContr = TextEditingController();
 
   void _showModalFuenteOp(BuildContext context, CustFormProvider newCustForm) {
     showModalBottomSheet(
@@ -121,6 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if(newCustForm.customerType != '') custTypeController.text = newCustForm.customerTypeName;
     if(newCustForm.displayName != '') displayNameController.text = newCustForm.displayName!;
     if(newCustForm.legalName != '') legalNameController.text = newCustForm.legalName!;
+    if(newCustForm.salesManName != '') salesManContr.text = newCustForm.salesManName;
     // form 1
     if(newCustForm.firstName != '') firstNameController.text = newCustForm.firstName;
     if(newCustForm.fatherLastName != '') fatherLastController.text = newCustForm.fatherLastName;
@@ -132,16 +136,17 @@ class _MyHomePageState extends State<MyHomePage> {
     //form 3
     if(newCustForm.referralLabel != '') leadController.text = newCustForm.referralLabel;
     if(newCustForm.referralComments != '') notasRefController.text = newCustForm.referralComments!;
-    newCustForm.salesManId = 97;
+
+
     List<Step> stepList() => [
       Step(
-        state: (!_valid) ?_activeStepIndex <= 0 ? StepState.indexed : StepState.complete :StepState.error,
+        state: (!_inValid) ?_activeStepIndex <= 0 ? StepState.indexed : StepState.complete :StepState.error,
         isActive: _activeStepIndex >= 0,
         title: const Text('General'),
         content: Column(
           children: [
             TextFormField(
-              decoration: (!_valid)
+              decoration: (!_inValid)
                   ? InputDecorations.authInputDecoration(
                   labelText: 'Tipo Cliente*',
                   sufixIcon: Icons.arrow_drop_down_circle_outlined)
@@ -183,38 +188,23 @@ class _MyHomePageState extends State<MyHomePage> {
               onChanged: ( value ) => newCustForm.legalName = value,
             ),
             const SizedBox(height: 10),
-            /*TextFormField(
-              autocorrect: false,
-              readOnly: true,
-              initialValue: "Cristian : Hernández",
-              keyboardType: TextInputType.name,
-              decoration: InputDecorations.authInputDecoration(
-                  hintText: "Vendedor",
-                  labelText: "Vendedor*",
-                  prefixIcon: Icons.assignment_ind_outlined
-              ),
-              validator: ( value ) {
-                newCustForm.salesManId = 97;
-                return ( value != null && value.isNotEmpty )
-                    ? null
-                    : 'Por favor ingrese un nombre valido';
-
-              },
-            ),*/
             AutocompleteExampleApp(
-              label: 'Vendedor',
+              label: 'Vendedor*',
               programCode: 'USER',
               callback: (int id){
                 salesManId = id;
+                newCustForm.salesManId = id;
               },
               autoValue: salesManId,
+              icon: Icons.account_balance_wallet_outlined,
+              inValid: _inValid,
             )
           ],
         ),
       ),
       Step(
           state:
-          (!_valid) ?_activeStepIndex <= 1 ? StepState.editing : StepState.complete :StepState.error,
+          (!_inValid) ?_activeStepIndex <= 1 ? StepState.editing : StepState.complete :StepState.error,
           isActive: _activeStepIndex >= 1,
           title: const Text('Datos de Contacto'),
           content: Container(
@@ -224,7 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   autocorrect: false,
                   keyboardType: TextInputType.name,
                   controller: firstNameController,
-                  decoration: (!_valid)
+                  decoration: (!_inValid)
                       ?InputDecorations.authInputDecoration(
                       hintText: "Nombre",
                       labelText: "Nombre*",
@@ -250,15 +240,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     keyboardType: TextInputType.name,
                     // initialValue: newCustForm.fatherLastName,
                     controller: fatherLastController,
-                    decoration: (!_valid)
+                    decoration: (!_inValid)
                         ?InputDecorations.authInputDecoration(
                         hintText: "Apellido Paterno*",
-                        labelText: "Apellido Paterno",
+                        labelText: "Apellido Paterno*",
                         prefixIcon: Icons.account_box_outlined
                         )
                         :InputDecorationsInvalid.authInputDecoration(
                         hintText: "Apellido Paterno*",
-                        labelText: "Apellido Paterno",
+                        labelText: "Apellido Paterno*",
                         prefixIcon: Icons.account_box_outlined
                         ),
                     onChanged: ( value ) => newCustForm.fatherLastName = value,
@@ -288,7 +278,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     keyboardType: TextInputType.emailAddress,
                     // initialValue: newCustForm.email,
                     controller: emailController,
-                    decoration: (!_valid)
+                    decoration: (!_inValid)
                           ?InputDecorations.authInputDecoration(
                               hintText: 'tucorreo@gmail.com',
                               labelText: 'Email*',
@@ -366,7 +356,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           )),
       Step(
-          state: (!_valid) ?StepState.complete :StepState.error,
+          state: (_activeStepIndex>=3) ?StepState.complete :StepState.editing,
           isActive: _activeStepIndex >= 3,
           title: const Text('Datos de Referencia'),
           content: Container(
@@ -375,13 +365,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   TextFormField(
-                    decoration: (!_valid)
-                        ?InputDecorations.authInputDecoration(
-                        labelText: 'Fuente de Lead*',
-                        sufixIcon: Icons.arrow_drop_down_circle_outlined
-                        )
-                        :InputDecorationsInvalid.authInputDecoration(
-                        labelText: 'Fuente de Lead*',
+                    decoration: InputDecorations.authInputDecoration(
+                        labelText: 'Fuente de Lead',
                         sufixIcon: Icons.arrow_drop_down_circle_outlined
                         ),
                     controller: leadController,
@@ -438,13 +423,12 @@ class _MyHomePageState extends State<MyHomePage> {
           currentStep: _activeStepIndex,
           steps: stepList(),
           onStepContinue: () {
-            if (_activeStepIndex < (stepList().length - 1)) {
+            if (_activeStepIndex < (stepList().length - 1) &&
+                validStep(_activeStepIndex, newCustForm)) {
               setState(() {
                 _activeStepIndex += 1;
               });
-            } else {
-              print('Submited');
-            }
+            } 
           },
           onStepCancel: () {
             if (_activeStepIndex == 0) {
@@ -456,9 +440,11 @@ class _MyHomePageState extends State<MyHomePage> {
             });
           },
           onStepTapped: (int index) {
-            setState(() {
+            return;
+            //Funcion para ir al step al dar click en el icono
+  /*          setState(() {
               _activeStepIndex = index;
-            });
+            });*/
           },
           controlsBuilder: (context, details) {
             final isLastStep = _activeStepIndex == stepList().length - 1;
@@ -500,7 +486,7 @@ class _MyHomePageState extends State<MyHomePage> {
               addCust(context, newCustForm);
             } else {
               setState(() {
-                _valid = true;
+                _inValid = true;
               });
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -509,6 +495,32 @@ class _MyHomePageState extends State<MyHomePage> {
             }
           },
         ));
+  }
+
+  //Validaciones para avanzar step
+  bool validStep (int step, CustFormProvider newCustForm){
+    switch (step){
+      case 0:
+        if(newCustForm.customerType == '' || newCustForm.salesManId == 0) {
+          setState((){
+            _inValid = true;
+          });
+          return false;
+        }
+        break;
+      case 1:
+        if(newCustForm.firstName == '' || newCustForm.fatherLastName == ''
+            || newCustForm.email == ''){
+          return false;
+        }else{
+          setState((){
+            _inValid = false;
+          });
+          return true;
+        }
+        break;
+    }
+    return true;
   }
 }
 

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flexwm/ui/input_decorations_invalid.dart';
 import 'package:flutter/material.dart';
 import 'package:flexwm/common/params.dart' as params;
 import 'package:http/http.dart' as http;
@@ -11,6 +12,8 @@ class AutocompleteExampleApp extends StatefulWidget {
   final String label;
   final Function callback;
   final int autoValue;
+  final bool inValid;
+  final IconData? icon;
 
   const AutocompleteExampleApp({
     Key? key,
@@ -18,6 +21,8 @@ class AutocompleteExampleApp extends StatefulWidget {
     required this.label,
     required this.callback,
     required this.autoValue,
+    this.icon,
+    required this.inValid,
   }) : super(key: key);
 
   @override
@@ -54,10 +59,15 @@ class _AutocompleteBasicUserExample extends State<AutocompleteExampleApp> {
           FocusNode fieldFocusNode,
           VoidCallback onFieldSubmitted) {
         return TextField(
-          decoration: InputDecorations.authInputDecoration(
-              labelText: "Vendedor",
-              prefixIcon: Icons.account_balance_wallet_outlined
-          ),
+          decoration: (!widget.inValid)
+            ? InputDecorations.authInputDecoration(
+              labelText: widget.label,
+              prefixIcon: widget.icon
+              )
+            : InputDecorationsInvalid.authInputDecoration(
+              labelText: widget.label,
+              prefixIcon: widget.icon
+              ),
           controller: fieldTextEditingController,
           focusNode: fieldFocusNode,
         );
@@ -65,6 +75,9 @@ class _AutocompleteBasicUserExample extends State<AutocompleteExampleApp> {
       displayStringForOption: _displayStringForOption,
       optionsBuilder: (TextEditingValue textEditingValue) {
         if (textEditingValue.text == '') {
+          setState((){
+            _callback(0);
+          });
           return const Iterable<Data>.empty();
         }
         return dataList.where((Data option) {
