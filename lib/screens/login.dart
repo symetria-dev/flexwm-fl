@@ -11,7 +11,6 @@ import 'package:flexwm/models/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flexwm/common/params.dart' as params;
 
-import 'cust_steps_form.dart';
 import 'new_cust_form.dart';
 
 // Create a Form widget.
@@ -49,7 +48,6 @@ class LoginFormState extends State<LoginForm> {
     doLogout();
 
     return Scaffold(
-      backgroundColor: params.bgColor,
       body: AuthBackground(
         child: SingleChildScrollView(
           child: Column(
@@ -72,9 +70,6 @@ class LoginFormState extends State<LoginForm> {
                       style: Theme.of(context).textTheme.headline1,
                     ),*/
                     getLoginForm(),
-                    const SizedBox(
-                      height: 24,
-                    ),
                   ],
                 ),
               ),

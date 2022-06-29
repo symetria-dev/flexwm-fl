@@ -41,9 +41,13 @@ class _HeaderIcon extends StatelessWidget {
     return SafeArea(
       child: Container(
         width: double.infinity,
-        margin: EdgeInsets.only( top: 30),
-        child: Flexible(
-          child:Image.asset('images/logo.png'),
+        margin: const EdgeInsets.only( top: 30),
+        child: Row(
+          children: [
+            Flexible(
+              child:Image.asset('images/logo.png'),
+            ),
+          ],
         ),
       ),
     );
