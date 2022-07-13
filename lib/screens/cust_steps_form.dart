@@ -13,18 +13,6 @@ import 'package:flexwm/common/params.dart' as params;
 import 'package:http/http.dart' as http;
 
 import '../ui/input_decorations_invalid.dart';
-/*
-
-class CustStepsForm extends StatelessWidget {
-  const CustStepsForm({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return const MyHomePage();
-  }
-}
-*/
 
 class CustStepsForm extends StatefulWidget {
   const CustStepsForm({Key? key}) : super(key: key);
@@ -34,26 +22,29 @@ class CustStepsForm extends StatefulWidget {
 }
 
 class _CustStepsFormState extends State<CustStepsForm> {
+  // varibale para índice del paso activo
   int _activeStepIndex = 0;
   bool _inValid = false;
   late int salesManId = 0;
-//fomr 3
+  // Se crean los controllers para la forma 3
   final leadController = TextEditingController();
   final notasRefController = TextEditingController();
-  //form 0
+  // Se crean los controllers para la forma 0
   final custTypeController = TextEditingController();
   final displayNameController = TextEditingController();
   final legalNameController = TextEditingController();
-  //form 1
+  //Se crean los controllers para la forma 1
   final firstNameController = TextEditingController();
   final fatherLastController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
-  //form 2
+  //Se crean los controllers para la forma 2
   final nssController = TextEditingController();
   final dateContr = TextEditingController();
   final salesManContr = TextEditingController();
 
+  //TODO Hacer modal para funcionalidad dinamica
+  //Modal para el campo fuente de lead
   void _showModalFuenteOp(BuildContext context, CustFormProvider newCustForm) {
     showModalBottomSheet(
         context: context,
@@ -85,6 +76,8 @@ class _CustStepsFormState extends State<CustStepsForm> {
         });
   }
 
+  //TODO Hacer modal para funcionalidad dinamica
+  //Modal para el campo tipo de cliente
   void _showModalBottomSheet(BuildContext context, CustFormProvider newCustForm) {
     showModalBottomSheet(
         context: context,
@@ -120,26 +113,27 @@ class _CustStepsFormState extends State<CustStepsForm> {
   Widget build(BuildContext context) {
 
     final newCustForm = Provider.of<CustFormProvider>(context);
-    //form 0
+    //Asigna valores ya existentes en provider de la forma 0
     if(newCustForm.customerType != '') custTypeController.text = newCustForm.customerTypeName;
     if(newCustForm.displayName != '') displayNameController.text = newCustForm.displayName!;
     if(newCustForm.legalName != '') legalNameController.text = newCustForm.legalName!;
     if(newCustForm.salesManName != '') salesManContr.text = newCustForm.salesManName;
-    // form 1
+    // Asigna valores ya existentes en provider de la forma 1
     if(newCustForm.firstName != '') firstNameController.text = newCustForm.firstName;
     if(newCustForm.fatherLastName != '') fatherLastController.text = newCustForm.fatherLastName;
     if(newCustForm.phone != '') phoneController.text = newCustForm.phone;
     if(newCustForm.email != '') emailController.text = newCustForm.email;
-    //form 2
+    //Asigna valores ya existentes en provider de la forma 2
     if(newCustForm.nss != '') nssController.text = newCustForm.nss!;
     if(newCustForm.stablishMentDate != '') dateContr.text = newCustForm.stablishMentDate!;
-    //form 3
+    //Asigna valores ya existentes en provider de la forma 3
     if(newCustForm.referralLabel != '') leadController.text = newCustForm.referralLabel;
     if(newCustForm.referralComments != '') notasRefController.text = newCustForm.referralComments!;
 
-
+    //Lista de pasos para el formulario
     List<Step> stepList() => [
       Step(
+        //Validación para mostrar decoracion de campos invalidos
         state: (!_inValid) ?_activeStepIndex <= 0 ? StepState.indexed : StepState.complete :StepState.error,
         isActive: _activeStepIndex >= 0,
         title: const Text('General'),
@@ -198,6 +192,7 @@ class _CustStepsFormState extends State<CustStepsForm> {
               autoValue: salesManId,
               icon: Icons.account_balance_wallet_outlined,
               inValid: _inValid,
+              textValue: "",
             )
           ],
         ),
@@ -395,6 +390,7 @@ class _CustStepsFormState extends State<CustStepsForm> {
               )))
     ];
 
+    //Comienza el armado de la pantalla
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registro de Clientes', style: TextStyle(color: Colors.white),),
@@ -447,9 +443,11 @@ class _CustStepsFormState extends State<CustStepsForm> {
             });*/
           },
           controlsBuilder: (context, details) {
+            //valor del último paso
             final isLastStep = _activeStepIndex == stepList().length - 1;
             return Row(
               children: [
+                //Si es el último paso muestra Guardar en el texto del botón
                 if(!isLastStep)
                 Expanded(
                   child: ElevatedButton(
@@ -474,6 +472,7 @@ class _CustStepsFormState extends State<CustStepsForm> {
           },
         ),
       ),
+        //Botón de guardar
         floatingActionButton: FloatingActionButton(
           child: const Icon(
             Icons.save_outlined,
@@ -482,6 +481,7 @@ class _CustStepsFormState extends State<CustStepsForm> {
           backgroundColor: Colors.blueGrey.shade50,
           onPressed: () {
             newCustForm.salesManId = salesManId;
+            //Validación de campos obligatorios
             if (newCustForm.isValidForm()) {
               addCust(context, newCustForm);
             } else {
@@ -524,7 +524,7 @@ class _CustStepsFormState extends State<CustStepsForm> {
   }
 }
 
-// Actualiza el wflowstep en el servidor
+// Actualiza el customer en el servidor
 void addCust(BuildContext context, CustFormProvider custFormProv) async {
   SoCustomer soUser = SoCustomer.empty();
   soUser.customerType = custFormProv.customerType;

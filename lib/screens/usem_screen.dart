@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flexwm/models/usem.dart';
 import 'package:flexwm/screens/usem_form.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/common/params.dart' as params;
@@ -26,18 +27,103 @@ class _UserEmailState extends State<UserEmail> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: _userEmailListData.length,
+      itemCount: _userEmailListData.length+1,
       itemBuilder: (BuildContext context, int index) {
-        SoUserEmail nextSoUserEmail = SoUserEmail(
-            _userEmailListData[index].id,
-            _userEmailListData[index].userId,
-            _userEmailListData[index].email,
-            _userEmailListData[index].type);
-        return UserEmailForm(
-          soUserEmail: nextSoUserEmail,
-        );
+        if(index < _userEmailListData.length){
+          SoUserEmail nextSoUserEmail = SoUserEmail(
+              _userEmailListData[index].id,
+              _userEmailListData[index].userId,
+              _userEmailListData[index].email,
+              _userEmailListData[index].type);
+            return UserEmailForm(
+              soUserEmail: nextSoUserEmail,
+            );
+          }else{
+            return Column(
+              children: [
+                /*Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                        onPressed: (){
+                        _showModalBottomSheet(context);
+                    },
+                        icon: const Icon(Icons.add_circle,color: Colors.blue,)
+                    ),
+                  *//*  const SizedBox(width: 1,),
+                    IconButton(
+                        onPressed: (){
+                          _showModalBottomSheet(context);
+                        },
+                        icon: const Icon(Icons.mail_outlined,color: Colors.blue,)
+                    ),*//*
+                  ],
+                ),*/
+                Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                              text: 'Registrar Nuevo Correo',
+                              style: const TextStyle(color: Colors.blue,fontSize: 16),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  _showModalBottomSheet(context);
+                                }
+                          )
+                        ],
+                      ),
+                    )
+                ),
+                SizedBox(height: 20,)
+              ],
+            );
+          }
       },
     );
+  }
+
+  void _showModalBottomSheet(BuildContext context,) {
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 5,
+              right: 5
+
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const SizedBox(
+                  height: 50,
+                  child: Center(
+                    child: Text('Registro de Correo'),
+                  ),
+                ),
+                const Divider(thickness: 2,color: Colors.blueGrey,),
+                UserEmailForm(soUserEmail: SoUserEmail.empty()),
+                /*for(final opt in newCustForm.custTypeList)
+                  ListTile(
+                    leading: const Icon(Icons.circle_outlined),
+                    title:  Text(opt.label),
+                    onTap: () {
+                      newCustForm.customerType = opt.value;
+                      newCustForm.customerTypeName = opt.label;
+                      // custTypeController.text = opt.label;
+                      Navigator.pop(context);
+                    },
+                  ),*/
+
+                const SizedBox(height: 30,)
+              ],
+            ),
+          );
+        });
   }
 
   Future<List<SoUserEmail>> fetchSoUsersEmail(int forceFilter) async {

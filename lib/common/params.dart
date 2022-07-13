@@ -33,19 +33,35 @@ String firstname = '';
 String lastname = '';
 String jSessionId = '';
 String photoUrl = '';
+bool loggedCust = false;
+int idLoggedUser = -1;
+
+// Obtiene el id del usuario loggeado
+int getIdLoggedUser(){
+  return idLoggedUser;
+}
 
 // Obtiene el servidor a utilizar
 String getAppUrl(String instance) {
-  // Revisa si tiene prefijo para ambiente desarrollo
-  if (instance[0] == '_') {
-    String cleanInstance = instance.substring(1, instance.length);
-    return 'http://localhost:8080/' + cleanInstance + '/';
-  } else if (instance[0] == "-") {
-    String cleanInstance = instance.substring(1, instance.length);
-    return 'https://sandbox.flexwm.com/' + cleanInstance + '/';
-  } else {
-    return 'https://apps.flexwm.com/' + instance + '/';
+  //Revisa que el parametro de instancia no este vacio
+  if(instance != ""){
+    // Revisa si tiene prefijo para ambiente desarrollo
+    if (instance[0] == '_') {
+      String cleanInstance = instance.substring(1, instance.length);
+      return 'http://localhost:8080/' + cleanInstance + '/';
+      //return 'http://192.168.100.22:8080/' + cleanInstance + '/';
+    } else if (instance[0] == "-") {
+      String cleanInstance = instance.substring(1, instance.length);
+      return 'https://sandbox.flexwm.com/' + cleanInstance + '/';
+    } else {
+      return 'https://apps.flexwm.com/' + instance + '/';
+    }
+  }else{
+    //TODO configurar de maneria dinamica instancia default
+    //Si se encuentra vacio le seteamos la de local para pruebas
+    return 'http://192.168.100.22:8080/flexwm-js/';
   }
+
 }
 
 // Icono segun app

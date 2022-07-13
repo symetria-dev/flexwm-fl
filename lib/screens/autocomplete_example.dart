@@ -13,6 +13,7 @@ class AutocompleteExampleApp extends StatefulWidget {
   final Function callback;
   final int autoValue;
   final bool inValid;
+  final String textValue;
   final IconData? icon;
 
   const AutocompleteExampleApp({
@@ -21,6 +22,7 @@ class AutocompleteExampleApp extends StatefulWidget {
     required this.label,
     required this.callback,
     required this.autoValue,
+    required this.textValue,
     this.icon,
     required this.inValid,
   }) : super(key: key);
@@ -34,12 +36,14 @@ class _AutocompleteBasicUserExample extends State<AutocompleteExampleApp> {
   late Function _callback;
   late int _autoValue = -1;
   late List<Data> dataList = [];
+  final textValueCntrll = TextEditingController();
 
   @override
   void initState(){
     super.initState();
     _callback = widget.callback;
     _autoValue = widget.autoValue;
+    textValueCntrll.text = widget.textValue;
     getData();
   }
 

@@ -196,6 +196,7 @@ class LoginFormState extends State<LoginForm> {
     soLogin.password = passwordController.text;
 
     final response = await http.post(
+      //TODO colocar de forma dinamica que tipo de usuario hara login
       Uri.parse(params.getAppUrl(instanceController.text) + 'restlogin'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -256,5 +257,8 @@ class LoginFormState extends State<LoginForm> {
     params.lastname = soLogin.lastname;
     params.email = soLogin.email;
     params.photoUrl = soLogin.photoUrl;
+    //TODO detectar tipo de login de forma dinamica
+    params.loggedCust = true;
+    // params.idLoggedUser = soLogin.idLoggedUser;
   }
 }

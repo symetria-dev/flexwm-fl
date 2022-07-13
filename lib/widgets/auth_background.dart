@@ -17,12 +17,6 @@ class AuthBackground extends StatelessWidget {
         height: double.infinity,
         child: Stack(
           children: [
-/*            Transform(
-                alignment: Alignment.center,
-              transform: Matrix4.rotationZ(0.8),
-
-                child: ()
-            ),*/
             _PurpleBox(),
             _HeaderIcon(),
 
@@ -41,9 +35,11 @@ class _HeaderIcon extends StatelessWidget {
     return SafeArea(
       child: Container(
         width: double.infinity,
-        margin: const EdgeInsets.only( top: 30),
+        margin: const EdgeInsets.only( top: 60),
         child: Row(
           children: [
+            const SizedBox(width: 65,),
+
             Flexible(
               child:Image.asset('images/logo.png'),
             ),

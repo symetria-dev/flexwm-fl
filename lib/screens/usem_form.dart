@@ -15,8 +15,13 @@ class _UserEmailFormState extends State<UserEmailForm> {
 
   @override
   void initState() {
-    textEmailontroller.text = widget.soUserEmail.email;
-    type = widget.soUserEmail.type;
+    if(widget.soUserEmail.id > 0) {
+      textEmailontroller.text = widget.soUserEmail.email;
+      type = widget.soUserEmail.type;
+    }else{
+      textEmailontroller.text = '';
+      type = 'P';
+    }
     super.initState();
   }
 
@@ -54,6 +59,22 @@ class _UserEmailFormState extends State<UserEmailForm> {
                   ),
                 ),
               ],
+            ),
+          if(widget.soUserEmail.id < 1)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  print('');
+                },
+                child: const Text(
+                  'Guardar',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
             ),
           ],
         ),

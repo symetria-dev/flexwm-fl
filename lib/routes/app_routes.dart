@@ -1,5 +1,6 @@
 import 'package:flexwm/common/params.dart' as params;
 import 'package:flexwm/routes/routes.dart';
+import 'package:flexwm/screens/cust_credit_form.dart';
 import 'package:flexwm/widgets/upload_image_widget.dart';
 
 class AppRoutes {
@@ -10,6 +11,11 @@ class AppRoutes {
         leadingWidget: const Icon(Icons.home),
         name: 'Principal',
         screen: const MyCatalog()),
+      MenuOption(
+          route: '/cust_data',
+          leadingWidget: const Icon(Icons.account_circle_outlined),
+          name: 'Datos Personales',
+          screen: const CustDataForm(step1: true)),
     MenuOption(
         route: '/wfsp_list',
         name: 'Tareas Activas',
