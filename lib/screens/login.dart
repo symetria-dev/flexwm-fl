@@ -258,7 +258,7 @@ class LoginFormState extends State<LoginForm> {
     params.email = soLogin.email;
     params.photoUrl = soLogin.photoUrl;
     //TODO detectar tipo de login de forma dinamica
-    params.loggedCust = true;
-    // params.idLoggedUser = soLogin.idLoggedUser;
+    params.loggedCust = false;
+    params.idLoggedUser = soLogin.idLoggedUser;
   }
 }

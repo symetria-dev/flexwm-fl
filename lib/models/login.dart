@@ -10,10 +10,11 @@ class SoLogin {
   String firstname = "";
   String lastname = "";
   String photoUrl = "";
+  int idLoggedUser = -1;
 
   SoLogin.empty();
 
-  SoLogin(this.jSessionId, this.email, this.password, this.firstname, this.lastname, this.photoUrl);
+  SoLogin(this.jSessionId, this.email, this.password, this.firstname, this.lastname, this.photoUrl, this.idLoggedUser);
 
   factory SoLogin.fromJson(Map<String, dynamic> json) {
     return SoLogin(
@@ -23,6 +24,7 @@ class SoLogin {
       json['firstname'] as String,
       json['lastname'] as String,
       json['photoUrl'] as String,
+      json['idLoggedUser'] as int,
     );
   }
 
@@ -34,6 +36,7 @@ class SoLogin {
       'firstname': firstname,
       'lastname': lastname,
       'photoUrl': photoUrl,
+      'idLoggedUser': idLoggedUser,
     };
   }
 }

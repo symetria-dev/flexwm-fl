@@ -15,6 +15,7 @@ const String offsetQuery = 'offsqry';
 
 const String searchQuery = 's';
 const String forceFilter = 'ff';
+const String deleteFilter = 'delete';
 
 const int servletResponseScOk = 200;
 const int servletResponseScNotAcceptable = 406;

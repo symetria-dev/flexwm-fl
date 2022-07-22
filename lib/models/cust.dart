@@ -33,6 +33,7 @@ class SoCustomer {
   String passw = "";
   String passwconf = "";
 
+  String curp = "";
 
   SoCustomer.empty();
 
@@ -40,7 +41,7 @@ class SoCustomer {
       this.phone, this.email, this.referralId, this.referralComments
       ,this.customerType,this.rfc,this.firstName,this.fatherLastName,
       this.salesManId,this.nss,this.stablishMentDate, this.birthdate
-      ,this.passw, this.passwconf);
+      ,this.passw, this.passwconf, this.curp);
 
   factory SoCustomer.fromJson(Map<String, dynamic> json) {
     return SoCustomer(json['id'] as int,
@@ -63,6 +64,8 @@ class SoCustomer {
         json['birthdate'] as String,
         json['passw'] as String,
         json['passwconf'] as String,
+
+        json['curp'] as String,
     );
   }
 
@@ -87,6 +90,7 @@ class SoCustomer {
       'birthdate' : birthdate,
       'passw' : passw,
       'passwconf' : passwconf,
+      'curp' : curp,
     };
   }
 }

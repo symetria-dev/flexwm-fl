@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:flexwm/models/cuad.dart';
 import 'package:flexwm/screens/cuad_form.dart';
-import 'package:flexwm/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/common/params.dart' as params;
 
@@ -43,19 +43,46 @@ class _CustomerAddressState extends State<CustomerAddress>{
               _customerAddressListData[index].customerId,
               _customerAddressListData[index].deliveryAddress,
               _customerAddressListData[index].interiorNumber);
-          return Card(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25)
+          return Slidable(
+            endActionPane: ActionPane(
+                motion: const DrawerMotion(),
+                children: <Widget> [
+                  SlidableAction(
+                    icon: Icons.delete_forever,
+                      foregroundColor: Colors.red,
+                      label: 'Eliminar',
+                      onPressed: (_){
+                        deleteSoCustomerAddress(_customerAddressListData[index].id).
+                        then((value) {
+                          if(value){
+                            //Se actualiza la lista del subcatalogo
+                            _customerAddressListData.clear();
+                            setState((){
+                              fetchSoCustomerAddress(widget.forceFilter);
+                            });
+                          }
+                        });
+                      }
+                  ),
+                ]
             ),
-            child: ListTile(
-              title: Text(index.toString() + ':' + nextSoCustAddress.type + ' ' + nextSoCustAddress.street),
-              subtitle: Text(nextSoCustAddress.neighborhood+" "+nextSoCustAddress.number),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Icon(Icons.home),
-                  // IconButton(onPressed: () {utils.makePhoneCall(item.phone);}, icon: const Icon(Icons.phone)),
-                ],
+            child: Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25)
+              ),
+              child: ListTile(
+                onTap: (){
+                  _showModalBottomSheet(context, nextSoCustAddress);
+                },
+                title: Text(index.toString() + ':' + nextSoCustAddress.type + ' ' + nextSoCustAddress.street),
+                subtitle: Text(nextSoCustAddress.neighborhood+" "+nextSoCustAddress.number),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.home),
+                    // IconButton(onPressed: () {utils.makePhoneCall(item.phone);}, icon: const Icon(Icons.phone)),
+                  ],
+                ),
               ),
             ),
           );
@@ -72,7 +99,7 @@ class _CustomerAddressState extends State<CustomerAddress>{
                             style: const TextStyle(color: Colors.blue,fontSize: 16),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                _showModalBottomSheet(context);
+                                _showModalBottomSheet(context, SoCustAddres.empty());
                               }
                         )
                       ],
@@ -87,40 +114,47 @@ class _CustomerAddressState extends State<CustomerAddress>{
     );
   }
 
-  void _showModalBottomSheet(BuildContext context,) {
-    showModalBottomSheet(
+  void _showModalBottomSheet(BuildContext context,SoCustAddres soCustAddress) {
+    showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
         builder: (context) {
           return Padding(
+            //Funcion para mover widget a la altura del teclado
             padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom,
                 left: 5,
                 right: 5
             ),
-            child: Container(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const SizedBox(
-                      height: 50,
-                      child: Center(
-                        child: Text('Registro de Direcciones'),
-                      ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const SizedBox(
+                    height: 50,
+                    child: Center(
+                      child: Text('Registro de Direcciones'),
                     ),
-                    const Divider(thickness: 2,color: Colors.blueGrey,),
-                    CustAddressForm(soCustAddress: SoCustAddres.empty()),
-                  ],
-                ),
+                  ),
+                  const Divider(thickness: 2,color: Colors.blueGrey,),
+                  CustAddressForm(soCustAddress: soCustAddress),
+                ],
               ),
             ),
           );
-        });
+        }).whenComplete(_onBottomSheetClosed);
+  }
+
+  //Funcion que se ejecuta al cerrar modalbottomsheet
+  void _onBottomSheetClosed(){
+    //Se actualiza la lista del subcatalogo
+    _customerAddressListData.clear();
+    setState((){
+      fetchSoCustomerAddress(widget.forceFilter);
+    });
   }
 
   Future<List<SoCustAddres>> fetchSoCustomerAddress(int forceFilter) async {
-    print('SI en obtener CUAD screen');
     String url = params.getAppUrl(params.instance) +
         'restcuad;' +
         params.jSessionIdQuery +
@@ -143,11 +177,42 @@ class _CustomerAddressState extends State<CustomerAddress>{
 
     _customerAddressListData.addAll(
         parsed.map<SoCustAddres>((json) => SoCustAddres.fromJson(json)).toList());
-
-    setState(() {});
+    setState((){});
     return parsed
         .map<SoCustAddres>((json) => SoCustAddres.fromJson(json))
         .toList();
+  }
+
+  Future<bool> deleteSoCustomerAddress(int forceFilter) async {
+    String url = params.getAppUrl(params.instance) +
+        'restcuad;' +
+        params.jSessionIdQuery +
+        '=' +
+        params.jSessionId +
+        '?id='+
+        forceFilter.toString()+
+        '&' +
+        params.deleteFilter +
+        '=' +
+        forceFilter.toString();
+        print(url);
+    final response = await http.Client().get(Uri.parse(url));
+
+    // Si no es exitoso envia a login
+    if (response.statusCode == params.servletResponseScOk) {
+      // Muestra mensaje
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Registro eliminado correctamente')),
+      );
+      return true;
+    }else{
+      // Muestra mensaje
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ocurrió un error al eliminar el registro')),
+      );
+      return false;
+    }
+
   }
 
 }

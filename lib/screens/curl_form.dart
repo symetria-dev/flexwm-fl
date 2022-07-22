@@ -1,61 +1,58 @@
 import 'dart:convert';
 
-import 'package:flexwm/models/cuad.dart';
-import 'package:flexwm/screens/autocomplete_example.dart';
+import 'package:flexwm/models/curl.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/common/params.dart' as params;
 
 import '../ui/input_decorations.dart';
 
-class CustAddressForm extends StatefulWidget{
+class CustRelativeForm extends StatefulWidget{
   //Se recibe objeto para el fomulario
-  final SoCustAddres soCustAddress;
-  const CustAddressForm({Key? key, required this.soCustAddress}) : super(key: key);
+  final SoCustomerRelative soCustRelative;
+  const CustRelativeForm({Key? key, required this.soCustRelative}) : super(key: key);
 
   @override
-  State<CustAddressForm> createState() => _CustAddressFormState();
+  State<CustRelativeForm> createState() => _CustRelativeFormState();
 }
 
-class _CustAddressFormState extends State<CustAddressForm>{
+class _CustRelativeFormState extends State<CustRelativeForm>{
   //Se crean controllers para asignar valores en campos
   late String type = '';
-  final textStreetCntrll = TextEditingController();
+  final textNameCntrll = TextEditingController();
+  final textFatherLastNameCntrll = TextEditingController();
+  final textMotherLastNameCntrll = TextEditingController();
+  final textEmailCntrll = TextEditingController();
   final textNumberCntrll = TextEditingController();
-  final textNeighborhoodCntrll = TextEditingController();
-  final textZipCntrll = TextEditingController();
-  final textDescriptionCntrll = TextEditingController();
-  final textCityCntrll = TextEditingController();
-  final textDeliveryAddressCntrll = TextEditingController();
-  final textInteriorNumberCntrll = TextEditingController();
+  final textCellphoneCntrll = TextEditingController();
+  // final textCntrll = TextEditingController();
+  // final textInteriorNumberCntrll = TextEditingController();
 
   //key para el formulario
   final _formKey = GlobalKey<FormState>();
   //Objeto de tipo para manipular info
-  SoCustAddres soCustAddres = SoCustAddres.empty();
+  SoCustomerRelative soCustRelative = SoCustomerRelative.empty();
   //Variables de campos cambiantes
-  int cityId = 0;
   bool isSwitched = false;
-  int deliveryAddress = 0;
+  int responsible = 0;
 
   @override
   void initState(){
-    if(widget.soCustAddress.id > 0 ){
-      soCustAddres = widget.soCustAddress;
-      type = widget.soCustAddress.type;
-      textStreetCntrll.text = widget.soCustAddress.street;
-      textNumberCntrll.text = widget.soCustAddress.number;
-      textNeighborhoodCntrll.text = widget.soCustAddress.neighborhood;
-      textZipCntrll.text = widget.soCustAddress.zip;
-      textDescriptionCntrll.text = widget.soCustAddress.description;
-      textCityCntrll.text = widget.soCustAddress.cityId.toString();
-      if(widget.soCustAddress.deliveryAddress == 1) {
+    if(widget.soCustRelative.id > 0 ){
+      soCustRelative = widget.soCustRelative;
+      type = widget.soCustRelative.type;
+      textNameCntrll.text = widget.soCustRelative.fullName;
+      textFatherLastNameCntrll.text = widget.soCustRelative.fatherLastName;
+      textMotherLastNameCntrll.text = widget.soCustRelative.motherLastName;
+      textEmailCntrll.text = widget.soCustRelative.email;
+      textNumberCntrll.text = widget.soCustRelative.number;
+      textCellphoneCntrll.text = widget.soCustRelative.cellPhone;
+      if(widget.soCustRelative.responsible == 1) {
         isSwitched = true;
-        deliveryAddress = 1;
+        responsible = 1;
       }
-      textInteriorNumberCntrll.text = widget.soCustAddress.interiorNumber;
     }else{
-      soCustAddres.customerId = params.idLoggedUser;
+      soCustRelative.customerId = params.idLoggedUser;
       type = 'P';
     }
     super.initState();
@@ -81,7 +78,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
                     child: ButtonTheme(
                       child: DropdownButton(
                         value: type,
-                        items: SoCustAddres.getTypeOptions.map((e) {
+                        items: SoCustomerRelative.getTypeOptions.map((e) {
                           return DropdownMenuItem(
                             child: Text(e['label']),
                             value: e['value'],
@@ -101,10 +98,10 @@ class _CustAddressFormState extends State<CustAddressForm>{
               TextFormField(
                 autocorrect: false,
                 keyboardType: TextInputType.name,
-                controller: textStreetCntrll,
+                controller: textNameCntrll,
                 decoration: InputDecorations.authInputDecoration(
-                    hintText: "Calle",
-                    labelText: "Calle*",
+                    hintText: "Nombre",
+                    labelText: "Nombre*",
                     prefixIcon: Icons.add_road
                 ),
                 // onChanged: ( value ) => newCustForm.firstName = value,
@@ -119,97 +116,92 @@ class _CustAddressFormState extends State<CustAddressForm>{
               TextFormField(
                 autocorrect: false,
                 keyboardType: TextInputType.name,
+                controller: textFatherLastNameCntrll,
+                decoration: InputDecorations.authInputDecoration(
+                    hintText: "Apellido Paterno",
+                    labelText: "Apellido Paterno",
+                    prefixIcon: Icons.add_road
+                ),
+                // onChanged: ( value ) => newCustForm.firstName = value,
+/*                validator: ( value ) {
+                  return ( value != null && value.isNotEmpty )
+                      ? null
+                      : 'Por favor ingrese un nombre valido';
+
+                },*/
+              ),
+              const SizedBox(height: 10,),
+              const SizedBox(height: 10,),
+              TextFormField(
+                autocorrect: false,
+                keyboardType: TextInputType.name,
+                controller: textMotherLastNameCntrll,
+                decoration: InputDecorations.authInputDecoration(
+                    hintText: "Apellido Materno",
+                    labelText: "Apellido Materno",
+                    prefixIcon: Icons.add_road
+                ),
+                // onChanged: ( value ) => newCustForm.firstName = value,
+     /*           validator: ( value ) {
+                  return ( value != null && value.isNotEmpty )
+                      ? null
+                      : 'Por favor ingrese un nombre valido';
+
+                },*/
+              ),
+              const SizedBox(height: 10,),
+              TextFormField(
+                autocorrect: false,
+                keyboardType: TextInputType.name,
+                controller: textEmailCntrll,
+                decoration: InputDecorations.authInputDecoration(
+                    hintText: "Email",
+                    labelText: "Email",
+                    prefixIcon: Icons.add_road
+                ),
+                // onChanged: ( value ) => newCustForm.firstName = value,
+/*                validator: ( value ) {
+                  return ( value != null && value.isNotEmpty )
+                      ? null
+                      : 'Por favor ingrese un nombre valido';
+
+                },*/
+              ),
+              const SizedBox(height: 10,),
+              TextFormField(
+                autocorrect: false,
+                keyboardType: TextInputType.phone,
                 controller: textNumberCntrll,
                 decoration: InputDecorations.authInputDecoration(
-                    hintText: "No. exterior",
-                    labelText: "No. exterior*",
+                    hintText: "Teléfono",
+                    labelText: "Teléfono",
+                    prefixIcon: Icons.add_road
+                ),
+                // onChanged: ( value ) => newCustForm.firstName = value,
+/*                validator: ( value ) {
+                  return ( value != null && value.isNotEmpty )
+                      ? null
+                      : 'Por favor ingrese un nombre valido';
+
+                },*/
+              ),
+              const SizedBox(height: 10,),
+              TextFormField(
+                autocorrect: false,
+                keyboardType: TextInputType.phone,
+                controller: textCellphoneCntrll,
+                decoration: InputDecorations.authInputDecoration(
+                    hintText: "T. Celular",
+                    labelText: "T. Celular*",
                     prefixIcon: Icons.add_road
                 ),
                 // onChanged: ( value ) => newCustForm.firstName = value,
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un nombre valido';
+                      : 'Por favor ingrese un Teléfono celular valido';
 
                 },
-              ),
-              const SizedBox(height: 10,),
-              TextFormField(
-                autocorrect: false,
-                keyboardType: TextInputType.name,
-                controller: textInteriorNumberCntrll,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: "No. interior",
-                    labelText: "No. interior",
-                    prefixIcon: Icons.add_road
-                ),
-                // onChanged: ( value ) => newCustForm.firstName = value,
-              ),
-              const SizedBox(height: 10,),
-              TextFormField(
-                autocorrect: false,
-                keyboardType: TextInputType.name,
-                controller: textNeighborhoodCntrll,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: "Colonia",
-                    labelText: "Colonia*",
-                    prefixIcon: Icons.add_road
-                ),
-                // onChanged: ( value ) => newCustForm.firstName = value,
-                validator: ( value ) {
-                  return ( value != null && value.isNotEmpty )
-                      ? null
-                      : 'Por favor ingrese un nombre valido';
-
-                },
-              ),
-              const SizedBox(height: 10,),
-              TextFormField(
-                autocorrect: false,
-                keyboardType: TextInputType.name,
-                controller: textZipCntrll,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: "C.P.",
-                    labelText: "C.P.*",
-                    prefixIcon: Icons.add_road
-                ),
-                // onChanged: ( value ) => newCustForm.firstName = value,
-                validator: ( value ) {
-                  return ( value != null && value.isNotEmpty )
-                      ? null
-                      : 'Por favor ingrese un nombre valido';
-
-                },
-              ),
-              const SizedBox(height: 10,),
-              TextFormField(
-                autocorrect: false,
-                keyboardType: TextInputType.name,
-                controller: textDescriptionCntrll,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: "Descripción",
-                    labelText: "Descripción*",
-                    prefixIcon: Icons.add_road
-                ),
-                // onChanged: ( value ) => newCustForm.firstName = value,
-                validator: ( value ) {
-                  return ( value != null && value.isNotEmpty )
-                      ? null
-                      : 'Por favor ingrese un nombre valido';
-
-                },
-              ),
-              const SizedBox(height: 10,),
-              AutocompleteExampleApp(
-                  programCode: 'CITY',
-                  label: 'Ciudad*',
-                  callback: (int id){
-                    cityId = id;
-                    textCityCntrll.text = id.toString();
-                  },
-                  autoValue: cityId,
-                  textValue: textCityCntrll.text,
-                  inValid: false
               ),
               const SizedBox(height: 10,),
               Row(
@@ -218,9 +210,9 @@ class _CustAddressFormState extends State<CustAddressForm>{
                     value: isSwitched,
                     onChanged: (value) {
                       if(value) {
-                        deliveryAddress = 1;
+                        responsible = 1;
                       } else {
-                        deliveryAddress = 0;
+                        responsible = 0;
                       }
                       setState(() {
                         isSwitched = value;
@@ -228,7 +220,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
                     },
                   ),
                   const Expanded(
-                      child: Text("Dirección de entrega?",
+                      child: Text("Responsable",
                         style: TextStyle(color: Colors.grey),
                       )
                   )
@@ -240,7 +232,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
                   child: ElevatedButton(
                     onPressed: () {
                       if(_formKey.currentState!.validate()){
-                        updateCustomerAddress();
+                        updateCustomerRelative();
                       }
                     },
                     child: const Text(
@@ -258,20 +250,19 @@ class _CustAddressFormState extends State<CustAddressForm>{
     );
   }
 
-  void updateCustomerAddress() async {
-    soCustAddres.type = type;
-    soCustAddres.street = textStreetCntrll.text;
-    soCustAddres.number = textNumberCntrll.text;
-    soCustAddres.interiorNumber = textInteriorNumberCntrll.text;
-    soCustAddres.neighborhood = textNeighborhoodCntrll.text;
-    soCustAddres.zip = textZipCntrll.text;
-    soCustAddres.description = textDescriptionCntrll.text;
-    soCustAddres.cityId = cityId;
-    soCustAddres.deliveryAddress = deliveryAddress;
+  void updateCustomerRelative() async {
+    soCustRelative.type = type;
+    soCustRelative.fullName = textNameCntrll.text;
+    soCustRelative.fatherLastName = textFatherLastNameCntrll.text;
+    soCustRelative.motherLastName = textMotherLastNameCntrll.text;
+    soCustRelative.email = textEmailCntrll.text;
+    soCustRelative.cellPhone = textCellphoneCntrll.text;
+    soCustRelative.number = textNumberCntrll.text;
+    soCustRelative.responsible = responsible;
 
     final response = await http.post(
       Uri.parse(params.getAppUrl(params.instance) +
-          'restcuad;' +
+          'restcurl;' +
           params.jSessionIdQuery),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -279,7 +270,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
         'Cookie':
         params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
       },
-      body: jsonEncode(soCustAddres),
+      body: jsonEncode(soCustRelative),
     );
 
     if (response.statusCode == params.servletResponseScOk) {
