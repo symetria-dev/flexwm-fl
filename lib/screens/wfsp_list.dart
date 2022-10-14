@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flexwm/screens/wfsp_form.dart';
 import 'package:flexwm/ui/appbar_flexwm.dart';
+import 'package:flexwm/widgets/auth_formbackground.dart';
+import 'package:flexwm/widgets/auth_listbackground.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/drawer.dart';
@@ -54,24 +56,31 @@ class _WFlowStepListState extends State<WFlowStepList> {
     return Scaffold(
       // backgroundColor: params.bgColor,
       appBar: AppBarStyle.authAppBarFlex(title: 'Tareas Activas'),
-      body: FutureBuilder<List<SoWFlowStep>>(
-        future: _futureSoWFlowSteps,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return RefreshIndicator(
-              child: getListWidget(snapshot.data!),
-              onRefresh: _pullRefresh,
-            );
-          } else if (snapshot.hasError) {
-            // Hay errores los muestra
-            return Text('${snapshot.error}');
-          } else {
-            // Muestra icono avance
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
+      body: AuthListBackground(
+        child: AuthFormBackground(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: FutureBuilder<List<SoWFlowStep>>(
+              future: _futureSoWFlowSteps,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return RefreshIndicator(
+                    child: getListWidget(snapshot.data!),
+                    onRefresh: _pullRefresh,
+                  );
+                } else if (snapshot.hasError) {
+                  // Hay errores los muestra
+                  return Text('${snapshot.error}');
+                } else {
+                  // Muestra icono avance
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+              },
+            ),
+          ),
+        ),
       ),
       drawer: getDrawer(context),
     );

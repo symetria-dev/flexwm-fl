@@ -102,7 +102,7 @@ class _CustRelativeFormState extends State<CustRelativeForm>{
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "Nombre",
                     labelText: "Nombre*",
-                    prefixIcon: Icons.add_road
+                    prefixIcon: Icons.account_circle_outlined
                 ),
                 // onChanged: ( value ) => newCustForm.firstName = value,
                 validator: ( value ) {
@@ -120,7 +120,7 @@ class _CustRelativeFormState extends State<CustRelativeForm>{
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "Apellido Paterno",
                     labelText: "Apellido Paterno",
-                    prefixIcon: Icons.add_road
+                    prefixIcon: Icons.account_circle_outlined
                 ),
                 // onChanged: ( value ) => newCustForm.firstName = value,
 /*                validator: ( value ) {
@@ -139,7 +139,7 @@ class _CustRelativeFormState extends State<CustRelativeForm>{
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "Apellido Materno",
                     labelText: "Apellido Materno",
-                    prefixIcon: Icons.add_road
+                    prefixIcon: Icons.account_circle_outlined
                 ),
                 // onChanged: ( value ) => newCustForm.firstName = value,
      /*           validator: ( value ) {
@@ -157,7 +157,7 @@ class _CustRelativeFormState extends State<CustRelativeForm>{
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "Email",
                     labelText: "Email",
-                    prefixIcon: Icons.add_road
+                    prefixIcon: Icons.email_outlined
                 ),
                 // onChanged: ( value ) => newCustForm.firstName = value,
 /*                validator: ( value ) {
@@ -175,7 +175,7 @@ class _CustRelativeFormState extends State<CustRelativeForm>{
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "Teléfono",
                     labelText: "Teléfono",
-                    prefixIcon: Icons.add_road
+                    prefixIcon: Icons.phone_enabled_outlined
                 ),
                 // onChanged: ( value ) => newCustForm.firstName = value,
 /*                validator: ( value ) {
@@ -193,7 +193,7 @@ class _CustRelativeFormState extends State<CustRelativeForm>{
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "T. Celular",
                     labelText: "T. Celular*",
-                    prefixIcon: Icons.add_road
+                    prefixIcon: Icons.phone_iphone_outlined
                 ),
                 // onChanged: ( value ) => newCustForm.firstName = value,
                 validator: ( value ) {

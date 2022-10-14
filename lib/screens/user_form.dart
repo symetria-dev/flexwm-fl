@@ -13,7 +13,6 @@ import 'package:flexwm/widgets/upload_file_widget.dart';
 import 'package:flexwm/widgets/upload_image_widget.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -160,53 +159,39 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 labelText: 'Email',
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                UploadFile(
-                    programCode: 'USER',
-                    fielName: 'user_photo',
-                    label: 'Foto',
-                    id: userData.id.toString()),
-                const SizedBox(width: 10,),
-                if(soUser.photo != '')
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      10,
-                      10,
-                      0,
-                      5,
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        String file = soUser.photo;
-                        final dot = file.indexOf('.');
-                        String type = file.substring(dot, file.length);
-                        print('type '+type+' urlDoc '+urlDoc);
-                        if(type == '.pdf'){
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                              builder: (_) => PdfView(url: urlDoc,),
-                              ),
-                          );
-                          // _showModalPdf(context,urlDoc);
-                        }else{
-                          showImageUser(context, urlDoc);
-                        }
-                      },
-                      child: const Text(
-                        'Ver archivo',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
+            UploadFile(
+              initialRuta: soUser.photo,
+                programCode: 'USER',
+                fielName: 'user_photo',
+                label: 'Foto',
+                id: userData.id.toString()),
+            const SizedBox(width: 10,),
+            if(soUser.photo != '')
+            ElevatedButton(
+              onPressed: () async {
+                String file = soUser.photo;
+                final dot = file.indexOf('.');
+                String type = file.substring(dot, file.length);
+                print('type '+type+' urlDoc '+urlDoc);
+                if(type == '.pdf'){
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                      builder: (_) => PdfView(url: urlDoc,),
                       ),
-                    ),
-                  ),
+                  );
+                  // _showModalPdf(context,urlDoc);
+                }else{
+                  showImageUser(context, urlDoc);
+                }
+              },
+              child: const Text(
+                'Ver archivo',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
                 ),
-              ],
+              ),
             ),
             DropdownWidget(
               callback: (String id) {

@@ -16,6 +16,7 @@ const String offsetQuery = 'offsqry';
 const String searchQuery = 's';
 const String forceFilter = 'ff';
 const String deleteFilter = 'delete';
+const String filterValueQuery = 'filterfieldvalue';
 
 const int servletResponseScOk = 200;
 const int servletResponseScNotAcceptable = 406;
@@ -49,8 +50,8 @@ String getAppUrl(String instance) {
     // Revisa si tiene prefijo para ambiente desarrollo
     if (instance[0] == '_') {
       String cleanInstance = instance.substring(1, instance.length);
-      return 'http://localhost:8080/' + cleanInstance + '/';
-      //return 'http://192.168.100.22:8080/' + cleanInstance + '/';
+      //return 'http://localhost:8080/' + cleanInstance + '/';
+      return 'http://192.168.100.22:8080/' + cleanInstance + '/';
     } else if (instance[0] == "-") {
       String cleanInstance = instance.substring(1, instance.length);
       return 'https://sandbox.flexwm.com/' + cleanInstance + '/';

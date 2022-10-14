@@ -415,7 +415,6 @@ void addCust(BuildContext context, CustFormProvider custFormProv) async {
   soUser.phone = custFormProv.phone;
   soUser.birthdate = custFormProv.birthdate;
 
-
   // Envia la sesion como Cookie, con el nombre en UpperCase
   final response = await http.post(
     Uri.parse(params.getAppUrl(params.instance) +
@@ -450,7 +449,7 @@ void addCust(BuildContext context, CustFormProvider custFormProv) async {
     // Error al guardar
     custFormProv.vaciar();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Error al Guardar')),
+       SnackBar(content: Text('Error al Guardar ${response.body}')),
     );
   } else {
     // Aun no se recibe respuesta del servidor

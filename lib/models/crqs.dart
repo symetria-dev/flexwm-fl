@@ -7,10 +7,40 @@ class SoCreditRequest {
   int customerId = -1;
   int currencyId = -1;
   int creditTypeId = -1;
-  int oderTypeId = -1;
   int creditProfileId = -1;
-  int wflowTypeId = -1;
+  String educationalInstitution = "";
+  String educationalInstitutionType = "";
+  String dateStartInstitution = "";
+  String dateEndInstitution = "";
+  String code = "";
+  String status = "";
+  int wFlowId = -1;
+  /*String employmentStatus = 'E';
+  String company = "";
+  String economicActivity = "";
+  String yearsEmployment = "";
+  double creditCards = 0.0;
+  double rent = 0.0;
+  double creditAutomotive = 0.0;
+  double creditFurniture = 0.0;
+  double personalLoans = 0.0;
 
+  double monthlyIncome = 0.0;
+  double otherIncome = 0.0;
+  double aproximateMonthlyPay = 0.0;*/
+
+  static String INSTITUTION_TYPE_NATIONAL = 'N';
+  static String INSTITUTION_TYPE_INTERNATIONAL = 'I';
+
+  static String STATUS_EDITION = 'E';
+  static String STATUS_REVISION = 'R';
+  static String STATUS_AUTHORIZED = 'A';
+  static String STATUS_CANCELLED = 'C';
+
+  static List getInstitutionType = [
+    {"value": INSTITUTION_TYPE_NATIONAL, "label": "Nacional"},
+    {"value": INSTITUTION_TYPE_INTERNATIONAL, "label": "Internacional"},
+  ];
   static List getDestinyOptions = [
     {"value": "D", "label": "Diplomado"},
     {"value": "P", "label": "Preparatoria"},
@@ -19,11 +49,56 @@ class SoCreditRequest {
     {"value": "L", "label": "Licenciatura"},
   ];
 
+  static String getStatusText(String value){
+    String status = '';
+    switch(value){
+      case 'E':{
+        status = 'Edición';
+      }
+      break;
+      case 'R':{
+        status = 'Revisión';
+      }
+      break;
+      case 'A':{
+        status = 'Autorizado';
+      }
+      break;
+      case 'C':{
+        status = 'Cancelada';
+      }
+      break;
+    }
+
+    return status;
+  }
+
+  static String getStatusPorcent(String value){
+    String statusPorcent = '';
+    return statusPorcent;
+  }
+  static String getCreditDestiny(String value){
+    String destiny = '';
+    for(int i = 0;i < getDestinyOptions.length;i++){
+      if(getDestinyOptions[i]['value'] == value){
+        destiny = getDestinyOptions[i]['label'];
+      }
+    }
+    return destiny;
+  }
+
+  static List getEmploymentStatus = [
+    {"value": "E", "label": "Empleado"},
+    {"value": "P", "label": "Profesionista"},
+    {"value": "B", "label": "Empresario"},
+  ];
+
   SoCreditRequest.empty();
 
   SoCreditRequest(this.id, this.destiny,this.customerId,this.amountRequired,
       this.deadlineRequired,this.monthlyPayment,this.currencyId,this.creditTypeId,
-      this.oderTypeId,this.creditProfileId, this.wflowTypeId);
+      this.creditProfileId,this.educationalInstitution, this.educationalInstitutionType,
+      this.dateStartInstitution, this.dateEndInstitution, this.code, this.status,this.wFlowId);
 
   factory SoCreditRequest.fromJson(Map<String, dynamic> json) {
     return SoCreditRequest(
@@ -35,9 +110,14 @@ class SoCreditRequest {
       json['monthlyPayment'] as double,
       json['currencyId'] as int,
       json['creditTypeId'] as int,
-      json['oderTypeId'] as int,
       json['creditProfileId'] as int,
-      json['wflowTypeId'] as int,
+      json['educationalInstitution'] as String,
+      json['educationalInstitutionType'] as String,
+      json['dateStartInstitution'] as String,
+      json['dateEndInstitution'] as String,
+      json['code'] as String,
+      json['status'] as String,
+      json['wFlowId'] as int,
     );
   }
 
@@ -51,9 +131,14 @@ class SoCreditRequest {
       'monthlyPayment' : monthlyPayment,
       'currencyId' : currencyId,
       'creditTypeId' : creditTypeId,
-      'oderTypeId' : oderTypeId,
       'creditProfileId' : creditProfileId,
-      'wflowTypeId' : wflowTypeId,
+      'educationalInstitution' : educationalInstitution,
+      'educationalInstitutionType' : educationalInstitutionType,
+      'dateStartInstitution' : dateStartInstitution,
+      'dateEndInstitution' : dateEndInstitution,
+      'code' : code,
+      'status' : status,
+      'wFlowId' : wFlowId,
     };
   }
 

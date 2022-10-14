@@ -118,12 +118,12 @@ class _CustAddressFormState extends State<CustAddressForm>{
               const SizedBox(height: 10,),
               TextFormField(
                 autocorrect: false,
-                keyboardType: TextInputType.name,
+                keyboardType: TextInputType.number,
                 controller: textNumberCntrll,
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "No. exterior",
                     labelText: "No. exterior*",
-                    prefixIcon: Icons.add_road
+                    prefixIcon: Icons.numbers_outlined
                 ),
                 // onChanged: ( value ) => newCustForm.firstName = value,
                 validator: ( value ) {
@@ -136,24 +136,24 @@ class _CustAddressFormState extends State<CustAddressForm>{
               const SizedBox(height: 10,),
               TextFormField(
                 autocorrect: false,
-                keyboardType: TextInputType.name,
+                keyboardType: TextInputType.number,
                 controller: textInteriorNumberCntrll,
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "No. interior",
                     labelText: "No. interior",
-                    prefixIcon: Icons.add_road
+                    prefixIcon: Icons.numbers_outlined
                 ),
                 // onChanged: ( value ) => newCustForm.firstName = value,
               ),
               const SizedBox(height: 10,),
               TextFormField(
                 autocorrect: false,
-                keyboardType: TextInputType.name,
+                keyboardType: TextInputType.number,
                 controller: textNeighborhoodCntrll,
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "Colonia",
                     labelText: "Colonia*",
-                    prefixIcon: Icons.add_road
+                    prefixIcon: Icons.home_outlined
                 ),
                 // onChanged: ( value ) => newCustForm.firstName = value,
                 validator: ( value ) {
@@ -171,7 +171,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "C.P.",
                     labelText: "C.P.*",
-                    prefixIcon: Icons.add_road
+                    prefixIcon: Icons.home_work_outlined
                 ),
                 // onChanged: ( value ) => newCustForm.firstName = value,
                 validator: ( value ) {

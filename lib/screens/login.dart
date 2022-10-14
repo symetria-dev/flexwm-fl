@@ -30,6 +30,14 @@ class LoginFormState extends State<LoginForm> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   SoLogin soLogin = SoLogin.empty();
+  //Progresindicator envio de datos
+  bool sendingData = false;
+
+  @override
+  void initState(){
+    sendingData = false;
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -135,12 +143,17 @@ class LoginFormState extends State<LoginForm> {
             obscureText: true,
             controller: passwordController,
           ),
+          if(sendingData)
+            const LinearProgressIndicator(),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: ElevatedButton(
               onPressed: () {
                 // Validate returns true if the form is valid, or false otherwise.
                 if (_formKey.currentState!.validate()) {
+                  setState(() {
+                    sendingData = true;
+                  });
                   // If the form is valid, display a snackbar. In the real world,
                   // you'd often call a server or save the information in a database.
                   doLogin();
@@ -197,7 +210,7 @@ class LoginFormState extends State<LoginForm> {
 
     final response = await http.post(
       //TODO colocar de forma dinamica que tipo de usuario hara login
-      Uri.parse(params.getAppUrl(instanceController.text) + 'restlogin'),
+      Uri.parse(params.getAppUrl(instanceController.text) + 'restlogincust'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Access-Control-Allow-Origin': '*',
@@ -208,7 +221,7 @@ class LoginFormState extends State<LoginForm> {
     if (response.statusCode == 200) {
       soLogin = SoLogin.fromJson(jsonDecode(response.body));
       doContinue();
-      Navigator.pushReplacementNamed(context, '/wfsp_list');
+      Navigator.pushReplacementNamed(context, '/crqs_list');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error de Login')),
@@ -236,10 +249,10 @@ class LoginFormState extends State<LoginForm> {
 
     if (email != '') {
       emailController.text = email;
-      passwordController.text = '2020Cris+';
+      passwordController.text = '2020Cris*';
     } else {
       emailController.text = 'mlopez@flexwm.com';
-      passwordController.text = '2020Cris+';
+      passwordController.text = '2020Cris*';
     }
   }
 
@@ -258,7 +271,7 @@ class LoginFormState extends State<LoginForm> {
     params.email = soLogin.email;
     params.photoUrl = soLogin.photoUrl;
     //TODO detectar tipo de login de forma dinamica
-    params.loggedCust = false;
+    params.loggedCust = true;
     params.idLoggedUser = soLogin.idLoggedUser;
   }
 }

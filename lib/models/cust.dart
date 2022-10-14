@@ -11,6 +11,11 @@ class SoCustomer {
   static const String TYPE_PERSON = 'P';
   static const String TYPE_COMPANY = 'C';
 
+  //Regimen conyugal
+  static const REGIMEN_CONJUGAL_SOCIETY = 'C';
+  static const REGIMEN_SEPARATION_PROPERTY = 'S';
+  static const REGIMEN_MIXED_REGIMEN = 'M';
+
   int id = -1;
   String code = '';
   String displayName = '';
@@ -35,13 +40,20 @@ class SoCustomer {
 
   String curp = "";
 
+  int recommendedBy =0;
+  String motherlastname = "";
+  int maritalStatusId = 0;
+  String mobile = "";
+  String maritalRegimen = '';
+
   SoCustomer.empty();
 
   SoCustomer(this.id, this.code, this.displayName, this.legalName, this.logo,
       this.phone, this.email, this.referralId, this.referralComments
       ,this.customerType,this.rfc,this.firstName,this.fatherLastName,
       this.salesManId,this.nss,this.stablishMentDate, this.birthdate
-      ,this.passw, this.passwconf, this.curp);
+      ,this.passw, this.passwconf, this.curp,this.recommendedBy,this.motherlastname,
+      this.maritalStatusId,this.mobile, this.maritalRegimen);
 
   factory SoCustomer.fromJson(Map<String, dynamic> json) {
     return SoCustomer(json['id'] as int,
@@ -66,6 +78,11 @@ class SoCustomer {
         json['passwconf'] as String,
 
         json['curp'] as String,
+        json['recommendedBy'] as int,
+        json['motherlastname'] as String,
+        json['maritalStatusId'] as int,
+        json['mobile'] as String,
+      json['maritalRegimen'] as String,
     );
   }
 
@@ -91,6 +108,11 @@ class SoCustomer {
       'passw' : passw,
       'passwconf' : passwconf,
       'curp' : curp,
+      'recommendedBy' : recommendedBy,
+      'motherlastname' : motherlastname,
+      'maritalStatusId' : maritalStatusId,
+      'mobile' : mobile,
+      'maritalRegimen' : maritalRegimen,
     };
   }
 }

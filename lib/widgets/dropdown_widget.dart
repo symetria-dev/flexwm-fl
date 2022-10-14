@@ -31,6 +31,7 @@ class _DropdownWidgetState extends State<DropdownWidget> {
 
   @override
   void initState() {
+    print('el value dropdown es -> ${widget.dropdownValue}');
     super.initState();
     _callback = widget.callback;
     _dropdownValue = widget.dropdownValue;
@@ -55,6 +56,7 @@ class _DropdownWidgetState extends State<DropdownWidget> {
                 child: ButtonTheme(
                   alignedDropdown: true,
                   child: DropdownButton(
+                    isExpanded: true,
                     icon: const Icon(
                       Icons.arrow_drop_down_circle_outlined,
                       color: Colors.blueGrey,
