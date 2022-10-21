@@ -158,6 +158,7 @@ class SoCreditRequestGuarantee {
         json['soCustomer']['maritalStatusId'] as int,
         json['soCustomer']['mobile'] as String,
         json['soCustomer']['maritalRegimen'] as String,
+        json['soCustomer']['creditBureau'] as int,
           ),
       json['identification'] as String,
       json['proofIncome'] as String,

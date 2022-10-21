@@ -264,6 +264,7 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
                                     _soCustomerList[index].maritalStatusId,
                                     _soCustomerList[index].mobile,
                                     _soCustomerList[index].maritalRegimen,
+                                    _soCustomerList[index].creditBureau,
                               );
                               return Slidable(
                                 endActionPane: ActionPane(

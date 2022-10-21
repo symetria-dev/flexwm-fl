@@ -16,6 +16,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/cust.dart';
 import '../routes/app_routes.dart';
+import '../widgets/dropdown_widget.dart';
 import '../widgets/sub_catalog_widget.dart';
 import 'cuad_screen.dart';
 import 'curl_screen.dart';
@@ -40,6 +41,8 @@ class _CustCrqsForm extends State<CustCrqsForm> {
   final _formKeyCustDetail = GlobalKey<FormState>();
   //id del cliente logeado
   late int idCustomer = 0;
+  //id de referencia (Como conoció la empresa)
+  late int referralId = 0;
 
   @override
   void initState(){
@@ -118,11 +121,21 @@ class _CustCrqsForm extends State<CustCrqsForm> {
               )
           ),
           const SizedBox(height: 10,),
-          SubCatalogContainerWidget(
+/*          SubCatalogContainerWidget(
               title: 'Referencias*',
               child: CustomerRelative(
                 forceFilter: idCustomer,
               )
+          ),*/
+          DropdownWidget(
+            callback: (String id) {
+              setState(() {
+                referralId = int.parse(id);
+              });
+            },
+            programCode: 'REFE',
+            label: 'Referencia*',
+            dropdownValue: referralId.toString(),
           ),
           const SizedBox(height: 10,),
 
@@ -239,6 +252,12 @@ class _CustCrqsForm extends State<CustCrqsForm> {
   Future<bool> addCust(BuildContext context,) async {
     soCustomer.rfc = textRfcCntrll.text;
     soCustomer.curp = textCurpCntrll.text;
+    soCustomer.referralId = referralId;
+    if(isSwitched){
+      soCustomer.creditBureau = 1;
+    }else{
+      soCustomer.creditBureau = 0;
+    }
     // Envia la sesion como Cookie, con el nombre en UpperCase
     final response = await http.post(
       Uri.parse(params.getAppUrl(params.instance) +

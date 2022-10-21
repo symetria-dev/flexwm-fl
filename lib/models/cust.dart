@@ -45,6 +45,12 @@ class SoCustomer {
   int maritalStatusId = 0;
   String mobile = "";
   String maritalRegimen = '';
+  int creditBureau = 0;
+
+  static List getTypeCustomer = [
+    {"value": TYPE_PERSON, "label": "Persona"},
+    {"value": TYPE_COMPANY, "label": "Empresa"},
+  ];
 
   SoCustomer.empty();
 
@@ -53,7 +59,7 @@ class SoCustomer {
       ,this.customerType,this.rfc,this.firstName,this.fatherLastName,
       this.salesManId,this.nss,this.stablishMentDate, this.birthdate
       ,this.passw, this.passwconf, this.curp,this.recommendedBy,this.motherlastname,
-      this.maritalStatusId,this.mobile, this.maritalRegimen);
+      this.maritalStatusId,this.mobile, this.maritalRegimen, this.creditBureau);
 
   factory SoCustomer.fromJson(Map<String, dynamic> json) {
     return SoCustomer(json['id'] as int,
@@ -83,6 +89,7 @@ class SoCustomer {
         json['maritalStatusId'] as int,
         json['mobile'] as String,
       json['maritalRegimen'] as String,
+      json['creditBureau'] as int,
     );
   }
 
@@ -113,6 +120,7 @@ class SoCustomer {
       'maritalStatusId' : maritalStatusId,
       'mobile' : mobile,
       'maritalRegimen' : maritalRegimen,
+      'creditBureau' : creditBureau,
     };
   }
 }

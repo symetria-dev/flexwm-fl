@@ -14,18 +14,43 @@ import 'package:http/http.dart' as http;
 
 import '../models/cust.dart';
 
-class NewCustForm extends StatelessWidget {
+class NewCustForm extends StatefulWidget {
 
-  final bool step1;
-
-  const NewCustForm({
-    Key? key,
-    required this.step1
+  const NewCustForm({Key? key,
   }) : super(key: key);
 
   @override
+  _NewCustForm createState() => _NewCustForm();
+
+}
+
+class _NewCustForm extends State<NewCustForm>{
+  bool stepForm = false;
+  //controllers para manejo de datos
+  final nameCtrll = TextEditingController();
+  final lastNameCtrll = TextEditingController();
+  final custTypeController = TextEditingController();
+  final dateContr = TextEditingController();
+  final legalNameCtrll = TextEditingController();
+  final emailCtrll = TextEditingController();
+  final cellPhoneCtrll = TextEditingController();
+  final textMotherLastNameCntrll = TextEditingController();
+  final textPhoneContrll = TextEditingController();
+
+  //Keys para formularios
+  final _firstForm = GlobalKey<FormState>();
+  final _secondForm = GlobalKey<FormState>();
+  //mostrar carga visual
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    custTypeController.text = SoCustomer.TYPE_PERSON;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final newCustForm = Provider.of<CustFormProvider>(context);
+
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
       floatingActionButton: Padding(
@@ -33,10 +58,14 @@ class NewCustForm extends StatelessWidget {
         child: FloatingActionButton(
           backgroundColor: Colors.white,
           child: const Icon(Icons.arrow_back,color: Colors.grey,),
-
           onPressed: (){
-            if(step1) newCustForm.vaciar();
-            Navigator.pop(context);
+            if(stepForm){
+              setState(() {
+                stepForm = false;
+              });
+            }else{
+              Navigator.pop(context);
+            }
           },
           mini: true,
         ),
@@ -56,10 +85,10 @@ class NewCustForm extends StatelessWidget {
                     const Text('Registro Cliente Nuevo', style: TextStyle(color: Colors.grey, fontSize: 20)),
                     const SizedBox( height: 20 ),
 
-                    if(step1)
-                     _NewUSerForm()
+                    if(!stepForm)
+                     stepOneForm()
                     else
-                     _NewUSerForm2()
+                     stepTwoForm()
                   ],
                 )
               ),
@@ -71,32 +100,14 @@ class NewCustForm extends StatelessWidget {
       )
    );
   }
-}
 
-
-class _NewUSerForm extends StatelessWidget {
-
-  final nameCtrll = TextEditingController();
-  final lastNameCtrll = TextEditingController();
-  final custTypeController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-
-    final newCustForm = Provider.of<CustFormProvider>(context);
-
-    if(newCustForm.firstName != '') nameCtrll.text = newCustForm.firstName;
-    if(newCustForm.fatherLastName != '') lastNameCtrll.text = newCustForm.fatherLastName;
-    if(newCustForm.customerType != '') custTypeController.text = newCustForm.customerTypeName;
-
+  Widget stepOneForm(){
     return Container(
       child: Form(
-        key: newCustForm.firstFormKey,
+        key: _firstForm,
         autovalidateMode: AutovalidateMode.onUserInteraction,
-
         child: Column(
           children: [
-
             TextFormField(
               autocorrect: false,
               controller: nameCtrll,
@@ -106,9 +117,6 @@ class _NewUSerForm extends StatelessWidget {
                   labelText: "*Nombre",
                   prefixIcon: Icons.account_circle_outlined
               ),
-              onChanged: ( value ) {
-                newCustForm.firstName = value;
-                },
               validator: ( value ) {
 
                 return ( value != null && value.isNotEmpty )
@@ -117,9 +125,7 @@ class _NewUSerForm extends StatelessWidget {
 
               },
             ),
-
             const SizedBox(height: 10),
-
             TextFormField(
               autocorrect: false,
               keyboardType: TextInputType.name,
@@ -129,7 +135,6 @@ class _NewUSerForm extends StatelessWidget {
                   labelText: "*Apellido Paterno",
                   prefixIcon: Icons.account_circle_outlined
               ),
-              onChanged: ( value ) => newCustForm.fatherLastName = value,
               validator: ( value ) {
 
                 return ( value != null && value.isNotEmpty )
@@ -138,68 +143,56 @@ class _NewUSerForm extends StatelessWidget {
 
               },
             ),
-
             const SizedBox(height: 10),
-
-            TextFormField(
-              decoration: InputDecorations.authInputDecoration(
-                  labelText: 'Tipo Cliente*',
-                  sufixIcon: Icons.arrow_drop_down_circle_outlined),
-              readOnly: true,
-              controller: custTypeController,
-              validator: ( value ) {
-                return ( value != null && value.isNotEmpty )
-                    ? null
-                    : 'Por favor seleccione tipo de cliente';
-              },
-              onTap: () => _showModalBottomSheet(context,newCustForm),
+            Row(
+              children: [
+                const SizedBox(height: 10,),
+                const Expanded(
+                    child: Text("Tipo Cliente*",
+                      style: TextStyle(color: Colors.grey,fontSize: 15),
+                    )
+                ),
+                DropdownButtonHideUnderline(
+                  child: ButtonTheme(
+                    child: DropdownButton(
+                      value: custTypeController.text,
+                      items: SoCustomer.getTypeCustomer.map((e) {
+                        return DropdownMenuItem(
+                          child: Text(e['label']),
+                          value: e['value'],
+                        );
+                      }).toList(),
+                      onChanged: (Object? value) {
+                        setState(() {
+                          custTypeController.text = '$value';
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-
-/*            TextFormField(
-              autocorrect: false,
-              obscureText: true,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecorations.authInputDecoration(
-                hintText: '*****',
-                labelText: 'Contraseña',
-                prefixIcon: Icons.lock_outline
-              ),
-              onChanged: ( value ) => newUserForm.password = value,
-              validator: ( value ) {
-
-                String pattern = r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
-                RegExp regExp  = new RegExp(pattern);
-
-                return regExp.hasMatch(value ?? '')
-                    ? null
-                    :'Contraseña invalida';
-
-              },
-            ),*/
-
             const SizedBox( height: 40 ),
 
             MaterialButton(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              disabledColor: Colors.grey,
-              elevation: 0,
-              color: const Color.fromRGBO(37, 131, 170, 1),
-              child: Container(
-                padding: const EdgeInsets.symmetric( horizontal: 80, vertical: 15),
-                child: const Text(
-                  'Siguiente',
-                  style: TextStyle( color: Colors.white ),
-                )
-              ),
-              onPressed: () async {
-                if(!newCustForm.isValidFirstForm()){
-                  return;
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                disabledColor: Colors.grey,
+                elevation: 0,
+                color: const Color.fromRGBO(37, 131, 170, 1),
+                child: Container(
+                    padding: const EdgeInsets.symmetric( horizontal: 80, vertical: 15),
+                    child: const Text(
+                      'Siguiente',
+                      style: TextStyle( color: Colors.white ),
+                    )
+                ),
+                onPressed: () async {
+                  if(_firstForm.currentState!.validate()){
+                    setState((){
+                      stepForm = true;
+                    });
+                  }
                 }
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const NewCustForm(step1: false,))
-                );
-              }
             )
 
           ],
@@ -208,114 +201,66 @@ class _NewUSerForm extends StatelessWidget {
     );
   }
 
-  void _showModalBottomSheet(BuildContext context, CustFormProvider newCustForm) {
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const SizedBox(
-                height: 50,
-                child: Center(
-                  child: Text('Seleccione el tipo de cliente'),
-                ),
-              ),
-              const Divider(thickness: 2,color: Colors.blueGrey,),
-              for(final opt in newCustForm.custTypeList)
-                ListTile(
-                  leading: const Icon(Icons.circle_outlined),
-                  title:  Text(opt.label),
-                  onTap: () {
-                    newCustForm.customerType = opt.value;
-                    newCustForm.customerTypeName = opt.label;
-                    custTypeController.text = opt.label;
-                    Navigator.pop(context);
-                  },
-                ),
-              const SizedBox(height: 30,)
-            ],
-          );
-        });
-  }
-}
-
-class _NewUSerForm2 extends StatelessWidget {
-
-  final dateContr = TextEditingController();
-  final legalNameCtrll = TextEditingController();
-  final emailCtrll = TextEditingController();
-  final phonCtrll = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-
-    final newCustForm = Provider.of<CustFormProvider>(context);
-
-    if(newCustForm.birthdate != '') dateContr.text = newCustForm.birthdate;
-    if(newCustForm.legalName != '') legalNameCtrll.text = newCustForm.legalName!;
-    if(newCustForm.email != '') emailCtrll.text = newCustForm.email;
-    if(newCustForm.phone != '') phonCtrll.text = newCustForm.phone;
-
+  Widget stepTwoForm (){
+    var now = DateTime.now();
+    var formatterAno = DateFormat("y");
     return Container(
       child: Form(
-        key: newCustForm.secondFormKey,
+        key: _secondForm,
         autovalidateMode: AutovalidateMode.onUserInteraction,
-
         child: Column(
           children: [
-            if(newCustForm.customerType == SoCustomer.TYPE_COMPANY)
-            TextFormField(
-              autocorrect: false,
-              keyboardType: TextInputType.name,
-              controller: legalNameCtrll,
-              decoration: InputDecorations.authInputDecoration(
-                  hintText: "Razón Social",
-                  labelText: "Razón Social",
-                  prefixIcon: Icons.account_circle_outlined
-              ),
-              onChanged: ( value ) => newCustForm.legalName = value,
-              validator: ( value ) {
+            if(custTypeController.text == SoCustomer.TYPE_COMPANY)
+              TextFormField(
+                autocorrect: false,
+                keyboardType: TextInputType.name,
+                controller: legalNameCtrll,
+                decoration: InputDecorations.authInputDecoration(
+                    hintText: "Razón Social",
+                    labelText: "Razón Social",
+                    prefixIcon: Icons.account_circle_outlined
+                ),
+                validator: ( value ) {
 
-                return ( value != null && value.isNotEmpty )
-                    ? null
-                    : 'Por favor ingrese un nombre valido';
+                  return ( value != null && value.isNotEmpty )
+                      ? null
+                      : 'Por favor ingrese un nombre valido';
 
-              },
-            ),
-            if(newCustForm.customerType == SoCustomer.TYPE_PERSON)
-            TextFormField(
-              autocorrect: false,
-              keyboardType: TextInputType.name,
-              decoration: InputDecorations.authInputDecoration(
-                  hintText: "Seleccione una Fecha",
-                  labelText: "Fecha de Nacimiento",
-                  prefixIcon: Icons.calendar_today_outlined
+                },
               ),
-              controller: dateContr,
-              readOnly: true,
-              validator: (value) {
-                return (value != null && value.isNotEmpty)
-                    ? null
-                    : 'Por favor ingrese una fecha valida';
-              },
-              onTap: (){
-                showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(1910),
-                  lastDate: DateTime(2025),
-                ).then((DateTime? value){
-                  if(value != null){
-                    DateTime _formDate = DateTime.now();
-                    _formDate = value;
-                    final String date = DateFormat('yyyy-MM-dd').format(_formDate);
-                    newCustForm.birthdate = date;
-                    dateContr.text = date;
-                  }
-                });
-              },
-            ),
+              TextFormField(
+                autocorrect: false,
+                keyboardType: TextInputType.name,
+                decoration: InputDecorations.authInputDecoration(
+                    hintText: "Seleccione una Fecha",
+                    labelText: (custTypeController.text == SoCustomer.TYPE_PERSON)
+                        ? "Fecha de Nacimiento"
+                        : "Fecha Constitución",
+                    prefixIcon: Icons.calendar_today_outlined
+                ),
+                controller: dateContr,
+                readOnly: true,
+                validator: (value) {
+                  return (value != null && value.isNotEmpty)
+                      ? null
+                      : 'Por favor ingrese una fecha valida';
+                },
+                onTap: (){
+                  showDatePicker(
+                    context: context,
+                    initialDate: DateTime(int.parse(formatterAno.format(now))-18),
+                    firstDate: DateTime(1910),
+                    lastDate: DateTime(int.parse(formatterAno.format(now))-18),
+                  ).then((DateTime? value){
+                    if(value != null){
+                      DateTime _formDate = DateTime.now();
+                      _formDate = value;
+                      final String date = DateFormat('yyyy-MM-dd').format(_formDate);
+                      dateContr.text = date;
+                    }
+                  });
+                },
+              ),
 
             const SizedBox(height: 10),
 
@@ -328,7 +273,6 @@ class _NewUSerForm2 extends StatelessWidget {
                   labelText: 'Correo electrónico',
                   prefixIcon: Icons.alternate_email_rounded
               ),
-              onChanged: ( value ) => newCustForm.email = value,
               validator: ( value ) {
 
                 String pattern = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
@@ -340,19 +284,16 @@ class _NewUSerForm2 extends StatelessWidget {
 
               },
             ),
-
             const SizedBox(height: 10),
-
             TextFormField(
               autocorrect: false,
               keyboardType: TextInputType.phone,
-              controller: phonCtrll,
+              controller: textPhoneContrll,
               decoration: InputDecorations.authInputDecoration(
-                  hintText: 'Tel. Celular',
-                  labelText: 'Tel. Celular',
-                  prefixIcon: Icons.phone_iphone_outlined
+                  hintText: 'Tel. Fijo',
+                  labelText: 'Tel. Fijo',
+                  prefixIcon: Icons.phone
               ),
-              onChanged: ( value ) => newCustForm.phone = value,
               validator: ( value ) {
                 final intNumber = int.tryParse(value!);
                 return ( intNumber != null && value.length > 9 )
@@ -361,9 +302,27 @@ class _NewUSerForm2 extends StatelessWidget {
 
               },
             ),
+            const SizedBox(height: 10),
+            TextFormField(
+              autocorrect: false,
+              keyboardType: TextInputType.phone,
+              controller: cellPhoneCtrll,
+              decoration: InputDecorations.authInputDecoration(
+                  hintText: 'Tel. Celular',
+                  labelText: 'Tel. Celular',
+                  prefixIcon: Icons.phone_iphone_outlined
+              ),
+              validator: ( value ) {
+                final intNumber = int.tryParse(value!);
+                return ( intNumber != null && value.length > 9 )
+                    ? null
+                    : 'Por favor ingrese un número de teléfono valido';
 
+              },
+            ),
+            if(isLoading)
+              const LinearProgressIndicator(),
             const SizedBox( height: 40 ),
-
             MaterialButton(
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 disabledColor: Colors.grey,
@@ -372,89 +331,76 @@ class _NewUSerForm2 extends StatelessWidget {
                 child: Container(
                     padding: const EdgeInsets.symmetric( horizontal: 80, vertical: 15),
                     child: Text(
-                      newCustForm.isLoading
+                      isLoading
                           ? 'Espere'
                           : 'Agregar',
                       style: const TextStyle( color: Colors.white ),
                     )
                 ),
                 onPressed: () async {
-
-                  FocusScope.of(context).unfocus();
-
-                  if( !newCustForm.isValidSecondForm() ) {
-                    return;
+                  if(_secondForm.currentState!.validate()){
+                    setState(() {
+                      isLoading = true;
+                    });
+                    addCust(context);
                   }
-                  newCustForm.isLoading = true;
-
-                  addCust(context, newCustForm);
-
-                  newCustForm.isLoading = false;
-                  // Navigator.pushReplacementNamed(context, 'home');
                 }
             )
-
           ],
         ),
       ),
     );
-
-
   }
 
-}
-
-// Actualiza el wflowstep en el servidor
-void addCust(BuildContext context, CustFormProvider custFormProv) async {
-  SoCustomer soUser = SoCustomer.empty();
-  soUser.customerType = custFormProv.customerType;
-  soUser.legalName = custFormProv.legalName!;
-  soUser.firstName = custFormProv.firstName;
-  soUser.fatherLastName = custFormProv.fatherLastName;
-  soUser.email = custFormProv.email;
-  soUser.phone = custFormProv.phone;
-  soUser.birthdate = custFormProv.birthdate;
-
-  // Envia la sesion como Cookie, con el nombre en UpperCase
-  final response = await http.post(
-    Uri.parse(params.getAppUrl(params.instance) +
-        'restcust;' +
-        params.jSessionIdQuery),
-    headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-      'Access-Control-Allow-Origin': '*',
-      'Cookie':
-      params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
-    },
-    body: jsonEncode(soUser),
-  );
-
-  if (response.statusCode == params.servletResponseScOk) {
-    // Si fue exitoso obtiene la respuesta
-    soUser = SoCustomer.fromJson(jsonDecode(response.body));
-
-    custFormProv.vaciar();
-    // Muestra mensaje
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Cliente "' + soUser.email + '" regitrado')),
+  // Actualiza el wflowstep en el servidor
+  void addCust(BuildContext context) async {
+    SoCustomer soCustomer = SoCustomer.empty();
+    soCustomer.customerType = custTypeController.text;
+    soCustomer.legalName = legalNameCtrll.text;
+    soCustomer.firstName = nameCtrll.text;
+    soCustomer.fatherLastName = lastNameCtrll.text;
+    soCustomer.email = emailCtrll.text;
+    soCustomer.mobile = cellPhoneCtrll.text;
+    soCustomer.birthdate = dateContr.text;
+    soCustomer.phone = textPhoneContrll.text;
+    print('params instance -> ${params.instance}');
+    // Envia la sesion como Cookie, con el nombre en UpperCase
+    final response = await http.post(
+      Uri.parse(params.getAppUrl(params.instance) +
+          'restcust;' +
+          params.jSessionIdQuery),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Access-Control-Allow-Origin': '*',
+        'Cookie':
+        params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
+      },
+      body: jsonEncode(soCustomer),
     );
-    // Regresa al login
-    //Navigator.pop(context);
-    Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginForm())
-    );
-  } else if (response.statusCode == params.servletResponseScNotAcceptable ||
-      response.statusCode == params.servletResponseScForbidden) {
-    // Error al guardar
-    custFormProv.vaciar();
-    ScaffoldMessenger.of(context).showSnackBar(
-       SnackBar(content: Text('Error al Guardar ${response.body}')),
-    );
-  } else {
-    // Aun no se recibe respuesta del servidor
-    const Center(
-      child: CircularProgressIndicator(),
-    );
+
+    if (response.statusCode == params.servletResponseScOk) {
+      setState((){isLoading = false;});
+      // Si fue exitoso obtiene la respuesta
+      soCustomer = SoCustomer.fromJson(jsonDecode(response.body));
+
+      // Muestra mensaje
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Cliente "' + soCustomer.email + '" regitrado')),
+      );
+      // Regresa al login
+      //Navigator.pop(context);
+      Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginForm())
+      );
+    } else {
+      setState((){isLoading = false;});
+      // Error al guardar
+      Navigator.pop(context);
+      print('Error al Guardar ${response.body}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al Guardar ${response.body}')),
+      );
+    }
   }
 }

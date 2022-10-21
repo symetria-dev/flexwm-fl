@@ -177,9 +177,10 @@ class LoginFormState extends State<LoginForm> {
                       style: const TextStyle(color: Colors.blue,fontSize: 16),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
+                        params.instance = instanceController.text;
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const NewCustForm(step1: true,))
+                            MaterialPageRoute(builder: (context) => const NewCustForm())
                           );
                         }
                   )

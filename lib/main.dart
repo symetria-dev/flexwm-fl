@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (_) => CustFormProvider(),child: const NewCustTabs(), ),
         ChangeNotifierProvider(create: (_) => CustFormProvider(),child: const CustStepsForm(), ),
-        ChangeNotifierProvider(create: (_) => CustFormProvider(),child: const NewCustForm(step1: true), )
+        ChangeNotifierProvider(create: (_) => CustFormProvider(),child: const NewCustForm(), )
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
