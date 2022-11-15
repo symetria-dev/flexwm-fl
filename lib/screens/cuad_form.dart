@@ -111,7 +111,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un nombre valido';
+                      : 'Por favor ingrese una calle válida';
 
                 },
               ),
@@ -129,7 +129,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un nombre valido';
+                      : 'Por favor ingrese un número válido';
 
                 },
               ),
@@ -148,7 +148,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
               const SizedBox(height: 10,),
               TextFormField(
                 autocorrect: false,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.name,
                 controller: textNeighborhoodCntrll,
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "Colonia",
@@ -159,7 +159,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un nombre valido';
+                      : 'Por favor ingrese una colonia válida';
 
                 },
               ),
@@ -177,7 +177,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un nombre valido';
+                      : 'Por favor ingrese un C.P. válido';
 
                 },
               ),
@@ -195,7 +195,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un nombre valido';
+                      : 'Por favor ingrese una descripción válida';
 
                 },
               ),

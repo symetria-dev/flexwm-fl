@@ -143,11 +143,16 @@ class _ChatPruebaState extends State<ChatPrueba> {
     DateTime lastDate = DateTime.now();
     // String dateFormat = DateFormat('yyyy-MM-dd').format(DateTime.parse(soCustomerList[0].datetime));
     final firstDate;
-    if(soCustomerList[0].datetime != ''){
-      firstDate = DateFormat('yyyy-MM-dd').parse(soCustomerList[0].datetime);
+    if(soCustomerList.length > 0){
+      if(soCustomerList[0].datetime != ''){
+        firstDate = DateFormat('yyyy-MM-dd').parse(soCustomerList[0].datetime);
+      }else{
+        firstDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      }
     }else{
       firstDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
     }
+
 
     return ListView.builder(
       itemCount: soCustomerList.length,

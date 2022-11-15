@@ -123,23 +123,24 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
                   borderRadius: BorderRadius.circular(25)),
               child: ListTile(
                 onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CreditRequestGuarateeForm(
-                            soCreditRequestGuarantee: nextSoCreditRequest,
-                            creditRequestId: idCreditRequest),
-                      ));
+                  if(nextSoCreditRequest.soCustomer.id != params.idLoggedUser){
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CreditRequestGuarateeForm(
+                              soCreditRequestGuarantee: nextSoCreditRequest,
+                              creditRequestId: idCreditRequest),
+                        ));
+                  }
                 },
                 leading: const Icon(
                   Icons.assignment_ind,
                   size: 50,
                 ),
-                title: Text(index.toString() +
-                    ':' +
+                title: Text(
                     nextSoCreditRequest.soCustomer.firstName +
-                    ' ' +
-                    nextSoCreditRequest.relation),
+                    ' : ' +
+                    SoCreditRequestGuarantee.getLabelRol(nextSoCreditRequest.role)),
                 subtitle: Text(nextSoCreditRequest.soCustomer.firstName),
                 trailing: null,
               ),
@@ -261,10 +262,9 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
                                     _soCustomerList[index].curp,
                                     _soCustomerList[index].recommendedBy,
                                     _soCustomerList[index].motherlastname,
-                                    _soCustomerList[index].maritalStatusId,
+                                    _soCustomerList[index].maritalStatus,
                                     _soCustomerList[index].mobile,
                                     _soCustomerList[index].maritalRegimen,
-                                    _soCustomerList[index].creditBureau,
                               );
                               return Slidable(
                                 endActionPane: ActionPane(
@@ -621,7 +621,7 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
     soCustomer.email = textEmailCntrll.text;
     soCustomer.rfc = textRfcCntrll.text;
     soCustomer.curp = textCurpCntrll.text;
-    soCustomer.maritalStatusId = int.parse(maritalStatus);
+    soCustomer.maritalStatus = maritalStatus;
     soCustomer.maritalRegimen = regimenMarital;
     // Envia la sesion como Cookie, con el nombre en UpperCase
     final response = await http.post(

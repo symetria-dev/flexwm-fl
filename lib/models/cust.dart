@@ -16,6 +16,11 @@ class SoCustomer {
   static const REGIMEN_SEPARATION_PROPERTY = 'S';
   static const REGIMEN_MIXED_REGIMEN = 'M';
 
+  //Estado civil
+  static const String MARITALSTATUS_SINGLE = 'S';
+  static const String MARITALSTATUS_MARRIED = 'M';
+  static const String MARITALSTATUS_FREEUNION = 'U';
+
   int id = -1;
   String code = '';
   String displayName = '';
@@ -42,14 +47,29 @@ class SoCustomer {
 
   int recommendedBy =0;
   String motherlastname = "";
-  int maritalStatusId = 0;
+  String maritalStatus = '';
   String mobile = "";
   String maritalRegimen = '';
-  int creditBureau = 0;
 
   static List getTypeCustomer = [
     {"value": TYPE_PERSON, "label": "Persona"},
     {"value": TYPE_COMPANY, "label": "Empresa"},
+  ];
+
+  static List getStatusOptions = [
+    {"value": MARITALSTATUS_SINGLE, "label": "Soltero(a)"},
+    {"value": MARITALSTATUS_MARRIED, "label": "Casado(a)"},
+    {"value": MARITALSTATUS_FREEUNION, "label": "Union Libre"},
+ /*   {"value": MARITALSTATUS_DIVORCED, "label": "Divorciado(a)"},
+    {"value": MARITALSTATUS_SEPARATION, "label": "Separación en Proceso"},
+    {"value": MARITALSTATUS_WIDOWED, "label": "Viudo"},
+    {"value": MARITALSTATUS_CONCUBINAGE, "label": "Concubinato"},*/
+  ];
+
+  static List getRegimenOptions = [
+    {"value": REGIMEN_CONJUGAL_SOCIETY, "label":"Comunidad"},
+    {"value": REGIMEN_SEPARATION_PROPERTY, "label":"Bienes Separados"},
+    {"value": REGIMEN_MIXED_REGIMEN, "label":"Mixto"},
   ];
 
   SoCustomer.empty();
@@ -59,7 +79,7 @@ class SoCustomer {
       ,this.customerType,this.rfc,this.firstName,this.fatherLastName,
       this.salesManId,this.nss,this.stablishMentDate, this.birthdate
       ,this.passw, this.passwconf, this.curp,this.recommendedBy,this.motherlastname,
-      this.maritalStatusId,this.mobile, this.maritalRegimen, this.creditBureau);
+      this.maritalStatus,this.mobile, this.maritalRegimen);
 
   factory SoCustomer.fromJson(Map<String, dynamic> json) {
     return SoCustomer(json['id'] as int,
@@ -86,10 +106,9 @@ class SoCustomer {
         json['curp'] as String,
         json['recommendedBy'] as int,
         json['motherlastname'] as String,
-        json['maritalStatusId'] as int,
+        json['maritalStatus'] as String,
         json['mobile'] as String,
-      json['maritalRegimen'] as String,
-      json['creditBureau'] as int,
+      json['maritalRegime'] as String,
     );
   }
 
@@ -117,10 +136,9 @@ class SoCustomer {
       'curp' : curp,
       'recommendedBy' : recommendedBy,
       'motherlastname' : motherlastname,
-      'maritalStatusId' : maritalStatusId,
+      'maritalStatusId' : maritalStatus,
       'mobile' : mobile,
-      'maritalRegimen' : maritalRegimen,
-      'creditBureau' : creditBureau,
+      'maritalRegime' : maritalRegimen,
     };
   }
 }

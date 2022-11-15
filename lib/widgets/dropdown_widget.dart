@@ -10,6 +10,7 @@ class DropdownWidget extends StatefulWidget {
   final String programCode;
   final String label;
   final List<SoFilters>? filterList;
+  final Function? validations;
 
   const DropdownWidget({
     Key? key,
@@ -18,6 +19,7 @@ class DropdownWidget extends StatefulWidget {
     required this.programCode,
     required this.label,
     this.filterList,
+    this.validations,
   }) : super(key: key);
 
   @override
@@ -28,13 +30,14 @@ class _DropdownWidgetState extends State<DropdownWidget> {
   late String _dropdownValue = '-1';
   late Function _callback;
   late List dataList = [];
+  late Function _validation;
 
   @override
   void initState() {
-    print('el value dropdown es -> ${widget.dropdownValue}');
     super.initState();
     _callback = widget.callback;
     _dropdownValue = widget.dropdownValue;
+    if(widget.programCode == 'CRTY'){_validation = widget.validations!;}
     getData();
   }
 
@@ -72,6 +75,14 @@ class _DropdownWidgetState extends State<DropdownWidget> {
                       return DropdownMenuItem(
                         child: Text(e['label']),
                         value: e['id'].toString(),
+                        onTap: (){
+                          if(widget.programCode == 'CRTY'){
+                            _validation(int.parse(e['periods'].toString()),
+                                double.parse(e['minAmount'].toString()),
+                                double.parse(e['maxAmount'].toString()),
+                            );
+                          }
+                        },
                       );
                     }).toList(),
                   ),
@@ -99,6 +110,8 @@ class _DropdownWidgetState extends State<DropdownWidget> {
     return value;
   }
 
+
+
   Future getData() async {
     final response = await http.post(
         Uri.parse(params.getAppUrl(params.instance) +
@@ -112,7 +125,6 @@ class _DropdownWidgetState extends State<DropdownWidget> {
               params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
         },
         body: json.encode(widget.filterList));
-
     setState(() {
       dataList = json.decode(response.body);
       dataList.add({"id": -1, "label": "| " + widget.label + " | "});

@@ -49,8 +49,8 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
   final textEmailCntrll = TextEditingController();
   final textRfcCntrll = TextEditingController();
   final textCurpCntrll = TextEditingController();
-  late int maritalStatusId = 0;
-  late String regimenMarital = '';
+  late String maritalStatus = SoCustomer.MARITALSTATUS_SINGLE;
+  late String regimenMarital = SoCustomer.REGIMEN_CONJUGAL_SOCIETY;
   String msjResponsServer = '';
 
   final textEconomicDepCntrll = TextEditingController();
@@ -91,10 +91,16 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
   GlobalKey<uploadFile> _keyUploadFiscalSituation = GlobalKey();
   GlobalKey<uploadFile> _keyUploadVerifiableIncome = GlobalKey();
   GlobalKey<uploadFile> _keyUploadDeclaratory = GlobalKey();
+  //indicador de aval creado
+  bool avalCreated = false;
+  //id aval
+  int creditRequestGuaranteeId = 0;
 
   @override
   void initState(){
     if(widget.soCreditRequestGuarantee.id > 0 ){
+      creditRequestGuaranteeId = widget.soCreditRequestGuarantee.id;
+      avalCreated = true;
       soCreditRequestGuarantee = widget.soCreditRequestGuarantee;
       relation = soCreditRequestGuarantee.relation;
       textEconomicDepCntrll.text = soCreditRequestGuarantee.economicDependents.toString();
@@ -110,25 +116,31 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
       textEmailCntrll.text = soCreditRequestGuarantee.soCustomer.email;
       textRfcCntrll.text = soCreditRequestGuarantee.soCustomer.rfc;
       textCurpCntrll.text = soCreditRequestGuarantee.soCustomer.curp;
-      maritalStatusId = soCreditRequestGuarantee.soCustomer.maritalStatusId;
-      regimenMarital = soCreditRequestGuarantee.soCustomer.maritalRegimen;
 
-      if(soCreditRequestGuarantee.accountStatement > 0.0) textAccountStatementCntrll.updateValue(soCreditRequestGuarantee.accountStatement);
-      if(soCreditRequestGuarantee.payrollReceipts > 0.0) textPayrollReceiptsCntrll.updateValue(soCreditRequestGuarantee.payrollReceipts);
-      if(soCreditRequestGuarantee.typeHousing != '') textTypeHousingCntrll.text = soCreditRequestGuarantee.typeHousing;
-      if(soCreditRequestGuarantee.heritage != '') textHeritageCntrll.text = soCreditRequestGuarantee.heritage;
-      if(soCreditRequestGuarantee.economicDependents > 0) textEconomicDepCntrll.text = soCreditRequestGuarantee.economicDependents.toString();
-      if(soCreditRequestGuarantee.employmentStatus != '') employmentStatus = soCreditRequestGuarantee.employmentStatus;
-      if(soCreditRequestGuarantee.company != '') textCompanyCntrll.text = soCreditRequestGuarantee.company;
-      if(soCreditRequestGuarantee.economicActivity != '')textEconomicActCntrll.text = soCreditRequestGuarantee.economicActivity;
-      if(soCreditRequestGuarantee.yearsEmployment > 0)textYearsEmploymentCntrll.text = soCreditRequestGuarantee.yearsEmployment.toString();
-      if(soCreditRequestGuarantee.creditCards > 0.0)textCreditCardsCntrll.updateValue(soCreditRequestGuarantee.creditCards);
-      if(soCreditRequestGuarantee.rent > 0.0)textRentCntrll.updateValue(soCreditRequestGuarantee.rent);
-      if(soCreditRequestGuarantee.creditAutomotive > 0.0)textCreditAutomotiveCntrll.updateValue(soCreditRequestGuarantee.creditAutomotive);
-      if(soCreditRequestGuarantee.creditFurniture > 0.0)textCreditFurniturCntrll.updateValue(soCreditRequestGuarantee.creditFurniture);
-      if(soCreditRequestGuarantee.personalLoans > 0.0)textPersonalLoansCntrll.updateValue(soCreditRequestGuarantee.personalLoans);
-      if(soCreditRequestGuarantee.ciec != '') textCiecCntrll.text = soCreditRequestGuarantee.ciec;
-    }else{
+      if(soCreditRequestGuarantee.soCustomer.maritalStatus != '') {
+        setState((){
+          maritalStatus = soCreditRequestGuarantee.soCustomer.maritalStatus;
+        });
+      }
+        if(soCreditRequestGuarantee.soCustomer.maritalRegimen != '') regimenMarital = soCreditRequestGuarantee.soCustomer.maritalRegimen;
+
+        if(soCreditRequestGuarantee.accountStatement > 0.0) textAccountStatementCntrll.updateValue(soCreditRequestGuarantee.accountStatement);
+        if(soCreditRequestGuarantee.payrollReceipts > 0.0) textPayrollReceiptsCntrll.updateValue(soCreditRequestGuarantee.payrollReceipts);
+        if(soCreditRequestGuarantee.typeHousing != '') textTypeHousingCntrll.text = soCreditRequestGuarantee.typeHousing;
+        if(soCreditRequestGuarantee.heritage != '') textHeritageCntrll.text = soCreditRequestGuarantee.heritage;
+        if(soCreditRequestGuarantee.economicDependents > 0) textEconomicDepCntrll.text = soCreditRequestGuarantee.economicDependents.toString();
+        if(soCreditRequestGuarantee.employmentStatus != '') employmentStatus = soCreditRequestGuarantee.employmentStatus;
+        if(soCreditRequestGuarantee.company != '') textCompanyCntrll.text = soCreditRequestGuarantee.company;
+        if(soCreditRequestGuarantee.economicActivity != '')textEconomicActCntrll.text = soCreditRequestGuarantee.economicActivity;
+        if(soCreditRequestGuarantee.yearsEmployment > 0)textYearsEmploymentCntrll.text = soCreditRequestGuarantee.yearsEmployment.toString();
+        if(soCreditRequestGuarantee.creditCards > 0.0)textCreditCardsCntrll.updateValue(soCreditRequestGuarantee.creditCards);
+        if(soCreditRequestGuarantee.rent > 0.0)textRentCntrll.updateValue(soCreditRequestGuarantee.rent);
+        if(soCreditRequestGuarantee.creditAutomotive > 0.0)textCreditAutomotiveCntrll.updateValue(soCreditRequestGuarantee.creditAutomotive);
+        if(soCreditRequestGuarantee.creditFurniture > 0.0)textCreditFurniturCntrll.updateValue(soCreditRequestGuarantee.creditFurniture);
+        if(soCreditRequestGuarantee.personalLoans > 0.0)textPersonalLoansCntrll.updateValue(soCreditRequestGuarantee.personalLoans);
+        if(soCreditRequestGuarantee.ciec != '') textCiecCntrll.text = soCreditRequestGuarantee.ciec;
+      }else{
+      maritalStatus = SoCreditRequestGuarantee.STATUS_SINGLE;
       regimenMarital = SoCreditRequestGuarantee.REGIMEN_CONJUGAL_SOCIETY;
       relation = SoCreditRequestGuarantee.RELATION_ACCREDITED;
       role = SoCreditRequestGuarantee.ROLE_ACREDITED_HOLDER;
@@ -151,12 +163,12 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
     //Lista de widgets para la seleccion del tab
     final _crqgTabPages = <Widget>[
       AuthListBackground(child: formDatosGenerales()),
-      AuthListBackground(child: formDatosFinancieros()),
-      AuthListBackground(child: formDatosAdicionales()),
-      AuthListBackground(child: Padding(
+      AuthListBackground(child: avalCreated ?formDatosFinancieros() :noSponsor()),
+      AuthListBackground(child: avalCreated ?formDatosAdicionales() :noSponsor()),
+      AuthListBackground(child: avalCreated ?Padding(
         padding: const EdgeInsets.only(top: 50),
         child: CreditRequestAsset(soCreditRequestGuarantee: soCreditRequestGuarantee),
-      )),
+      ) :noSponsor()),
     ];
 
     //Botones de barra de navegación inferior
@@ -205,6 +217,15 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
     );
   }
 
+  Widget noSponsor(){
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 150),
+        child: Text('Complete los datos iniciales del aval.'),
+      ),
+    );
+  }
+
   Widget formDatosFinancieros(){
     return SingleChildScrollView(
       child: Column(
@@ -225,7 +246,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                     validator: ( value ) {
                       return ( value != null && value.isNotEmpty )
                           ? null
-                          : 'Por favor ingrese nombre de la empresa';
+                          : 'Por favor ingrese un valor';
                     },
                   ),
                   const SizedBox(height: 10,),
@@ -238,7 +259,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                     validator: ( value ) {
                       return ( value != null && value.isNotEmpty )
                           ? null
-                          : 'Por favor ingrese nombre de la empresa';
+                          : 'Por favor ingrese un valor';
                     },
                   ),
                   const SizedBox(height: 10,),
@@ -251,7 +272,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                     validator: ( value ) {
                       return ( value != null && value.isNotEmpty )
                           ? null
-                          : 'Por favor ingrese nombre de la empresa';
+                          : 'Por favor ingrese un valor';
                     },
                   ),
                   const SizedBox(height: 10,),
@@ -263,7 +284,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                     validator: ( value ) {
                       return ( value != null && value.isNotEmpty )
                           ? null
-                          : 'Por favor ingrese nombre de la empresa';
+                          : 'Por favor ingrese un valor';
                     },
                   ),
                   const SizedBox(height: 10,),
@@ -275,7 +296,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                     validator: ( value ) {
                       return ( value != null && value.isNotEmpty )
                           ? null
-                          : 'Por favor ingrese nombre de la empresa';
+                          : 'Por favor ingrese un valor';
                     },
                   ),
                   const SizedBox(height: 10,),
@@ -289,7 +310,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                       final intNumber = int.tryParse(value!);
                       return (intNumber != null && value.length > 0)
                           ? null
-                          : 'Por favor ingrese un número valido';
+                          : 'Por favor ingrese un número válido';
                     },
                   ),
                   Row(
@@ -355,7 +376,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                       final intNumber = int.tryParse(value!);
                       return (intNumber != null && value.length > 0)
                           ? null
-                          : 'Por favor ingrese un número valido';
+                          : 'Por favor ingrese un número válido';
                     },
                   ),
                   const SizedBox(height: 10,),
@@ -370,7 +391,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                     validator: ( value ) {
                       return ( value != null && value.isNotEmpty )
                           ? null
-                          : 'Por favor seleccione tipo de cliente';
+                          : 'Por favor ingrese un número válido';
                     },
                   ),
                   const SizedBox(height: 10,),
@@ -383,7 +404,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                       validator: ( value ) {
                         return ( value != null && value.isNotEmpty )
                             ? null
-                            : 'Por favor seleccione tipo de cliente';
+                            : 'Por favor ingrese un número válido';
                       }
                   ),
                   const SizedBox(height: 10,),
@@ -396,7 +417,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                     validator: ( value ) {
                       return ( value != null && value.isNotEmpty )
                           ? null
-                          : 'Por favor seleccione tipo de cliente';
+                          : 'Por favor ingrese un número válido';
                     },
                   ),
                   const SizedBox(height: 10,),
@@ -409,7 +430,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                     validator: ( value ) {
                       return ( value != null && value.isNotEmpty )
                           ? null
-                          : 'Por favor seleccione tipo de cliente';
+                          : 'Por favor ingrese un número válido';
                     },
                   ),
                   const SizedBox(height: 10,),
@@ -422,7 +443,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                     validator: ( value ) {
                       return ( value != null && value.isNotEmpty )
                           ? null
-                          : 'Por favor seleccione tipo de cliente';
+                          : 'Por favor ingrese un número válido';
                     },
                   ),
                   if(sendingData)
@@ -436,7 +457,10 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         expenses = false;
                         updateCreditRequestGuarantee().then((value) {
                           if(value){
-                            Navigator.pop(context);
+                            // Error al guardar
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Registro actualizado con éxito.')),
+                            );
                           }else{
                             // Error al guardar
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -609,7 +633,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         validator: (value) {
                           return (value != null && value.isNotEmpty)
                               ? null
-                              : 'Por favor ingrese un nombre valido';
+                              : 'Por favor ingrese un nombre válido';
                         },
                       ),
                       const SizedBox(
@@ -625,7 +649,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         validator: (value) {
                           return (value != null && value.isNotEmpty)
                               ? null
-                              : 'Por favor ingrese un nombre valido';
+                              : 'Por favor ingrese un apellido válido';
                         },
                       ),
                       const SizedBox(
@@ -641,7 +665,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         validator: (value) {
                           return (value != null && value.isNotEmpty)
                               ? null
-                              : 'Por favor ingrese un nombre valido';
+                              : 'Por favor ingrese un apellido válido';
                         },
                       ),
                       const SizedBox(
@@ -659,7 +683,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         validator: (value) {
                           return (value != null && value.isNotEmpty)
                               ? null
-                              : 'Por favor ingrese una fecha valida';
+                              : 'Por favor ingrese una fecha válida';
                         },
                         onTap: () {
                           showDatePicker(
@@ -681,17 +705,17 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                       const SizedBox(height: 10),
                       TextFormField(
                         autocorrect: false,
-                        keyboardType: TextInputType.number,
+                        keyboardType: TextInputType.phone,
                         controller: textCellphoneCntrll,
                         decoration: InputDecorations.authInputDecoration(
                             hintText: 'Tel. Celular',
                             labelText: 'Tel. Celular',
                             prefixIcon: Icons.phone_iphone_outlined),
                         validator: (value) {
-                          final intNumber = int.tryParse(value!);
+                          final intNumber = int.tryParse(value!.replaceAll('-', ''));
                           return (intNumber != null && value.length > 9)
                               ? null
-                              : 'Por favor ingrese un número de teléfono valido';
+                              : 'Por favor ingrese un número de teléfono válido';
                         },
                       ),
                       const SizedBox(height: 10),
@@ -722,7 +746,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         validator: (value) {
                           return (value != null && value.isNotEmpty)
                               ? null
-                              : 'Por favor ingrese un rfc valido';
+                              : 'Por favor ingrese un rfc válido';
                         },
                       ),
                       const SizedBox(
@@ -734,27 +758,46 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                             prefixIcon: Icons.perm_identity_outlined),
                         controller: textCurpCntrll,
                         validator: (value) {
-                          return (value != null && value.isNotEmpty)
+                          return (value != null && value.isNotEmpty && value.length > 17)
                               ? null
-                              : 'Por favor ingrese un curp valido';
+                              : 'Por favor ingrese un curp válido';
                         },
                       ),
                       const SizedBox(
                         height: 10,
                       ),
-                      DropdownWidget(
-                        callback: (String id) {
-                          setState(() {
-                            maritalStatusId = int.parse(id);
-                          });
-                        },
-                        programCode: 'MAST',
-                        label: 'Estado Civil*',
-                        dropdownValue: maritalStatusId.toString(),
+                      Row(
+                        children: [
+                          const Expanded(
+                              child: Text(
+                                "Estado Civil*",
+                                style: TextStyle(color: Colors.grey, fontSize: 15),
+                              )),
+                          DropdownButtonHideUnderline(
+                            child: ButtonTheme(
+                              child: DropdownButton(
+                                value: maritalStatus,
+                                items: SoCustomer.getStatusOptions
+                                    .map((e) {
+                                  return DropdownMenuItem(
+                                    child: Text(e['label']),
+                                    value: e['value'],
+                                  );
+                                }).toList(),
+                                onChanged: (Object? value) {
+                                  setState(() {
+                                    maritalStatus = '$value';
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(
                         height: 10,
                       ),
+                      if(maritalStatus == SoCustomer.MARITALSTATUS_MARRIED)
                       Row(
                         children: [
                           const Expanded(
@@ -766,7 +809,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                             child: ButtonTheme(
                               child: DropdownButton(
                                 value: regimenMarital,
-                                items: SoCreditRequestGuarantee.getRegimenOptions
+                                items: SoCustomer.getRegimenOptions
                                     .map((e) {
                                   return DropdownMenuItem(
                                     child: Text(e['label']),
@@ -805,6 +848,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text(msjResponsServer)),
                                     );
+                                    updateDataCrqg();
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(content: Text(msjResponsServer)),
@@ -847,10 +891,15 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
     soCustomer.email = textEmailCntrll.text;
     soCustomer.rfc = textRfcCntrll.text;
     soCustomer.curp = textCurpCntrll.text;
-    soCustomer.maritalStatusId = maritalStatusId;
+    soCustomer.maritalStatus = maritalStatus;
+    if(maritalStatus == SoCustomer.MARITALSTATUS_MARRIED){
+      soCustomer.maritalRegimen = regimenMarital;
+    }else{
+      soCustomer.maritalRegimen = '';
+    }
+
     soCustomer.recommendedBy = params.idLoggedUser;
     soCustomer.customerType = SoCustomer.TYPE_PERSON;
-    soCustomer.maritalRegimen = regimenMarital;
     // Envia la sesion como Cookie, con el nombre en UpperCase
     final response = await http.post(
       Uri.parse(params.getAppUrl(params.instance) +
@@ -867,15 +916,18 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
 
     if (response.statusCode == params.servletResponseScOk) {
       if(soCustomer.id>0){
-        msjResponsServer = 'Registro actualizado con exito.';
+        msjResponsServer = 'Registro actualizado con éxito.';
       }else{
-        msjResponsServer = 'Nuevo aval registrado y asignado con exito.';
+        msjResponsServer = 'Nuevo aval registrado.';
       }
       soCustomer = SoCustomer.fromJson(jsonDecode(response.body));
       // Muestra mensaje
 
       return true;
     } else {
+      setState(() {
+        sendingData = false;
+      });
       // Muestra mensaje
       msjResponsServer = response.body.toString();
       return false;
@@ -892,7 +944,12 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
     soCustomer.email = textEmailCntrll.text;
     soCustomer.rfc = textRfcCntrll.text;
     soCustomer.curp = textCurpCntrll.text;
-    soCustomer.maritalStatusId = maritalStatusId;
+    soCustomer.maritalStatus = maritalStatus;
+    if(maritalStatus == SoCustomer.MARITALSTATUS_MARRIED){
+      soCustomer.maritalRegimen = regimenMarital;
+    }else{
+      soCustomer.maritalRegimen = '';
+    }
     soCreditRequestGuarantee.soCustomer = soCustomer;
     soCreditRequestGuarantee.creditRequestId = widget.creditRequestId;
     soCreditRequestGuarantee.role = role;
@@ -933,32 +990,46 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
     );
 
     if (response.statusCode == params.servletResponseScOk) {
+      if(soCustomer.id>0){
+        msjResponsServer = 'Registro actualizado con éxito.';
+      }else{
+        msjResponsServer = ' Nuevo aval asignado con éxito.';
+      }
       setState((){
+        avalCreated = true;
         soCreditRequestGuarantee = SoCreditRequestGuarantee.fromJson(jsonDecode(response.body));
+        creditRequestGuaranteeId = soCreditRequestGuarantee.id;
       });
       // Muestra mensaje
-      ScaffoldMessenger.of(context).showSnackBar(
+/*      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registro actualizado')),
-      );
+      );*/
       return true;
     } else {
       msjError = response.body.toString();
       // Error al guardar
-      ScaffoldMessenger.of(context).showSnackBar(
+/*      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error al Guardar')),
-      );
+      );*/
       return false;
     }
   }
 
   //funcion para actualizar widget hijo mediante el callback (uploadfile)
   updateDataCrqg(){
-    fetchCrqg(widget.soCreditRequestGuarantee.id.toString()).then((value) {
+    fetchCrqg(creditRequestGuaranteeId.toString()).then((value) {
       _keyUploadIdentification.currentState?.updateData(soCreditRequestGuarantee.identification);
       _keyUploadProofIncome.currentState?.updateData(soCreditRequestGuarantee.proofIncome);
       _keyUploadFiscalSituation.currentState?.updateData(soCreditRequestGuarantee.fiscalSituation);
       _keyUploadVerifiableIncome.currentState?.updateData(soCreditRequestGuarantee.verifiableIncomeFile);
       _keyUploadDeclaratory.currentState?.updateData(soCreditRequestGuarantee.declaratory);
+      avalCreated = true;
+
+      _keyUploadIdentification.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+      _keyUploadProofIncome.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+      _keyUploadFiscalSituation.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+      _keyUploadVerifiableIncome.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+      _keyUploadDeclaratory.currentState?.updateId(soCreditRequestGuarantee.id.toString());
     });
   }
   //Peticon de datos de un cliente especifico

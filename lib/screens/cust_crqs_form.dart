@@ -36,7 +36,6 @@ class _CustCrqsForm extends State<CustCrqsForm> {
   //controllers para campos del formulario
   final textRfcCntrll = TextEditingController();
   final textCurpCntrll = TextEditingController();
-  bool isSwitched = false;
   //key para validación del formulario
   final _formKeyCustDetail = GlobalKey<FormState>();
   //id del cliente logeado
@@ -96,7 +95,7 @@ class _CustCrqsForm extends State<CustCrqsForm> {
             validator: ( value ) {
               return ( value != null && value.isNotEmpty )
                   ? null
-                  : 'Por favor ingrese un rfc valido';
+                  : 'Por favor ingrese un rfc válido';
             },
           ),
 
@@ -110,7 +109,7 @@ class _CustCrqsForm extends State<CustCrqsForm> {
             validator: ( value ) {
               return ( value != null && value.isNotEmpty )
                   ? null
-                  : 'Por favor ingrese un curp valido';
+                  : 'Por favor ingrese un curp válido';
             },
           ),
           const SizedBox(height: 10,),
@@ -137,30 +136,6 @@ class _CustCrqsForm extends State<CustCrqsForm> {
             label: 'Referencia*',
             dropdownValue: referralId.toString(),
           ),
-          const SizedBox(height: 10,),
-
-          Row(
-            children: [
-              Switch(
-                value: isSwitched,
-                onChanged: (value) {
-                  if(!isSwitched){
-                    _confirmPassword();
-                  }else {
-                    setState(() {
-                      isSwitched = value;
-                    });
-                  }
-                },
-              ),
-              const Expanded(
-                  child: Text("Confirmación de autorización para revisar "
-                      "buro de credito",
-                    style: TextStyle(color: Colors.grey),
-                  )
-              ),
-            ],
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: ElevatedButton(
@@ -182,48 +157,6 @@ class _CustCrqsForm extends State<CustCrqsForm> {
           ),
         ],
       ),
-    );
-  }
-  //Funcion para validad contraseña
-  Future<void> _confirmPassword() async{
-    final textPassCntrll = TextEditingController();
-    return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Confirme su Contraseña'),
-            content: TextField(
-              obscureText: true,
-              decoration: InputDecorations.authInputDecoration(
-                  labelText: 'Contraseña'
-              ),
-              controller: textPassCntrll,
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: (){
-                  if(textPassCntrll.text == soCustomer.passw){
-                    setState(() {
-                      isSwitched = true;
-                      // Muestra mensaje
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Contraseña Correcta')),
-                      );
-                      Navigator.pop(context);
-                    });
-                  }else{
-                    // Muestra mensaje
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Contraseña Inconrrecta')),
-                    );
-                    Navigator.pop(context);
-                  }
-                },
-                child: const Text('Confirmar'),
-              )
-            ],
-          );
-        }
     );
   }
 
@@ -253,11 +186,11 @@ class _CustCrqsForm extends State<CustCrqsForm> {
     soCustomer.rfc = textRfcCntrll.text;
     soCustomer.curp = textCurpCntrll.text;
     soCustomer.referralId = referralId;
-    if(isSwitched){
+/*    if(isSwitched){
       soCustomer.creditBureau = 1;
     }else{
       soCustomer.creditBureau = 0;
-    }
+    }*/
     // Envia la sesion como Cookie, con el nombre en UpperCase
     final response = await http.post(
       Uri.parse(params.getAppUrl(params.instance) +

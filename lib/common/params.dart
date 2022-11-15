@@ -51,7 +51,7 @@ String getAppUrl(String instance) {
     if (instance[0] == '_') {
       String cleanInstance = instance.substring(1, instance.length);
       //return 'http://localhost:8080/' + cleanInstance + '/';
-      return 'http://192.168.100.22:8080/' + cleanInstance + '/';
+      return 'http://192.168.100.34:8080/' + cleanInstance + '/';
     } else if (instance[0] == "-") {
       String cleanInstance = instance.substring(1, instance.length);
       return 'https://sandbox.flexwm.com/' + cleanInstance + '/';

@@ -166,7 +166,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un nombre valido';
+                      : 'Por favor ingrese un nombre válido';
 
                 },
               ),
@@ -183,7 +183,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                 validator: (value) {
                   return (value != null && value.isNotEmpty)
                       ? null
-                      : 'Por favor ingrese una fecha valida';
+                      : 'Por favor ingrese una fecha válida';
                 },
                 onTap: () {
                   showDatePicker(
@@ -227,7 +227,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                 validator: (value) {
                   return (value != null && value.isNotEmpty)
                       ? null
-                      : 'Por favor ingrese una fecha valida';
+                      : 'Por favor ingrese una fecha válida';
                 },
                 onTap: () {
                   showDatePicker(
@@ -260,7 +260,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un valor valido';
+                      : 'Por favor ingrese un valor válido';
 
                 },
               ),
@@ -278,7 +278,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese una calle valida';
+                      : 'Por favor ingrese una calle válida';
 
                 },
               ),
@@ -296,7 +296,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un nuúmero valido';
+                      : 'Por favor ingrese un número válido';
 
                 },
               ),
@@ -325,7 +325,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un c.p. valido';
+                      : 'Por favor ingrese un c.p. válido';
 
                 },
               ),
@@ -399,7 +399,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                 validator: (value) {
                   return (value != null && value.isNotEmpty)
                       ? null
-                      : 'Por favor ingrese una fecha valida';
+                      : 'Por favor ingrese una fecha válida';
                 },
                 onTap: () {
                   showDatePicker(
@@ -468,7 +468,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un número valido';
+                      : 'Por favor ingrese un número válido';
 
                 },
               ),
@@ -486,7 +486,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un número valido';
+                      : 'Por favor ingrese un número válido';
 
                 },
               ),
@@ -502,7 +502,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                 ), validator: ( value ) {
                 return ( value != null && value.isNotEmpty )
                     ? null
-                    : 'Por favor ingrese un la marca';
+                    : 'Por favor ingrese una marca';
 
               },
                 // onChanged: ( value ) => newCustForm.firstName = value,
@@ -519,7 +519,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                 ), validator: ( value ) {
                 return ( value != null && value.isNotEmpty )
                     ? null
-                    : 'Por favor ingrese un el modelo';
+                    : 'Por favor ingrese el modelo';
 
               },
                 // onChanged: ( value ) => newCustForm.firstName = value,

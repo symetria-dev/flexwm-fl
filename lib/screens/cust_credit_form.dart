@@ -28,6 +28,7 @@ import 'package:intl/intl.dart';
 import '../routes/app_routes.dart';
 import '../widgets/card_stepcontainer.dart';
 import '../widgets/dropdown_widget.dart';
+import '../widgets/upload_file_widget.dart';
 import 'cust_crqs_form.dart';
 
 
@@ -57,6 +58,7 @@ class _CustDataFormState extends State<CustDataForm>{
   final textMontoCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
   late String creditDestiny = '';
   int monthSelected = 0;
+  int deadLine = 0;
   final textPagoMonthCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
   int currencyId = 0;
   int creditTypeId = 0;
@@ -114,6 +116,23 @@ class _CustDataFormState extends State<CustDataForm>{
   bool sendingData = false;
   //errores de solicitud
   String errorMsg = '';
+  //id de flujo
+  int wflowId = 0;
+  //id detalles de solicitud
+  int creditRequestDetailId = 0;
+  // Regimen Fiscal
+  String fiscalRegime = SoCreditRequest.FISCALREGIME_PERSON;
+  //Validaciones plan de credito
+  int _periods = 0;
+  double _minAmount = 0.0;
+  double _maxAmount = 0.0;
+//check para revisión buro de crédito
+  bool isSwitched = false;
+
+  //docuemntos
+  GlobalKey<uploadFile> _keyUploadIdentification = GlobalKey();
+  GlobalKey<uploadFile> _keyUploadIdentificationBack= GlobalKey();
+  GlobalKey<uploadFile> _keyUploadProofAddress = GlobalKey();
   @override
   void initState(){
     //Se obtiene el cliente que se encuentra loggeado
@@ -132,7 +151,9 @@ class _CustDataFormState extends State<CustDataForm>{
     institutionType = SoCreditRequest.INSTITUTION_TYPE_NATIONAL;
     //Se inicializa step 2 y 4
     if(widget.creditRequest.id > 0){
+      setState(() => _activeStepIndex = 1);
       soCreditRequest = widget.creditRequest;
+      fiscalRegime = soCreditRequest.fiscalRegime;
       currencyId = soCreditRequest.currencyId;
       creditDestiny = soCreditRequest.destiny;
       creditTypeId = soCreditRequest.creditTypeId;
@@ -140,8 +161,15 @@ class _CustDataFormState extends State<CustDataForm>{
       monthSelected = soCreditRequest.deadlineRequired;
       textPagoMonthCntrll.updateValue(soCreditRequest.monthlyPayment);
       creditProfileId = soCreditRequest.creditProfileId;
+      if(soCreditRequest.creditBureau == 1) isSwitched = true;
       fetchCreditRequest(widget.creditRequest.id.toString()).then((value) {
         if(value){
+          if(soCreditRequest.educationalInstitution != '' &&
+              soCreditRequest.educationalInstitutionType != '' &&
+              soCreditRequest.dateStartInstitution != '' &&
+              soCreditRequest.dateEndInstitution != ''){
+            setState(() => _activeStepIndex = 2);
+          }
           if(soCreditRequest.educationalInstitution != '' ) textEducationalInstitutionCntrll.text = soCreditRequest.educationalInstitution;
           if(soCreditRequest.educationalInstitutionType != '' ) institutionType = soCreditRequest.educationalInstitutionType;
           if(soCreditRequest.dateStartInstitution != '' ) textDateStartCntrll.text = soCreditRequest.dateStartInstitution;
@@ -156,6 +184,12 @@ class _CustDataFormState extends State<CustDataForm>{
 
       fetchCustomerDetail(idCustomer.toString()).then((value) {
         if(value){
+          if( textInstitutionCntrll.text != '' &&
+              textLocationCntrll.text != '' &&
+              textPeriodCntrll.text != '' &&
+              textDegreeCntrll.text != ''){
+            setState(() => _activeStepIndex = 3);
+          }
           textInstitutionCntrll.text = soCustomerDetail.institution;
           textLocationCntrll.text = soCustomerDetail.location;
           textPeriodCntrll.text = soCustomerDetail.period;
@@ -165,6 +199,8 @@ class _CustDataFormState extends State<CustDataForm>{
       });
       fetchCreditRequestDetail(soCreditRequest.id.toString()).then((value) {
         if(value){
+          setState((){creditRequestDetailId = soCreditRequestDetail.id;});
+          updateDataCrqs();
           if(soCreditRequestDetail.visaFees > 0 ) visaFees = true;
           if(soCreditRequestDetail.planeTickets > 0 ) planeTickets = true;
           if(soCreditRequestDetail.programCost > 0.0 ) textProgramCostCntrll.updateValue(soCreditRequestDetail.programCost);
@@ -208,7 +244,7 @@ class _CustDataFormState extends State<CustDataForm>{
       )),
       AuthListBackground(child: Padding(
         padding: const EdgeInsets.only(top: 50),
-        child: ChatPrueba(forceFilter: soCreditRequest.wFlowId),
+        child: ChatPrueba(forceFilter: wflowId),
       ),),
     ];
 
@@ -230,10 +266,12 @@ class _CustDataFormState extends State<CustDataForm>{
       onTap: (int index) {
         if(soCreditRequest.id > 0){
           setState(() {
+            creditRequestDetailId = soCreditRequestDetail.id;
+            wflowId = soCreditRequest.wFlowId;
             _currentTabIndex = index;
           });
         }else{
-          Fluttertoast.showToast(msg: 'Complete el paso 1 para poder registrar avales.');
+          Fluttertoast.showToast(msg: 'Complete el paso 1 para poder continuar con su registro.');
         }
       },
     );
@@ -266,18 +304,28 @@ class _CustDataFormState extends State<CustDataForm>{
     switch (step){
       case 0:
         if(_formKeyCrqs.currentState!.validate()){
-          addCreditRequest().then((value) {
-            if(value){setState(() {
-              _activeStepIndex += 1;
-              sendingData = false;
+          if(deadLine <= _periods){
+            addCreditRequest().then((value) {
+              if(value){setState(() {
+                addCreditRequestDetail().then((value) => updateDataCrqs());
+                _activeStepIndex += 1;
+                sendingData = false;
               });
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Datos actualizados correctamente')),
-            );
-            }else{setState(() {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Datos actualizados correctamente')),
+              );
+              }else{setState(() {
+                sendingData = false;
+              });return false;}
+            });
+          }else{
+            setState(() {
               sendingData = false;
-            });return false;}
-          });
+            });
+            Fluttertoast.showToast(msg: 'Lo sentimos, el plan de crédito seleccionado \n '
+                'solo le permite un plazo máximo de $_periods meses.');
+           return false;
+          }
         }else{
           return false;
         }
@@ -453,8 +501,15 @@ class _CustDataFormState extends State<CustDataForm>{
                       });
                     },
                     programCode: 'CRTY',
-                    label: 'Tipo de Crédito',
+                    label: 'Plan de Crédito',
                     dropdownValue: soCreditRequest.creditTypeId.toString(),
+                    validations: (int periods, double minAmount, double maxAmount){
+                      setState((){
+                        _periods = periods;
+                        _minAmount = minAmount;
+                        _maxAmount = maxAmount;
+                      });
+                    },
                   ),
                   const SizedBox(height: 10,),
                   TextFormField(
@@ -465,9 +520,11 @@ class _CustDataFormState extends State<CustDataForm>{
                     controller: textMontoCntrll,
                     validator: ( value ) {
                       final intNumber = double.tryParse(value!.replaceAll(',', ''));
-                      return (intNumber != null && intNumber > 9999.99)
+                      return (intNumber != null && intNumber > _minAmount &&
+                      intNumber < _maxAmount)
                           ? null
-                          : 'Por favor ingrese un monto valido';
+                          : 'Lo sentimos, el plan de crédito seleccionado requiere\n'
+                          'un monto mínimo de $_minAmount y máximo $_maxAmount';
                     },
                   ),
                   const SizedBox(height: 10, ),
@@ -503,30 +560,132 @@ class _CustDataFormState extends State<CustDataForm>{
                     label: 'Perfiles de Crédito',
                     dropdownValue: soCreditRequest.creditProfileId.toString(),
                   ),
+                  const SizedBox( height: 10 ),
+                  Row(
+                    children: [
+                      const Expanded(
+                          child: Text("Regimen Fiscal*",
+                            style: TextStyle(color: Colors.grey,fontSize: 15),
+                          )
+                      ),
+                      DropdownButtonHideUnderline(
+                        child: ButtonTheme(
+                          child: DropdownButton(
+                            value: fiscalRegime,
+                            items: SoCreditRequest.getFiscalRegime.map((e) {
+                              return DropdownMenuItem(
+                                child: Text(e['label']),
+                                value: e['value'],
+                              );
+                            }).toList(),
+                            onChanged: (Object? value) {
+                              setState(() {
+                                fiscalRegime = '$value';
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10,),
+                  Row(
+                    children: [
+                      Switch(
+                        value: isSwitched,
+                        onChanged: (value) {
+                          if(!isSwitched){
+                            _confirmPassword();
+                          }else {
+                            setState(() {
+                              isSwitched = value;
+                            });
+                          }
+                        },
+                      ),
+                      const Expanded(
+                          child: Text("Confirmación de autorización para revisar "
+                              "buro de credito",
+                            style: TextStyle(color: Colors.grey),
+                          )
+                      ),
+                    ],
+                  ),
                   if(sendingData)
                     const LinearProgressIndicator(),
                   const SizedBox(height: 30,)
-                ])
+                ]),
+
             ),
           ),
         );
   }
 
+  //Funcion para validad contraseña
+  Future<void> _confirmPassword() async{
+    final textPassCntrll = TextEditingController();
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Confirme su Contraseña'),
+            content: TextField(
+              obscureText: true,
+              decoration: InputDecorations.authInputDecoration(
+                  labelText: 'Contraseña'
+              ),
+              controller: textPassCntrll,
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: (){
+                  if(textPassCntrll.text == soCustomer.passw){
+                    setState(() {
+                      isSwitched = true;
+                      // Muestra mensaje
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Contraseña Correcta')),
+                      );
+                      Navigator.pop(context);
+                    });
+                  }else{
+                    // Muestra mensaje
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Contraseña Inconrrecta')),
+                    );
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text('Confirmar'),
+              )
+            ],
+          );
+        }
+    );
+  }
+
+
   List<Widget> plazosChips(){
-    List<String> _chipsList = ["6","9","12","18","24","30","36","48"];
+    List<int> _chipsList = [6,9,12,18,24,30,36,48];
     List<Widget> chips = [];
     for(int i=0;i<_chipsList.length;i++){
       Widget item = Padding(
         padding: const EdgeInsets.only(left: 10,right: 5),
         child: ChoiceChip(
-            label: Text(_chipsList[i]),
+            label: Text(_chipsList[i].toString()),
             labelStyle: const TextStyle(color: Colors.white),
             backgroundColor: Colors.blueGrey,
             selected: monthSelected == i,
           onSelected: (bool value){
-              setState((){
-                monthSelected = i;
-              });
+              if(_chipsList[i] <= _periods){
+                setState((){
+                  monthSelected = i;
+                  deadLine = _chipsList[i];
+                });
+              }else{
+                Fluttertoast.showToast(msg: 'Lo sentimos, el plan de crédito seleccionado \n '
+                    'solo le permite un plazo máximo de $_periods meses.');
+              }
           },
         ),
       );
@@ -604,7 +763,7 @@ class _CustDataFormState extends State<CustDataForm>{
                 validator: (value) {
                   return (value != null && value.isNotEmpty)
                       ? null
-                      : 'Por favor ingrese una fecha valida';
+                      : 'Por favor ingrese una fecha válida';
                 },
                 onTap: (){
                   showDatePicker(
@@ -636,7 +795,7 @@ class _CustDataFormState extends State<CustDataForm>{
                 validator: (value) {
                   return (value != null && value.isNotEmpty)
                       ? null
-                      : 'Por favor ingrese una fecha valida';
+                      : 'Por favor ingrese una fecha válida';
                 },
                 onTap: (){
                   showDatePicker(
@@ -729,6 +888,37 @@ class _CustDataFormState extends State<CustDataForm>{
                             : 'Por favor ingrese un grado obtenido';
                       },
                 ),
+                const SizedBox( height: 10 ),
+                const Text("Documentos",
+                  style: TextStyle(color: Colors.grey,fontSize: 20),
+                ),
+                const SizedBox(height: 10,),
+                UploadFile(
+                  key: _keyUploadIdentification,
+                  initialRuta: soCreditRequestDetail.identification,
+                  programCode: SoCreditRequestDetail.programCode,
+                  fielName: 'crqd_identification',
+                  label: 'Identificacion parte frontal',
+                  id: creditRequestDetailId.toString(),
+                  callBack: updateDataCrqs,),
+                const SizedBox(height: 10,),
+                UploadFile(
+                  key: _keyUploadIdentificationBack,
+                  initialRuta: soCreditRequestDetail.identificationBack,
+                  programCode: SoCreditRequestDetail.programCode,
+                  fielName: 'crqd_identificationback',
+                  label: 'Identificacion parte trasera',
+                  id: creditRequestDetailId.toString(),
+                  callBack: updateDataCrqs,),
+                const SizedBox(height: 10,),
+                UploadFile(
+                  key: _keyUploadProofAddress,
+                  initialRuta: soCreditRequestDetail.proofAddress,
+                  programCode: SoCreditRequestDetail.programCode,
+                  fielName: 'crqd_proofaddress',
+                  label: 'Comprobante de Domicilio',
+                  id: creditRequestDetailId.toString(),
+                  callBack: updateDataCrqs,),
                 if(sendingData)
                   const LinearProgressIndicator(),
                 const SizedBox(height: 30,)
@@ -736,6 +926,18 @@ class _CustDataFormState extends State<CustDataForm>{
           ),
         )
     );
+  }
+
+  updateDataCrqs(){
+     fetchCreditRequestDetail(soCreditRequest.id.toString()).then((value) {
+       _keyUploadIdentification.currentState?.updateData(soCreditRequestDetail.identification);
+       _keyUploadIdentificationBack.currentState?.updateData(soCreditRequestDetail.identificationBack);
+       _keyUploadProofAddress.currentState?.updateData(soCreditRequestDetail.proofAddress);
+
+       _keyUploadIdentification.currentState?.updateId(creditRequestDetailId.toString());
+       _keyUploadIdentificationBack.currentState?.updateId(creditRequestDetailId.toString());
+       _keyUploadProofAddress.currentState?.updateId(creditRequestDetailId.toString());
+     });
   }
 
   Widget formCrqd(){
@@ -905,7 +1107,7 @@ class _CustDataFormState extends State<CustDataForm>{
                       validator: (value) {
                         return (value != null && value.isNotEmpty)
                             ? null
-                            : 'Por favor ingrese una fecha valida';
+                            : 'Por favor ingrese una fecha válida';
                       },
                       onTap: (){
                         showDatePicker(
@@ -1087,7 +1289,10 @@ class _CustDataFormState extends State<CustDataForm>{
       return false;
     }
     //Si no hay errores se guarda el obejto devuelto
-    soCreditRequestDetail = SoCreditRequestDetail.fromJson(jsonDecode(response.body));
+      soCreditRequestDetail = SoCreditRequestDetail.fromJson(jsonDecode(response.body));
+    setState((){
+      creditRequestDetailId = soCreditRequestDetail.id;
+    });
     return true;
   }
   //petición de creditrequestguarantees para definir rol preliminar del crédito
@@ -1111,33 +1316,12 @@ class _CustDataFormState extends State<CustDataForm>{
     return true;
   }
 
-  //petición de creditrequestguarantees para definir rol preliminar del crédito
-  Future<bool> fetchCreditRequest(String id) async {
-    final response = await http.get(Uri.parse(
-        params.getAppUrl(params.instance) +
-            'restcrqs;' +
-            params.jSessionIdQuery +
-            '=' +
-            params.jSessionId +
-            '?id=' +
-            id.toString()));
-
-    // Si no es exitoso envia a login
-    if (response.statusCode != params.servletResponseScOk) {
-      // Navigator.pushNamed(context, AppRoutes.initialRoute);
-      return false;
-    }
-    //Si no hay errores se guarda el obejto devuelto
-    soCreditRequest= SoCreditRequest.fromJson(jsonDecode(response.body));
-    return true;
-  }
-
   // Actualiza la solicitud de credito en el servidor
   Future<bool> addCreditRequest() async {
     soCreditRequest.customerId = idCustomer;
     soCreditRequest.amountRequired = textMontoCntrll.numberValue;
     soCreditRequest.destiny = creditDestiny;
-    soCreditRequest.deadlineRequired = monthSelected;
+    soCreditRequest.deadlineRequired = deadLine;
     soCreditRequest.monthlyPayment = textPagoMonthCntrll.numberValue;
     soCreditRequest.currencyId = currencyId;
     soCreditRequest.creditTypeId = creditTypeId;
@@ -1146,6 +1330,12 @@ class _CustDataFormState extends State<CustDataForm>{
     soCreditRequest.educationalInstitutionType = institutionType;
     soCreditRequest.dateStartInstitution = textDateStartCntrll.text;
     soCreditRequest.dateEndInstitution = textDateEndCntrll.text;
+    soCreditRequest.fiscalRegime = fiscalRegime;
+    if(isSwitched){
+      soCreditRequest.creditBureau = 1;
+    }else{
+      soCreditRequest.creditBureau = 0;
+    }
 
     if(_activeStepIndex == 1) addCreditRequestDetail();
 
@@ -1166,8 +1356,9 @@ class _CustDataFormState extends State<CustDataForm>{
     if (response.statusCode == params.servletResponseScOk) {
 
       // Si fue exitoso obtiene la respuesta
-      soCreditRequest = SoCreditRequest.fromJson(jsonDecode(response.body));
-
+        soCreditRequest = SoCreditRequest.fromJson(jsonDecode(response.body));
+        fetchCreditRequest(soCreditRequest.id.toString());
+        fetchCreditRequestDetail(soCreditRequest.id.toString());
       // Muestra mensaje
      /* ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Datos actualizados correctamente')),
@@ -1175,6 +1366,7 @@ class _CustDataFormState extends State<CustDataForm>{
       return true;
     } else {
       errorMsg = response.body.toString();
+      print(errorMsg);
       // Error al guardar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error ${response.body}')),
@@ -1183,13 +1375,38 @@ class _CustDataFormState extends State<CustDataForm>{
     }
   }
 
+  //petición de creditrequestguarantees para definir rol preliminar del crédito
+  Future<bool> fetchCreditRequest(String id) async {
+    final response = await http.get(Uri.parse(
+        params.getAppUrl(params.instance) +
+            'restcrqs;' +
+            params.jSessionIdQuery +
+            '=' +
+            params.jSessionId +
+            '?id=' +
+            id.toString()));
+
+    // Si no es exitoso envia a login
+    if (response.statusCode != params.servletResponseScOk) {
+      // Navigator.pushNamed(context, AppRoutes.initialRoute);
+      return false;
+    }
+    //Si no hay errores se guarda el obejto devuelto
+
+    soCreditRequest= SoCreditRequest.fromJson(jsonDecode(response.body));
+    setState((){
+      wflowId = soCreditRequest.wFlowId;
+    });
+    return true;
+  }
+
   // Actualiza el customer en el servidor
   Future<bool> addCustomerDetail() async {
     soCustomerDetail.institution = textInstitutionCntrll.text;
     soCustomerDetail.location = textLocationCntrll.text;
     soCustomerDetail.period = textPeriodCntrll.text;
     soCustomerDetail.degreeObtained = textDegreeCntrll.text;
-    soCustomerDetail.customerId = idCustomer;
+    soCustomerDetail.customerId = params.idLoggedUser;
 
     // Envia la sesion como Cookie, con el nombre en UpperCase
     final response = await http.post(
@@ -1279,7 +1496,9 @@ class _CustDataFormState extends State<CustDataForm>{
 
       // Si fue exitoso obtiene la respuesta
       soCreditRequestDetail = SoCreditRequestDetail.fromJson(jsonDecode(response.body));
-
+      setState(() {
+        creditRequestDetailId = soCreditRequestDetail.id;
+      });
       // Muestra mensaje
       // ScaffoldMessenger.of(context).showSnackBar(
       //   const SnackBar(content: Text('Datos actualizados correctamente')),

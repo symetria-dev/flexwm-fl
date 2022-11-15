@@ -59,6 +59,7 @@ class SoCreditRequestGuarantee {
   static String STATUS_EMPLOYEE = 'E';
   static String STATUS_PROFESSIONAL = 'P';
   static String STATUS_BUSINESSMAN = 'B';
+/*
 
   static List getStatusOptions = [
     {"value": STATUS_SINGLE, "label": "Soltero(a)"},
@@ -74,6 +75,7 @@ class SoCreditRequestGuarantee {
     {"value": REGIMEN_SEPARATION_PROPERTY, "label":"Bienes Separados"},
     {"value": REGIMEN_MIXED_REGIMEN, "label":"Mixto"},
   ];
+*/
 
   static List getRelationOptions = [
     {"value": RELATION_ACCREDITED, "label": "Acreditado Principal"},
@@ -96,6 +98,18 @@ class SoCreditRequestGuarantee {
     {"value": STATUS_PROFESSIONAL, "label": "Profesionista"},
     {"value": STATUS_BUSINESSMAN, "label": "Empresario"},
   ];
+
+  static String getLabelRol(String value){
+    String role = '';
+    List roles = getRoleOptions;
+    for(int i =0;i<roles.length;i++){
+      if(value == roles[i]['value']){
+        role = roles[i]['label'];
+      }
+    }
+    return role;
+  }
+
 
   SoCreditRequestGuarantee.empty();
 
@@ -155,10 +169,9 @@ class SoCreditRequestGuarantee {
         json['soCustomer']['curp'] as String,
         json['soCustomer']['recommendedBy'] as int,
         json['soCustomer']['motherlastname'] as String,
-        json['soCustomer']['maritalStatusId'] as int,
+        json['soCustomer']['maritalStatus'] as String,
         json['soCustomer']['mobile'] as String,
-        json['soCustomer']['maritalRegimen'] as String,
-        json['soCustomer']['creditBureau'] as int,
+        json['soCustomer']['maritalRegime'] as String,
           ),
       json['identification'] as String,
       json['proofIncome'] as String,

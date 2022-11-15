@@ -1,4 +1,5 @@
 class SoCreditRequestDetail {
+  static const String programCode = 'CRQD';
   int id = -1;
   int visaFees = 0;
   int planeTickets = 0;
@@ -13,6 +14,9 @@ class SoCreditRequestDetail {
   double verifiableIncome = 0.0;
   int countryId = -1;
   String city = "";
+  String identification = "";
+  String identificationBack = "";
+  String proofAddress = "";
 
   static String AGENCY_UNO = 'U';
   static String AGENCY_DOS = 'D';
@@ -28,7 +32,8 @@ class SoCreditRequestDetail {
   SoCreditRequestDetail(this.id,this.visaFees,this.planeTickets,this.programCost,
       this.maintenance,this.studiesPlace,this.engagementAgencyId,
       this.engagementSchool,this.dateProbablyTravel,this.educationalProgram,
-      this.creditRequestId,this.verifiableIncome, this.countryId, this.city);
+      this.creditRequestId,this.verifiableIncome, this.countryId, this.city,
+      this.identification,this.identificationBack,this.proofAddress);
 
   factory SoCreditRequestDetail.fromJson(Map<String, dynamic> json){
     return SoCreditRequestDetail(
@@ -46,6 +51,9 @@ class SoCreditRequestDetail {
       json['verifiableIncome'] as double,
       json["countryId"] as int,
       json["city"] as String,
+      json['identification'] as String,
+      json['identificationBack'] as String,
+      json['proofAddress'] as String,
     );
   }
 
@@ -65,6 +73,9 @@ class SoCreditRequestDetail {
       'verifiableIncome' : verifiableIncome,
       'countryId' : countryId,
       'city' : city,
+      'identification' : identification,
+      'identificationBack' : identificationBack,
+      'proofAddress' : proofAddress,
     };
   }
 }

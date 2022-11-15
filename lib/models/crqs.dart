@@ -15,6 +15,8 @@ class SoCreditRequest {
   String code = "";
   String status = "";
   int wFlowId = -1;
+  String fiscalRegime = '';
+  int creditBureau = 0;
   /*String employmentStatus = 'E';
   String company = "";
   String economicActivity = "";
@@ -37,6 +39,10 @@ class SoCreditRequest {
   static String STATUS_AUTHORIZED = 'A';
   static String STATUS_CANCELLED = 'C';
 
+  static String FISCALREGIME_PERSON = 'P';
+  static String FISCALREGIME_PERSONACTIVITY = 'A';
+  static String FISCALREGIME_COMPANY = 'C';
+
   static List getInstitutionType = [
     {"value": INSTITUTION_TYPE_NATIONAL, "label": "Nacional"},
     {"value": INSTITUTION_TYPE_INTERNATIONAL, "label": "Internacional"},
@@ -49,6 +55,11 @@ class SoCreditRequest {
     {"value": "L", "label": "Licenciatura"},
   ];
 
+  static List getFiscalRegime = [
+    {"value": FISCALREGIME_PERSON, "label": "Persona Fisica"},
+    {"value": FISCALREGIME_PERSONACTIVITY, "label": "Persona Fisica Act. Emp."},
+    {"value": FISCALREGIME_COMPANY, "label": "Persona Moral"},
+  ];
   static String getStatusText(String value){
     String status = '';
     switch(value){
@@ -98,7 +109,8 @@ class SoCreditRequest {
   SoCreditRequest(this.id, this.destiny,this.customerId,this.amountRequired,
       this.deadlineRequired,this.monthlyPayment,this.currencyId,this.creditTypeId,
       this.creditProfileId,this.educationalInstitution, this.educationalInstitutionType,
-      this.dateStartInstitution, this.dateEndInstitution, this.code, this.status,this.wFlowId);
+      this.dateStartInstitution, this.dateEndInstitution, this.code, this.status,
+      this.wFlowId, this.fiscalRegime, this.creditBureau);
 
   factory SoCreditRequest.fromJson(Map<String, dynamic> json) {
     return SoCreditRequest(
@@ -118,6 +130,8 @@ class SoCreditRequest {
       json['code'] as String,
       json['status'] as String,
       json['wFlowId'] as int,
+      json['fiscalRegime'] as String,
+      json['creditBureau'] as int,
     );
   }
 
@@ -139,6 +153,8 @@ class SoCreditRequest {
       'code' : code,
       'status' : status,
       'wFlowId' : wFlowId,
+      'fiscalRegime' : fiscalRegime,
+      'creditBureau' : creditBureau,
     };
   }
 

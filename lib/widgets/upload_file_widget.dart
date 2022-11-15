@@ -45,7 +45,6 @@ class uploadFile extends State<UploadFile> {
 
   @override
   void initState() {
-   
     _programCode = widget.programCode;
     _fielName = widget.fielName;
     _id = widget.id;
@@ -135,8 +134,11 @@ class uploadFile extends State<UploadFile> {
             if (_hasUpload)
               IconButton(
                 color: Colors.blue,
-                onPressed: () =>
-                    sendFile(_ruta!, _programCode, _fielName, _id),
+                onPressed: () {
+                  //se ejecuta callback por si hay datos que actualizar antes de enviar
+                  widget.callBack!();
+                  sendFile(_ruta!, _programCode, _fielName, _id);
+                },
                 icon: const Icon(
                   Icons.upload,
                   color: Colors.red,
@@ -171,9 +173,14 @@ class uploadFile extends State<UploadFile> {
   }
 
   void updateData(String initialRuta){
-    print('jjij');
     setState(() {
       _initialRuta = initialRuta;
+    });
+  }
+
+  void updateId(String id){
+    setState(() {
+      _id = id;
     });
   }
 

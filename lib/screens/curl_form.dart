@@ -108,7 +108,7 @@ class _CustRelativeFormState extends State<CustRelativeForm>{
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un nombre valido';
+                      : 'Por favor ingrese un nombre válido';
 
                 },
               ),
@@ -199,7 +199,7 @@ class _CustRelativeFormState extends State<CustRelativeForm>{
                 validator: ( value ) {
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un Teléfono celular valido';
+                      : 'Por favor ingrese un Teléfono celular válido';
 
                 },
               ),

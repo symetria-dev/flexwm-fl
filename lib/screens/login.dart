@@ -35,26 +35,23 @@ class LoginFormState extends State<LoginForm> {
 
   @override
   void initState(){
+    // Primero libera la sesion existente
+    doLogout();
+    // Asigna datos previos de persistencia
+    setPrevData();
     sendingData = false;
+    // instanceController.text = '-edupass';
     super.initState();
   }
 
   @override
   void dispose() {
-    // Limpia controladores al eliminar pantalla
-    instanceController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     // SharedPreferences.setMockInitialValues({});
-
-    // Primero libera la sesion existente
-    doLogout();
-
     return Scaffold(
       body: AuthBackground(
         child: SingleChildScrollView(
@@ -90,14 +87,11 @@ class LoginFormState extends State<LoginForm> {
 
   // Prepara la forma
   Widget getLoginForm() {
-    // Asigna datos previos de persistencia
-    setPrevData();
-
     return Form(
       key: _formKey,
       child: Column(
         children: <Widget>[
-          TextFormField(
+         /* TextFormField(
             //initialValue: soWFlowStep.name,
             // The validator receives the text that the user has entered.
             validator: (value) {
@@ -111,7 +105,7 @@ class LoginFormState extends State<LoginForm> {
               labelText: 'Instancia',
             ),
             controller: instanceController,
-          ),
+          ),*/
           TextFormField(
             //initialValue: soWFlowStep.name,
             // The validator receives the text that the user has entered.
@@ -177,7 +171,8 @@ class LoginFormState extends State<LoginForm> {
                       style: const TextStyle(color: Colors.blue,fontSize: 16),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                        params.instance = instanceController.text;
+                          params.instance = '_flexwm-js';
+                        // params.instance = '-edupass';
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => const NewCustForm())
@@ -206,9 +201,9 @@ class LoginFormState extends State<LoginForm> {
   // Envia datos de login al servidor
   void doLogin() async {
     soLogin.email = emailController.text;
-    soLogin.email = emailController.text;
     soLogin.password = passwordController.text;
-
+    instanceController.text = '_flexwm-js';
+    // instanceController.text = '-edupass';
     final response = await http.post(
       //TODO colocar de forma dinamica que tipo de usuario hara login
       Uri.parse(params.getAppUrl(instanceController.text) + 'restlogincust'),
@@ -223,12 +218,14 @@ class LoginFormState extends State<LoginForm> {
       soLogin = SoLogin.fromJson(jsonDecode(response.body));
       doContinue();
       Navigator.pushReplacementNamed(context, '/crqs_list');
+      //setState(() {sendingData = false;});
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error de Login')),
       );
 
       passwordController.text = '';
+      setState(() {sendingData = false;});
       // If the server did not return a 201 CREATED response,
       // then throw an exception.
       throw Exception('Error de Login: ' + response.statusCode.toString());
@@ -242,17 +239,14 @@ class LoginFormState extends State<LoginForm> {
     String instance = prefs.getString('instance') ?? '';
     String email = prefs.getString('email') ?? '';
 
-    if (instance != '') {
+   /* if (instance != '') {
       instanceController.text = instance;
     } else {
       instanceController.text = '_flexwm-js';
-    }
+    }*/
 
     if (email != '') {
       emailController.text = email;
-      passwordController.text = '2020Cris*';
-    } else {
-      emailController.text = 'mlopez@flexwm.com';
       passwordController.text = '2020Cris*';
     }
   }

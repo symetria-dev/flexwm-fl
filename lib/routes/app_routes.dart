@@ -24,7 +24,8 @@ class AppRoutes {
         name: 'Tareas Activas',
         leadingWidget: params.getProperIcon(SoWFlowStep.programCode),
         screen: const WFlowStepList()),
-    MenuOption(
+    //Se comentan para versión clientes edupass
+ /*   MenuOption(
         route: '/cust_list',
         name: 'Clientes',
         leadingWidget: params.getProperIcon(SoCustomer.programCode),
@@ -33,7 +34,7 @@ class AppRoutes {
         route: '/user',
         name: 'Usuarios',
         leadingWidget: params.getProperIcon(SoUser.programCode),
-        screen: const UserList()),
+        screen: const UserList()),*/
     MenuOption(
         route: '/',
         name: 'Salir',

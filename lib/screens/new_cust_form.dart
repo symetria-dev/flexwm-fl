@@ -121,7 +121,7 @@ class _NewCustForm extends State<NewCustForm>{
 
                 return ( value != null && value.isNotEmpty )
                     ? null
-                    : 'Por favor ingrese un nombre valido';
+                    : 'Por favor ingrese un nombre válido';
 
               },
             ),
@@ -139,7 +139,25 @@ class _NewCustForm extends State<NewCustForm>{
 
                 return ( value != null && value.isNotEmpty )
                     ? null
-                    : 'Por favor ingrese un nombre valido';
+                    : 'Por favor ingrese un apellido válido';
+
+              },
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              autocorrect: false,
+              keyboardType: TextInputType.name,
+              controller: textMotherLastNameCntrll,
+              decoration: InputDecorations.authInputDecoration(
+                  hintText: "Apellido Materno",
+                  labelText: "*Apellido Materno",
+                  prefixIcon: Icons.account_circle_outlined
+              ),
+              validator: ( value ) {
+
+                return ( value != null && value.isNotEmpty )
+                    ? null
+                    : 'Por favor ingrese un apellido válido';
 
               },
             ),
@@ -224,7 +242,7 @@ class _NewCustForm extends State<NewCustForm>{
 
                   return ( value != null && value.isNotEmpty )
                       ? null
-                      : 'Por favor ingrese un nombre valido';
+                      : 'Por favor ingrese una razón social válida';
 
                 },
               ),
@@ -243,7 +261,7 @@ class _NewCustForm extends State<NewCustForm>{
                 validator: (value) {
                   return (value != null && value.isNotEmpty)
                       ? null
-                      : 'Por favor ingrese una fecha valida';
+                      : 'Por favor ingrese una fecha válida';
                 },
                 onTap: (){
                   showDatePicker(
@@ -298,7 +316,7 @@ class _NewCustForm extends State<NewCustForm>{
                 final intNumber = int.tryParse(value!);
                 return ( intNumber != null && value.length > 9 )
                     ? null
-                    : 'Por favor ingrese un número de teléfono valido';
+                    : 'Por favor ingrese un número de teléfono válido';
 
               },
             ),
@@ -316,7 +334,7 @@ class _NewCustForm extends State<NewCustForm>{
                 final intNumber = int.tryParse(value!);
                 return ( intNumber != null && value.length > 9 )
                     ? null
-                    : 'Por favor ingrese un número de teléfono valido';
+                    : 'Por favor ingrese un número de teléfono válido';
 
               },
             ),
@@ -363,6 +381,7 @@ class _NewCustForm extends State<NewCustForm>{
     soCustomer.mobile = cellPhoneCtrll.text;
     soCustomer.birthdate = dateContr.text;
     soCustomer.phone = textPhoneContrll.text;
+    soCustomer.motherlastname = textMotherLastNameCntrll.text;
     print('params instance -> ${params.instance}');
     // Envia la sesion como Cookie, con el nombre en UpperCase
     final response = await http.post(
@@ -385,7 +404,11 @@ class _NewCustForm extends State<NewCustForm>{
 
       // Muestra mensaje
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Cliente "' + soCustomer.email + '" regitrado')),
+        SnackBar(content: Text('Cliente "' + soCustomer.email + '" registrado')),
+      );
+      // Muestra mensaje
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Favor de revisar su correo para activar su cuenta')),
       );
       // Regresa al login
       //Navigator.pop(context);
