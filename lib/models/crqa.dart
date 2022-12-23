@@ -43,6 +43,35 @@ class SoCreditRequestAsset {
     {"value": TYPE_PROPERTY, "label": "Inmueble"},
   ];
 
+  static List getStatusOptions = [
+    {"value": "-", "label": "Seleccione una agencia"},
+    {"value": STATUS_REVISION, "label": "Revisión"},
+    {"value": STATUS_AUTHORIZED, "label": "Autorizado"},
+    {"value": STATUS_REJECTED, "label": "Rechazado"},
+  ];
+
+  static String getLabelType(String value){
+    String role = '';
+    List roles = getTypeOptions;
+    for(int i =0;i<roles.length;i++){
+      if(value == roles[i]['value']){
+        role = roles[i]['label'];
+      }
+    }
+    return role;
+  }
+
+  static String getLabelStatus(String value){
+    String role = '';
+    List roles = getStatusOptions;
+    for(int i =0;i<roles.length;i++){
+      if(value == roles[i]['value']){
+        role = roles[i]['label'];
+      }
+    }
+    return role;
+  }
+
   SoCreditRequestAsset.empty();
 
   SoCreditRequestAsset(this.id,this.type,this.description,this.value,

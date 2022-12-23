@@ -4,6 +4,7 @@ import 'package:flexwm/screens/crqs_list.dart';
 import 'package:flexwm/screens/cust_credit_form.dart';
 import 'package:flexwm/screens/cust_crqs_form.dart';
 import 'package:flexwm/screens/dashboard.dart';
+import 'package:flexwm/screens/cameraPhotoId.dart';
 import 'package:flexwm/widgets/upload_image_widget.dart';
 
 class AppRoutes {
@@ -34,7 +35,7 @@ class AppRoutes {
         route: '/user',
         name: 'Usuarios',
         leadingWidget: params.getProperIcon(SoUser.programCode),
-        screen: const UserList()),*/
+        screen: const CameraPhotoId()),*/
     MenuOption(
         route: '/',
         name: 'Salir',

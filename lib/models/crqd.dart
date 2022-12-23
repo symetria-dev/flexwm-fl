@@ -14,17 +14,30 @@ class SoCreditRequestDetail {
   double verifiableIncome = 0.0;
   int countryId = -1;
   String city = "";
-  String identification = "";
-  String identificationBack = "";
-  String proofAddress = "";
+  String educationalInstitution = "";
+  String educationalInstitutionType = "";
+  String dateStartInstitution = "";
+  String dateEndInstitution = "";
+  String institution= "";
+  String location = "";
+  String period = "";
+  String degreeObtained = "";
 
   static String AGENCY_UNO = 'U';
   static String AGENCY_DOS = 'D';
+
+  static String INSTITUTION_TYPE_NATIONAL = 'N';
+  static String INSTITUTION_TYPE_INTERNATIONAL = 'I';
 
   static List getAgencyOptions = [
     {"value": "-", "label": "Seleccione una agencia"},
     {"value": AGENCY_UNO, "label": "Agencia Uno"},
     {"value": AGENCY_DOS, "label": "Agencia Dos"},
+  ];
+
+  static List getInstitutionType = [
+    {"value": INSTITUTION_TYPE_NATIONAL, "label": "Nacional"},
+    {"value": INSTITUTION_TYPE_INTERNATIONAL, "label": "Internacional"},
   ];
 
   SoCreditRequestDetail.empty();
@@ -33,7 +46,10 @@ class SoCreditRequestDetail {
       this.maintenance,this.studiesPlace,this.engagementAgencyId,
       this.engagementSchool,this.dateProbablyTravel,this.educationalProgram,
       this.creditRequestId,this.verifiableIncome, this.countryId, this.city,
-      this.identification,this.identificationBack,this.proofAddress);
+      this.educationalInstitution, this.educationalInstitutionType,
+      this.dateStartInstitution, this.dateEndInstitution,this.institution,
+      this.location,this.period,this.degreeObtained,
+      );
 
   factory SoCreditRequestDetail.fromJson(Map<String, dynamic> json){
     return SoCreditRequestDetail(
@@ -51,9 +67,14 @@ class SoCreditRequestDetail {
       json['verifiableIncome'] as double,
       json["countryId"] as int,
       json["city"] as String,
-      json['identification'] as String,
-      json['identificationBack'] as String,
-      json['proofAddress'] as String,
+      json['educationalInstitution'] as String,
+      json['educationalInstitutionType'] as String,
+      json['dateStartInstitution'] as String,
+      json['dateEndInstitution'] as String,
+      json['institution'] as String,
+      json['location'] as String,
+      json['period'] as String,
+      json['degreeObtained'] as String,
     );
   }
 
@@ -73,9 +94,14 @@ class SoCreditRequestDetail {
       'verifiableIncome' : verifiableIncome,
       'countryId' : countryId,
       'city' : city,
-      'identification' : identification,
-      'identificationBack' : identificationBack,
-      'proofAddress' : proofAddress,
+      'educationalInstitution' : educationalInstitution,
+      'educationalInstitutionType' : educationalInstitutionType,
+      'dateStartInstitution' : dateStartInstitution,
+      'dateEndInstitution' : dateEndInstitution,
+      'institution' : institution,
+      'location' : location,
+      'period' : period,
+      'degreeObtained' : degreeObtained,
     };
   }
 }

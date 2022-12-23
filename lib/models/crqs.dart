@@ -1,3 +1,5 @@
+import 'package:flexwm/models/wflw.dart';
+
 class SoCreditRequest {
   int id = -1;
   String destiny = "D";
@@ -8,15 +10,12 @@ class SoCreditRequest {
   int currencyId = -1;
   int creditTypeId = -1;
   int creditProfileId = -1;
-  String educationalInstitution = "";
-  String educationalInstitutionType = "";
-  String dateStartInstitution = "";
-  String dateEndInstitution = "";
   String code = "";
   String status = "";
   int wFlowId = -1;
   String fiscalRegime = '';
   int creditBureau = 0;
+  SoWFlow soWFlow = SoWFlow.empty();
   /*String employmentStatus = 'E';
   String company = "";
   String economicActivity = "";
@@ -31,9 +30,6 @@ class SoCreditRequest {
   double otherIncome = 0.0;
   double aproximateMonthlyPay = 0.0;*/
 
-  static String INSTITUTION_TYPE_NATIONAL = 'N';
-  static String INSTITUTION_TYPE_INTERNATIONAL = 'I';
-
   static String STATUS_EDITION = 'E';
   static String STATUS_REVISION = 'R';
   static String STATUS_AUTHORIZED = 'A';
@@ -43,10 +39,6 @@ class SoCreditRequest {
   static String FISCALREGIME_PERSONACTIVITY = 'A';
   static String FISCALREGIME_COMPANY = 'C';
 
-  static List getInstitutionType = [
-    {"value": INSTITUTION_TYPE_NATIONAL, "label": "Nacional"},
-    {"value": INSTITUTION_TYPE_INTERNATIONAL, "label": "Internacional"},
-  ];
   static List getDestinyOptions = [
     {"value": "D", "label": "Diplomado"},
     {"value": "P", "label": "Preparatoria"},
@@ -108,9 +100,8 @@ class SoCreditRequest {
 
   SoCreditRequest(this.id, this.destiny,this.customerId,this.amountRequired,
       this.deadlineRequired,this.monthlyPayment,this.currencyId,this.creditTypeId,
-      this.creditProfileId,this.educationalInstitution, this.educationalInstitutionType,
-      this.dateStartInstitution, this.dateEndInstitution, this.code, this.status,
-      this.wFlowId, this.fiscalRegime, this.creditBureau);
+      this.creditProfileId, this.code, this.status,
+      this.wFlowId, this.fiscalRegime, this.creditBureau, this.soWFlow);
 
   factory SoCreditRequest.fromJson(Map<String, dynamic> json) {
     return SoCreditRequest(
@@ -123,15 +114,19 @@ class SoCreditRequest {
       json['currencyId'] as int,
       json['creditTypeId'] as int,
       json['creditProfileId'] as int,
-      json['educationalInstitution'] as String,
-      json['educationalInstitutionType'] as String,
-      json['dateStartInstitution'] as String,
-      json['dateEndInstitution'] as String,
       json['code'] as String,
       json['status'] as String,
       json['wFlowId'] as int,
       json['fiscalRegime'] as String,
       json['creditBureau'] as int,
+      SoWFlow(
+        json['soWFlow']['id'] as int,
+        json['soWFlow']['code'] as String,
+        json['soWFlow']['name'] as String,
+        json['soWFlow']['description'] as String,
+        json['soWFlow']['userMsgs'] as bool,
+        json['soWFlow']['customerMsgs'] as bool,
+      ),
     );
   }
 
@@ -146,15 +141,12 @@ class SoCreditRequest {
       'currencyId' : currencyId,
       'creditTypeId' : creditTypeId,
       'creditProfileId' : creditProfileId,
-      'educationalInstitution' : educationalInstitution,
-      'educationalInstitutionType' : educationalInstitutionType,
-      'dateStartInstitution' : dateStartInstitution,
-      'dateEndInstitution' : dateEndInstitution,
       'code' : code,
       'status' : status,
       'wFlowId' : wFlowId,
       'fiscalRegime' : fiscalRegime,
       'creditBureau' : creditBureau,
+      'soWFlow' : soWFlow,
     };
   }
 

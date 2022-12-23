@@ -32,15 +32,18 @@ class SoCreditRequestGuarantee {
   String fiscalSituation = "";
   String verifiableIncomeFile = "";
   String declaratory = "";
+  String identificationBack = "";
+  String identityVideo = "";
+  String proofAddress = "";
 
-  static String RELATION_ACCREDITED = 'A';
+  static String RELATION_SELF = 'Z';
   static String RELATION_PARENT = 'P';
   static String RELATION_SIBLING = 'S';
   static String RELATION_MARITAL = 'M';
   static String RELATION_OTHER = 'O';
 
-  static String ROLE_STUDENT = 'S';
-  static String ROLE_ACREDITED_HOLDER = 'A';
+  static String ROLE_BENEFICIARY = 'B';
+  static String ROLE_ACREDITED = 'A';
   static String ROLE_COACREDITED = 'C';
   static String ROLE_GUARANTEE = 'G';
   static String ROLE_COLLATERAL = 'P';
@@ -78,7 +81,7 @@ class SoCreditRequestGuarantee {
 */
 
   static List getRelationOptions = [
-    {"value": RELATION_ACCREDITED, "label": "Acreditado Principal"},
+    {"value": RELATION_SELF, "label": "Mismo"},
     {"value": RELATION_PARENT, "label": "Padre/Madre"},
     {"value": RELATION_SIBLING, "label": "Hermano(a)"},
     {"value": RELATION_MARITAL, "label": "Pareja"},
@@ -86,8 +89,8 @@ class SoCreditRequestGuarantee {
   ];
 
   static List getRoleOptions = [
-    {"value": ROLE_STUDENT, "label": "Estudiante/Beneficiario"},
-    {"value": ROLE_ACREDITED_HOLDER, "label": "Acreditado Titular"},
+    {"value": ROLE_BENEFICIARY, "label": "Beneficiario"},
+    {"value": ROLE_ACREDITED, "label": "Acreditado Titular"},
     {"value": ROLE_COACREDITED, "label": "Coacreditado"},
     {"value": ROLE_GUARANTEE, "label": "Aval"},
     {"value": ROLE_COLLATERAL, "label": "Garante Prendiario"},
@@ -119,7 +122,8 @@ class SoCreditRequestGuarantee {
       this.employmentStatus,this.company,this.economicActivity,this.yearsEmployment,
       this.creditCards,this.rent,this.creditAutomotive,this.creditFurniture,this.personalLoans,
       this.verifiableIncome, this.soCustomer,this.identification,this.proofIncome,
-      this.fiscalSituation,this.verifiableIncomeFile,this.declaratory);
+      this.fiscalSituation,this.verifiableIncomeFile,this.declaratory, this.identificationBack,
+      this.identityVideo, this.proofAddress);
 
   factory SoCreditRequestGuarantee.fromJson(Map<String, dynamic> json){
     return SoCreditRequestGuarantee(
@@ -172,12 +176,16 @@ class SoCreditRequestGuarantee {
         json['soCustomer']['maritalStatus'] as String,
         json['soCustomer']['mobile'] as String,
         json['soCustomer']['maritalRegime'] as String,
+        json['soCustomer']['spouseName'] as String,
           ),
       json['identification'] as String,
       json['proofIncome'] as String,
       json['fiscalSituation'] as String,
       json['verifiableIncomeFile'] as String,
       json['declaratory'] as String,
+      json['identificationBack'] as String,
+      json['identityVideo'] as String,
+      json['proofAddress'] as String,
     );
   }
 
@@ -211,6 +219,9 @@ class SoCreditRequestGuarantee {
       'fiscalSituation' : fiscalSituation,
       'verifiableIncomeFile' : verifiableIncomeFile,
       'declaratory' : declaratory,
+      'identificationBack' : identificationBack,
+      'identityVideo' : identityVideo,
+      'proofAddress' : proofAddress,
     };
   }
 }

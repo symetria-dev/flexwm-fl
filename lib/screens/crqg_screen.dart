@@ -34,7 +34,7 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
   final _formKeyRolRelation = GlobalKey<FormState>();
   //Se crean controllers para asignar valores en campos generales de aval
   late String role = SoCreditRequestGuarantee.ROLE_COACREDITED;
-  late String relation = SoCreditRequestGuarantee.RELATION_ACCREDITED;
+  late String relation = SoCreditRequestGuarantee.RELATION_SELF;
   final textFisrtNameCntrll = TextEditingController();
   final textFatherLastNameCntrll = TextEditingController();
   final textMotherLastNameCntrll = TextEditingController();
@@ -52,7 +52,7 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
     idCustomer = params.idLoggedUser;
     idCreditRequest = widget.forceFilter;
     role = SoCreditRequestGuarantee.ROLE_COACREDITED;
-    relation = SoCreditRequestGuarantee.RELATION_ACCREDITED;
+    relation = SoCreditRequestGuarantee.RELATION_SELF;
     regimenMarital = SoCreditRequestGuarantee.REGIMEN_CONJUGAL_SOCIETY;
     fetchSoCreditRequestGuarantee(idCreditRequest);
     fetchSoCustomers();
@@ -95,6 +95,9 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
             _creditRequestGuarantee[index].fiscalSituation,
             _creditRequestGuarantee[index].verifiableIncomeFile,
             _creditRequestGuarantee[index].declaratory,
+            _creditRequestGuarantee[index].identificationBack,
+            _creditRequestGuarantee[index].identityVideo,
+            _creditRequestGuarantee[index].proofAddress,
           );
           return Slidable(
             endActionPane:
@@ -123,7 +126,6 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
                   borderRadius: BorderRadius.circular(25)),
               child: ListTile(
                 onTap: () {
-                  if(nextSoCreditRequest.soCustomer.id != params.idLoggedUser){
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -131,7 +133,6 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
                               soCreditRequestGuarantee: nextSoCreditRequest,
                               creditRequestId: idCreditRequest),
                         ));
-                  }
                 },
                 leading: const Icon(
                   Icons.assignment_ind,
@@ -265,6 +266,7 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
                                     _soCustomerList[index].maritalStatus,
                                     _soCustomerList[index].mobile,
                                     _soCustomerList[index].maritalRegimen,
+                                    _soCustomerList[index].spouseName,
                               );
                               return Slidable(
                                 endActionPane: ActionPane(

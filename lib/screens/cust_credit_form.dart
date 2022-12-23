@@ -5,7 +5,6 @@ import 'package:flexwm/main.dart';
 import 'package:flexwm/models/crqd.dart';
 import 'package:flexwm/models/crqg.dart';
 import 'package:flexwm/models/crqs.dart';
-import 'package:flexwm/models/cude.dart';
 import 'package:flexwm/routes/routes.dart';
 import 'package:flexwm/screens/chat_prueba.dart';
 import 'package:flexwm/screens/crqg_form.dart';
@@ -29,7 +28,9 @@ import '../routes/app_routes.dart';
 import '../widgets/card_stepcontainer.dart';
 import '../widgets/dropdown_widget.dart';
 import '../widgets/upload_file_widget.dart';
+import '../widgets/upload_id_photo_widget.dart';
 import 'cust_crqs_form.dart';
+import 'info_cqrs_screen.dart';
 
 
 class CustDataForm extends StatefulWidget {
@@ -45,8 +46,6 @@ class _CustDataFormState extends State<CustDataForm>{
   late int creditRequestId = 0;
   //objeto para los datos de la solicitud del credito
   SoCreditRequest soCreditRequest = SoCreditRequest.empty();
-  //objeto para los datos de detalle del cliente
-  SoCustDetail soCustomerDetail = SoCustDetail.empty();
   //objeto para los datos de detalle solicitud de crédito
   SoCreditRequestDetail soCreditRequestDetail = SoCreditRequestDetail.empty();
   //objeto para los datis de perfil de crédito
@@ -56,13 +55,11 @@ class _CustDataFormState extends State<CustDataForm>{
 
   //controllers campos step2
   final textMontoCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
-  late String creditDestiny = '';
+  late String creditDestiny = 'D';
   int monthSelected = 0;
   int deadLine = 0;
   final textPagoMonthCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
-  int currencyId = 0;
   int creditTypeId = 0;
-  int creditProfileId = 0;
   //controllers campos step 3
   final textEducationalInstitutionCntrll = TextEditingController();
   late String institutionType = '';
@@ -128,11 +125,13 @@ class _CustDataFormState extends State<CustDataForm>{
   double _maxAmount = 0.0;
 //check para revisión buro de crédito
   bool isSwitched = false;
+  //codigo solicitud
+  String codeCrqs = '';
+  //paso en el que se encuentra la solicitud
+  int stepRealized = 0;
+  // mensaje recibidos
+  bool messages = false;
 
-  //docuemntos
-  GlobalKey<uploadFile> _keyUploadIdentification = GlobalKey();
-  GlobalKey<uploadFile> _keyUploadIdentificationBack= GlobalKey();
-  GlobalKey<uploadFile> _keyUploadProofAddress = GlobalKey();
   @override
   void initState(){
     //Se obtiene el cliente que se encuentra loggeado
@@ -148,79 +147,107 @@ class _CustDataFormState extends State<CustDataForm>{
       }
     });
     super.initState();
-    institutionType = SoCreditRequest.INSTITUTION_TYPE_NATIONAL;
+    institutionType = SoCreditRequestDetail.INSTITUTION_TYPE_NATIONAL;
     //Se inicializa step 2 y 4
     if(widget.creditRequest.id > 0){
-      setState(() => _activeStepIndex = 1);
+      getData();
+
       soCreditRequest = widget.creditRequest;
+      if(soCreditRequest.soWFlow.userMsgs){
+        setState(() {
+          messages = true;
+        });
+      }
+      if(soCreditRequest.creditBureau > 0 && soCreditRequest.destiny != ''){
+        setState(() {
+          _activeStepIndex = 1;
+          stepRealized = 1;
+        });
+      }
+
+      codeCrqs = soCreditRequest.code;
       fiscalRegime = soCreditRequest.fiscalRegime;
-      currencyId = soCreditRequest.currencyId;
-      creditDestiny = soCreditRequest.destiny;
+      if(soCreditRequest.destiny != ''){
+        creditDestiny = soCreditRequest.destiny;
+      }
       creditTypeId = soCreditRequest.creditTypeId;
       textMontoCntrll.updateValue(soCreditRequest.amountRequired);
-      monthSelected = soCreditRequest.deadlineRequired;
+      deadLine = soCreditRequest.deadlineRequired;
       textPagoMonthCntrll.updateValue(soCreditRequest.monthlyPayment);
-      creditProfileId = soCreditRequest.creditProfileId;
-      if(soCreditRequest.creditBureau == 1) isSwitched = true;
-      fetchCreditRequest(widget.creditRequest.id.toString()).then((value) {
-        if(value){
-          if(soCreditRequest.educationalInstitution != '' &&
-              soCreditRequest.educationalInstitutionType != '' &&
-              soCreditRequest.dateStartInstitution != '' &&
-              soCreditRequest.dateEndInstitution != ''){
-            setState(() => _activeStepIndex = 2);
-          }
-          if(soCreditRequest.educationalInstitution != '' ) textEducationalInstitutionCntrll.text = soCreditRequest.educationalInstitution;
-          if(soCreditRequest.educationalInstitutionType != '' ) institutionType = soCreditRequest.educationalInstitutionType;
-          if(soCreditRequest.dateStartInstitution != '' ) textDateStartCntrll.text = soCreditRequest.dateStartInstitution;
-          if(soCreditRequest.dateEndInstitution != '' ) textDateEndCntrll.text = soCreditRequest.dateEndInstitution;
-          if(soCreditRequest.educationalInstitutionType == SoCreditRequest.INSTITUTION_TYPE_INTERNATIONAL){
-            setState(() {
-              institutionType = soCreditRequest.educationalInstitutionType;
-            });
-          }
-        }
-      });
 
-      fetchCustomerDetail(idCustomer.toString()).then((value) {
-        if(value){
-          if( textInstitutionCntrll.text != '' &&
-              textLocationCntrll.text != '' &&
-              textPeriodCntrll.text != '' &&
-              textDegreeCntrll.text != ''){
-            setState(() => _activeStepIndex = 3);
-          }
-          textInstitutionCntrll.text = soCustomerDetail.institution;
-          textLocationCntrll.text = soCustomerDetail.location;
-          textPeriodCntrll.text = soCustomerDetail.period;
-          textDegreeCntrll.text = soCustomerDetail.degreeObtained;
-          idCustomer = soCustomerDetail.customerId;
-        }
-      });
+      if(soCreditRequest.creditBureau == 1) isSwitched = true;
+
       fetchCreditRequestDetail(soCreditRequest.id.toString()).then((value) {
         if(value){
-          setState((){creditRequestDetailId = soCreditRequestDetail.id;});
-          updateDataCrqs();
-          if(soCreditRequestDetail.visaFees > 0 ) visaFees = true;
-          if(soCreditRequestDetail.planeTickets > 0 ) planeTickets = true;
-          if(soCreditRequestDetail.programCost > 0.0 ) textProgramCostCntrll.updateValue(soCreditRequestDetail.programCost);
-          if(soCreditRequestDetail.maintenance > 0.0 ) textMaintenanceCntrll.updateValue(soCreditRequestDetail.maintenance);
-          textStudiesPlaceCntrll.text = soCreditRequestDetail.studiesPlace;
-          if(soCreditRequestDetail.engagementAgencyId > 0) engagementAgencyId = soCreditRequestDetail.engagementAgencyId;
-          textEngagementSchollCntrll.text = soCreditRequestDetail.engagementSchool;
-          textDateProbablyTravelCntrll.text = soCreditRequestDetail.dateProbablyTravel;
-          textEducationalProgramCntrll.text = soCreditRequestDetail.educationalProgram;
-          countryId = soCreditRequestDetail.countryId;
-          textCityCntrll.text = soCreditRequestDetail.city;
+            if(soCreditRequestDetail.educationalInstitution != '' &&
+                soCreditRequestDetail.educationalInstitutionType != '' &&
+                soCreditRequestDetail.dateStartInstitution != '' &&
+                soCreditRequestDetail.dateEndInstitution != ''){
+              if(soCreditRequest.creditBureau > 0){
+                if( soCreditRequestDetail.institution != '' &&
+                    soCreditRequestDetail.location != '' &&
+                    soCreditRequestDetail.period != '' &&
+                    soCreditRequestDetail.degreeObtained != '' &&
+                    stepRealized >=1){
+                  setState(() {
+                    _activeStepIndex = 3;
+                    stepRealized = 3;
+                  });
+                  if(soCreditRequestDetail.educationalInstitutionType == SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL){
+                    setState(() {
+                      institutionType = soCreditRequestDetail.educationalInstitutionType;
+                        _currentTabIndex = 4;
+                    });
+                  }else{
+                    setState((){
+                      _currentTabIndex = 3;
+                    });
+                  }
+                }else{
+                  setState(() {
+                    _activeStepIndex = 2;
+                    stepRealized = 2;
+                  });
+                }
+              }else{
+                setState(() {
+                  _activeStepIndex = 0;
+                  stepRealized = 0;
+                });
+               Fluttertoast.showToast(msg: 'Favor de confirmar buro de crédito.');
+              }
+
+              textInstitutionCntrll.text = soCreditRequestDetail.institution;
+              textLocationCntrll.text = soCreditRequestDetail.location;
+              textPeriodCntrll.text = soCreditRequestDetail.period;
+              textDegreeCntrll.text = soCreditRequestDetail.degreeObtained;
+            }
+            if(soCreditRequestDetail.educationalInstitution != '' ) textEducationalInstitutionCntrll.text = soCreditRequestDetail.educationalInstitution;
+            if(soCreditRequestDetail.educationalInstitutionType != '' ) institutionType = soCreditRequestDetail.educationalInstitutionType;
+            if(soCreditRequestDetail.dateStartInstitution != '' ) textDateStartCntrll.text = soCreditRequestDetail.dateStartInstitution.replaceAll(' 00:00', '');
+            if(soCreditRequestDetail.dateEndInstitution != '' ) textDateEndCntrll.text = soCreditRequestDetail.dateEndInstitution.replaceAll(' 00:00', '');
+            setState((){creditRequestDetailId = soCreditRequestDetail.id;});
+            // updateDataCrqs();
+            if(soCreditRequestDetail.visaFees > 0 ) visaFees = true;
+            if(soCreditRequestDetail.planeTickets > 0 ) planeTickets = true;
+            if(soCreditRequestDetail.programCost > 0.0 ) textProgramCostCntrll.updateValue(soCreditRequestDetail.programCost);
+            if(soCreditRequestDetail.maintenance > 0.0 ) textMaintenanceCntrll.updateValue(soCreditRequestDetail.maintenance);
+            textStudiesPlaceCntrll.text = soCreditRequestDetail.studiesPlace;
+            if(soCreditRequestDetail.engagementAgencyId > 0) engagementAgencyId = soCreditRequestDetail.engagementAgencyId;
+            textEngagementSchollCntrll.text = soCreditRequestDetail.engagementSchool;
+            textDateProbablyTravelCntrll.text = soCreditRequestDetail.dateProbablyTravel;
+            textEducationalProgramCntrll.text = soCreditRequestDetail.educationalProgram;
+            countryId = soCreditRequestDetail.countryId;
+            textCityCntrll.text = soCreditRequestDetail.city;
         }
       });
       //step 3
-      rolePreliminar = SoCreditRequestGuarantee.ROLE_ACREDITED_HOLDER;
-      relation = SoCreditRequestGuarantee.RELATION_ACCREDITED;
+      rolePreliminar = SoCreditRequestGuarantee.ROLE_ACREDITED;
+      relation = SoCreditRequestGuarantee.RELATION_SELF;
     }else{
       creditDestiny = 'D';
-      rolePreliminar = SoCreditRequestGuarantee.ROLE_ACREDITED_HOLDER;
-      relation = SoCreditRequestGuarantee.RELATION_ACCREDITED;
+      rolePreliminar = SoCreditRequestGuarantee.ROLE_ACREDITED;
+      relation = SoCreditRequestGuarantee.RELATION_SELF;
     }
   }
   @override
@@ -236,7 +263,7 @@ class _CustDataFormState extends State<CustDataForm>{
     //lista de widgets para selección de body dependiendo tab seleccionado
     final _crqsTabPages = <Widget>[
       formCreditRequest(stepList()),
-      if(institutionType == SoCreditRequest.INSTITUTION_TYPE_INTERNATIONAL)
+      if(institutionType == SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL)
       AuthListBackground(child: formCrqd()),
       AuthListBackground(child: Padding(
         padding: const EdgeInsets.only(top: 50),
@@ -246,17 +273,38 @@ class _CustDataFormState extends State<CustDataForm>{
         padding: const EdgeInsets.only(top: 50),
         child: ChatPrueba(forceFilter: wflowId),
       ),),
+      AuthListBackground(child: CreditRequestInfoScreen(soCreditRequest: soCreditRequest,
+        step: stepRealized)
+      ),
     ];
 
     //Iconos para barra de navegación inferior
     final _crqsBottmonNavBarItems = <BottomNavigationBarItem>[
       const BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_sharp), label: 'Solicitud'),
-      if(institutionType == SoCreditRequest.INSTITUTION_TYPE_INTERNATIONAL)
+      if(institutionType == SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL)
         const BottomNavigationBarItem(icon: Icon(Icons.airplanemode_active), label: 'Detalles'),
       const BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Avales'),
-      const BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
+      BottomNavigationBarItem(
+          icon: Stack(
+            children: [
+              const Icon(Icons.chat),
+              if(messages)
+              const Positioned(  // draw a red marble
+                top: 0.0,
+                right: 0.0,
+                child: Icon(Icons.brightness_1, size: 12.0,
+                    color: Colors.redAccent),
+              ),
+            ],
+          ),
+          // Icon(Icons.chat),
+          label: 'Chat'),
+      const BottomNavigationBarItem(icon: Icon(Icons.assignment), label: 'Info'),
     ];
 
+    updateCrqsInfo(){
+
+    }
     //Bottom navigation bar
     final bottomNavBar = BottomNavigationBar(
       items: _crqsBottmonNavBarItems,
@@ -265,11 +313,34 @@ class _CustDataFormState extends State<CustDataForm>{
       type: BottomNavigationBarType.fixed,
       onTap: (int index) {
         if(soCreditRequest.id > 0){
-          setState(() {
-            creditRequestDetailId = soCreditRequestDetail.id;
-            wflowId = soCreditRequest.wFlowId;
-            _currentTabIndex = index;
-          });
+          if(soCreditRequest.status == SoCreditRequest.STATUS_EDITION){
+            setState(() {
+              creditRequestDetailId = soCreditRequestDetail.id;
+              wflowId = soCreditRequest.wFlowId;
+              _currentTabIndex = index;
+            });
+          }else{
+            if(index == _crqsBottmonNavBarItems.length-2 ||
+                index == _crqsBottmonNavBarItems.length-1){
+              setState(() {
+                creditRequestDetailId = soCreditRequestDetail.id;
+                wflowId = soCreditRequest.wFlowId;
+                _currentTabIndex = index;
+              });
+              if(index == _crqsBottmonNavBarItems.length-2){
+                setState(() {
+                  messages = false;
+                });
+              }
+            }else{
+              setState(() {
+                creditRequestDetailId = soCreditRequestDetail.id;
+                wflowId = soCreditRequest.wFlowId;
+                _currentTabIndex = _crqsBottmonNavBarItems.length-1;
+              });
+              Fluttertoast.showToast(msg: 'Su solicitud se encuentra en revisión, ya no puede editar su información.');
+            }
+          }
         }else{
           Fluttertoast.showToast(msg: 'Complete el paso 1 para poder continuar con su registro.');
         }
@@ -277,7 +348,7 @@ class _CustDataFormState extends State<CustDataForm>{
     );
 
    return Scaffold(
-     appBar: AppBarStyle.authAppBarFlex(title: 'Solicitud de Crédito'),
+     appBar: AppBarStyle.authAppBarFlex(title: 'Solicitud de Crédito $codeCrqs'),
      body: AuthFormBackground(
        child: _crqsTabPages[_currentTabIndex]
      ),
@@ -306,11 +377,13 @@ class _CustDataFormState extends State<CustDataForm>{
         if(_formKeyCrqs.currentState!.validate()){
           if(deadLine <= _periods){
             addCreditRequest().then((value) {
-              if(value){setState(() {
-                addCreditRequestDetail().then((value) => updateDataCrqs());
-                _activeStepIndex += 1;
-                sendingData = false;
-              });
+              if(value){
+                setState(() {
+                  // fetchCreditRequestDetail(soCreditRequest.id.toString()).then((value) => updateDataCrqs());
+                  _activeStepIndex += 1;
+                  stepRealized = 1;
+                  sendingData = false;
+                });
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Datos actualizados correctamente')),
               );
@@ -333,11 +406,12 @@ class _CustDataFormState extends State<CustDataForm>{
       case 1:
         if(_formKeyCrqs2.currentState!.validate()){
           //Se guardan datos de solicitud de crédito
-          addCreditRequest().then((value) {
+          addCreditRequestDetail().then((value) {
             if(value){
               setState(() {
                 sendingData = false;
                 _activeStepIndex += 1;
+                stepRealized = 2;
                 });
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Datos actualizados correctamente')),
@@ -359,7 +433,7 @@ class _CustDataFormState extends State<CustDataForm>{
         }
       case 2:
         if(_formKeyCude.currentState!.validate()){
-           addCustomerDetail().then((value) {
+           addCreditRequestDetail().then((value) {
             if(value){
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Datos actualizados correctamente')),
@@ -367,6 +441,7 @@ class _CustDataFormState extends State<CustDataForm>{
               setState(() {
                 sendingData = false;
                 _activeStepIndex += 1;
+                stepRealized = 3;
               });
             }else{sendingData = false;return false;}
           });setState(() {
@@ -455,17 +530,6 @@ class _CustDataFormState extends State<CustDataForm>{
                   const SizedBox( height: 10 ),
                   const Text('Solicitud de Credito', style: TextStyle(color: Colors.grey, fontSize: 20)),*/
                   const SizedBox( height: 10 ),
-                  DropdownWidget(
-                    callback: (String id) {
-                      setState(() {
-                        currencyId = int.parse(id);
-                      });
-                    },
-                    programCode: 'CURE',
-                    label: 'Divisa',
-                    dropdownValue: currencyId.toString(),
-                  ),
-                  const SizedBox( height: 10 ),
                   Row(
                     children: [
                       const Expanded(
@@ -520,8 +584,8 @@ class _CustDataFormState extends State<CustDataForm>{
                     controller: textMontoCntrll,
                     validator: ( value ) {
                       final intNumber = double.tryParse(value!.replaceAll(',', ''));
-                      return (intNumber != null && intNumber > _minAmount &&
-                      intNumber < _maxAmount)
+                      return (intNumber != null && intNumber >= _minAmount &&
+                      intNumber <= _maxAmount)
                           ? null
                           : 'Lo sentimos, el plan de crédito seleccionado requiere\n'
                           'un monto mínimo de $_minAmount y máximo $_maxAmount';
@@ -549,7 +613,7 @@ class _CustDataFormState extends State<CustDataForm>{
                           : 'Por favor indique su pago mensual deseado';
                     },
                   ),
-                  const SizedBox( height: 10 ),
+                 /* const SizedBox( height: 10 ),
                   DropdownWidget(
                     callback: (String id) {
                       setState(() {
@@ -559,7 +623,7 @@ class _CustDataFormState extends State<CustDataForm>{
                     programCode: 'CRPF',
                     label: 'Perfiles de Crédito',
                     dropdownValue: soCreditRequest.creditProfileId.toString(),
-                  ),
+                  ),*/
                   const SizedBox( height: 10 ),
                   Row(
                     children: [
@@ -651,7 +715,7 @@ class _CustDataFormState extends State<CustDataForm>{
                   }else{
                     // Muestra mensaje
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Contraseña Inconrrecta')),
+                      const SnackBar(content: Text('Contraseña Incorrecta')),
                     );
                     Navigator.pop(context);
                   }
@@ -675,7 +739,7 @@ class _CustDataFormState extends State<CustDataForm>{
             label: Text(_chipsList[i].toString()),
             labelStyle: const TextStyle(color: Colors.white),
             backgroundColor: Colors.blueGrey,
-            selected: monthSelected == i,
+            selected: deadLine == _chipsList[i],
           onSelected: (bool value){
               if(_chipsList[i] <= _periods){
                 setState((){
@@ -733,7 +797,7 @@ class _CustDataFormState extends State<CustDataForm>{
                     child: ButtonTheme(
                       child: DropdownButton(
                         value: institutionType,
-                        items: SoCreditRequest.getInstitutionType.map((e) {
+                        items: SoCreditRequestDetail.getInstitutionType.map((e) {
                           return DropdownMenuItem(
                             child: Text(e['label']),
                             value: e['value'],
@@ -889,36 +953,26 @@ class _CustDataFormState extends State<CustDataForm>{
                       },
                 ),
                 const SizedBox( height: 10 ),
-                const Text("Documentos",
+               /* const Text("Documentos",
                   style: TextStyle(color: Colors.grey,fontSize: 20),
                 ),
                 const SizedBox(height: 10,),
-                UploadFile(
+                UploadIdPhoto(
                   key: _keyUploadIdentification,
-                  initialRuta: soCreditRequestDetail.identification,
-                  programCode: SoCreditRequestDetail.programCode,
-                  fielName: 'crqd_identification',
-                  label: 'Identificacion parte frontal',
-                  id: creditRequestDetailId.toString(),
-                  callBack: updateDataCrqs,),
-                const SizedBox(height: 10,),
-                UploadFile(
+                    initialRuta: soCreditRequestDetail.identification,
+                    programCode: SoCreditRequestDetail.programCode,
+                    fielName: 'crqd_identification',
+                    id: soCreditRequestDetail.id.toString(),
+                    label: 'Identificación parte frontal',
+                callBack: updateDataCrqs,),
+                UploadIdPhoto(
                   key: _keyUploadIdentificationBack,
                   initialRuta: soCreditRequestDetail.identificationBack,
                   programCode: SoCreditRequestDetail.programCode,
                   fielName: 'crqd_identificationback',
-                  label: 'Identificacion parte trasera',
-                  id: creditRequestDetailId.toString(),
-                  callBack: updateDataCrqs,),
-                const SizedBox(height: 10,),
-                UploadFile(
-                  key: _keyUploadProofAddress,
-                  initialRuta: soCreditRequestDetail.proofAddress,
-                  programCode: SoCreditRequestDetail.programCode,
-                  fielName: 'crqd_proofaddress',
-                  label: 'Comprobante de Domicilio',
-                  id: creditRequestDetailId.toString(),
-                  callBack: updateDataCrqs,),
+                  label: 'Identificación parte trasera',
+                  id: soCreditRequestDetail.id.toString(),
+                  callBack: updateDataCrqs,),*/
                 if(sendingData)
                   const LinearProgressIndicator(),
                 const SizedBox(height: 30,)
@@ -928,17 +982,19 @@ class _CustDataFormState extends State<CustDataForm>{
     );
   }
 
-  updateDataCrqs(){
+/*  updateDataCrqs(){
      fetchCreditRequestDetail(soCreditRequest.id.toString()).then((value) {
        _keyUploadIdentification.currentState?.updateData(soCreditRequestDetail.identification);
        _keyUploadIdentificationBack.currentState?.updateData(soCreditRequestDetail.identificationBack);
        _keyUploadProofAddress.currentState?.updateData(soCreditRequestDetail.proofAddress);
+       _keyUploadIdentityVideo.currentState?.updateData(soCreditRequestDetail.identityVideo);
 
-       _keyUploadIdentification.currentState?.updateId(creditRequestDetailId.toString());
-       _keyUploadIdentificationBack.currentState?.updateId(creditRequestDetailId.toString());
-       _keyUploadProofAddress.currentState?.updateId(creditRequestDetailId.toString());
+       _keyUploadIdentification.currentState?.updateId(soCreditRequestDetail.id.toString());
+       _keyUploadIdentificationBack.currentState?.updateId(soCreditRequestDetail.id.toString());
+       _keyUploadProofAddress.currentState?.updateId(soCreditRequestDetail.id.toString());
+       _keyUploadIdentityVideo.currentState?.updateId(soCreditRequestDetail.id.toString());
      });
-  }
+  }*/
 
   Widget formCrqd(){
     return SingleChildScrollView(
@@ -1251,7 +1307,7 @@ class _CustDataFormState extends State<CustDataForm>{
     );
   }
 
-  //Petición de datos de detalles del cliente parametro id del cliente
+  /*//Petición de datos de detalles del cliente parametro id del cliente
   Future<bool> fetchCustomerDetail(String id) async {
     final response = await http.get(Uri.parse(
         params.getAppUrl(params.instance) +
@@ -1270,7 +1326,7 @@ class _CustDataFormState extends State<CustDataForm>{
     //Si no hay errores se guarda el obejto devuelto
     soCustomerDetail = SoCustDetail.fromJson(jsonDecode(response.body));
     return true;
-  }
+  }*/
 
   //Petición de datos de detalles de solicitud de crédito parametro id del la solicitud
   Future<bool> fetchCreditRequestDetail(String id) async {
@@ -1289,8 +1345,8 @@ class _CustDataFormState extends State<CustDataForm>{
       return false;
     }
     //Si no hay errores se guarda el obejto devuelto
-      soCreditRequestDetail = SoCreditRequestDetail.fromJson(jsonDecode(response.body));
     setState((){
+      soCreditRequestDetail = SoCreditRequestDetail.fromJson(jsonDecode(response.body));
       creditRequestDetailId = soCreditRequestDetail.id;
     });
     return true;
@@ -1311,8 +1367,11 @@ class _CustDataFormState extends State<CustDataForm>{
       // Navigator.pushNamed(context, AppRoutes.initialRoute);
       return false;
     }
-    //Si no hay errores se guarda el obejto devuelto
-    soCreditRequestGuarantee = SoCreditRequestGuarantee.fromJson(jsonDecode(response.body));
+    setState((){
+      //Si no hay errores se guarda el obejto devuelto
+      soCreditRequestGuarantee = SoCreditRequestGuarantee.fromJson(jsonDecode(response.body));
+    });
+
     return true;
   }
 
@@ -1323,14 +1382,11 @@ class _CustDataFormState extends State<CustDataForm>{
     soCreditRequest.destiny = creditDestiny;
     soCreditRequest.deadlineRequired = deadLine;
     soCreditRequest.monthlyPayment = textPagoMonthCntrll.numberValue;
-    soCreditRequest.currencyId = currencyId;
     soCreditRequest.creditTypeId = creditTypeId;
-    soCreditRequest.creditProfileId = creditProfileId;
-    soCreditRequest.educationalInstitution = textEducationalInstitutionCntrll.text;
-    soCreditRequest.educationalInstitutionType = institutionType;
-    soCreditRequest.dateStartInstitution = textDateStartCntrll.text;
-    soCreditRequest.dateEndInstitution = textDateEndCntrll.text;
     soCreditRequest.fiscalRegime = fiscalRegime;
+    if(soCreditRequest.status == ''){
+      soCreditRequest.status = SoCreditRequest.STATUS_EDITION;
+    }
     if(isSwitched){
       soCreditRequest.creditBureau = 1;
     }else{
@@ -1354,11 +1410,13 @@ class _CustDataFormState extends State<CustDataForm>{
     );
 
     if (response.statusCode == params.servletResponseScOk) {
-
+      setState((){
       // Si fue exitoso obtiene la respuesta
         soCreditRequest = SoCreditRequest.fromJson(jsonDecode(response.body));
         fetchCreditRequest(soCreditRequest.id.toString());
+        codeCrqs = soCreditRequest.code;
         fetchCreditRequestDetail(soCreditRequest.id.toString());
+    });
       // Muestra mensaje
      /* ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Datos actualizados correctamente')),
@@ -1366,7 +1424,6 @@ class _CustDataFormState extends State<CustDataForm>{
       return true;
     } else {
       errorMsg = response.body.toString();
-      print(errorMsg);
       // Error al guardar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error ${response.body}')),
@@ -1393,14 +1450,14 @@ class _CustDataFormState extends State<CustDataForm>{
     }
     //Si no hay errores se guarda el obejto devuelto
 
-    soCreditRequest= SoCreditRequest.fromJson(jsonDecode(response.body));
     setState((){
+    soCreditRequest= SoCreditRequest.fromJson(jsonDecode(response.body));
       wflowId = soCreditRequest.wFlowId;
     });
     return true;
   }
 
-  // Actualiza el customer en el servidor
+  /*// Actualiza el customer en el servidor
   Future<bool> addCustomerDetail() async {
     soCustomerDetail.institution = textInstitutionCntrll.text;
     soCustomerDetail.location = textLocationCntrll.text;
@@ -1440,14 +1497,18 @@ class _CustDataFormState extends State<CustDataForm>{
       );
       return false;
     }
-  }
+  }*/
 
   // Actualiza la solicitud de credito detalle en el servidor
   Future<bool> addCreditRequestDetail() async {
     soCreditRequestDetail.creditRequestId = soCreditRequest.id;
+    soCreditRequestDetail.educationalInstitution = textEducationalInstitutionCntrll.text;
+    soCreditRequestDetail.educationalInstitutionType = institutionType;
+    soCreditRequestDetail.dateStartInstitution = textDateStartCntrll.text;
+    soCreditRequestDetail.dateEndInstitution = textDateEndCntrll.text;
     // soCreditRequestDetail.verifiableIncome = verifiableIncome;
     //si es institución internacional
-    if(institutionType != SoCreditRequest.INSTITUTION_TYPE_INTERNATIONAL){
+    if(institutionType != SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL){
       soCreditRequestDetail.visaFees = 0;
       soCreditRequestDetail.planeTickets = 0;
       soCreditRequestDetail.programCost = 0;
@@ -1477,6 +1538,10 @@ class _CustDataFormState extends State<CustDataForm>{
       soCreditRequestDetail.countryId = countryId;
       soCreditRequestDetail.city = textCityCntrll.text;
     }
+    soCreditRequestDetail.institution = textInstitutionCntrll.text;
+    soCreditRequestDetail.location = textLocationCntrll.text;
+    soCreditRequestDetail.period = textPeriodCntrll.text;
+    soCreditRequestDetail.degreeObtained = textDegreeCntrll.text;
 
     // Envia la sesion como Cookie, con el nombre en UpperCase
     final response = await http.post(
@@ -1494,9 +1559,9 @@ class _CustDataFormState extends State<CustDataForm>{
 
     if (response.statusCode == params.servletResponseScOk) {
 
+      setState(() {
       // Si fue exitoso obtiene la respuesta
       soCreditRequestDetail = SoCreditRequestDetail.fromJson(jsonDecode(response.body));
-      setState(() {
         creditRequestDetailId = soCreditRequestDetail.id;
       });
       // Muestra mensaje
@@ -1567,8 +1632,41 @@ class _CustDataFormState extends State<CustDataForm>{
       return false;
     }
     //Si no hay errores se guarda el obejto devuelto
-    soCustomer = SoCustomer.fromJson(jsonDecode(response.body));
+    setState((){
+      soCustomer = SoCustomer.fromJson(jsonDecode(response.body));
+    });
+
     return true;
+  }
+
+  Future getData() async {
+    late List dataList = [];
+    final response = await http.post(
+        Uri.parse(params.getAppUrl(params.instance) +
+            'dropdownlist;' +
+            params.jSessionIdQuery),
+        headers: <String, String>{
+          'programCode': 'CRTY',
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Access-Control-Allow-Origin': '*',
+          'Cookie':
+          params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
+        },
+        body: json.encode(''));
+
+
+    setState(() {
+      dataList = json.decode(response.body);
+    });
+    for (int i = 0; i < dataList.length; i++) {
+      if (int.parse(dataList[i]['id'].toString()) == widget.creditRequest.creditTypeId) {
+        setState((){
+          _periods = dataList[i]['periods'];
+          _minAmount = dataList[i]['minAmount'];
+          _maxAmount = dataList[i]['maxAmount'];
+        });
+      }
+    }
   }
 }
 

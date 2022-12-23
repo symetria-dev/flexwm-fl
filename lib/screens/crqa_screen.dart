@@ -24,7 +24,7 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
 
   @override
   void initState(){
-    fetchSoCustomerAddress(widget.soCreditRequestGuarantee.id);
+    fetchSoCreditRequestAssets(widget.soCreditRequestGuarantee.id);
     super.initState();
   }
 
@@ -69,13 +69,13 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
                       foregroundColor: Colors.red,
                       label: 'Eliminar',
                       onPressed: (_){
-                        deleteSoCustomerAddress(_creditRequestAssetListData[index].id).
+                        deleteSoCustomerAssets(_creditRequestAssetListData[index].id).
                         then((value) {
                           if(value){
                             //Se actualiza la lista del subcatalogo
                             _creditRequestAssetListData.clear();
                             setState((){
-                              fetchSoCustomerAddress(widget.soCreditRequestGuarantee.id);
+                              fetchSoCreditRequestAssets(widget.soCreditRequestGuarantee.id);
                             });
                           }
                         });
@@ -89,16 +89,24 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
               ),
               child: ListTile(
                 onTap: (){
-                  _showModalBottomSheet(context, nextSoCrqa);
+                  if(nextSoCrqa.type == SoCreditRequestAsset.TYPE_PROPERTY){
+                    _showModalBottomSheet(context, nextSoCrqa, true);
+                  }else{
+                    _showModalBottomSheet(context, nextSoCrqa, false);
+                  }
                 },
-                title: Text(index.toString() + ':' + nextSoCrqa.type + ' ' + nextSoCrqa.status),
+                title: Text((index+1).toString() + ':' +
+                    SoCreditRequestAsset.getLabelType(nextSoCrqa.type) + ' ' +
+                    SoCreditRequestAsset.getLabelStatus(nextSoCrqa.status)),
                 subtitle: Text('Valor Actual: ' +
                     NumberFormat.currency(locale: 'es_MX',symbol: '\$').format(nextSoCrqa.value)),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.home),
-                    // IconButton(onPressed: () {utils.makePhoneCall(item.phone);}, icon: const Icon(Icons.phone)),
+                  children: [
+                    if(nextSoCrqa.type == SoCreditRequestAsset.TYPE_PROPERTY)
+                    const Icon(Icons.home_work_outlined),
+                    if(nextSoCrqa.type == SoCreditRequestAsset.TYPE_AUTO)
+                      const Icon(Icons.directions_car_filled_outlined),
                   ],
                 ),
               ),
@@ -109,7 +117,23 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
             children: [
               Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: RichText(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        iconSize: 35,
+                          onPressed: ()
+                          => _showModalBottomSheet(context, SoCreditRequestAsset.empty(), true),
+                          icon: const Icon(Icons.add_home_work_outlined, color: Colors.blue,)),
+                      IconButton(
+                          iconSize: 35,
+                          onPressed: ()
+                          => _showModalBottomSheet(context, SoCreditRequestAsset.empty(), false),
+                          icon: const Icon(Icons.car_rental_outlined, color: Colors.blue,))
+                    ],
+                  )
+              /*    RichText(
                     text: TextSpan(
                       children: [
                         TextSpan(
@@ -122,7 +146,7 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
                         )
                       ],
                     ),
-                  )
+                  )*/
               ),
               const SizedBox(height: 20,)
             ],
@@ -132,7 +156,7 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
     );
   }
 
-  void _showModalBottomSheet(BuildContext context,SoCreditRequestAsset soCrqa) {
+  void _showModalBottomSheet(BuildContext context,SoCreditRequestAsset soCrqa,bool typeInmueble) {
     showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
@@ -155,7 +179,10 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
                     ),
                   ),
                   const Divider(thickness: 2,color: Colors.blueGrey,),
-                  CreditRequestAssetsForm(soCreditRequestAsset: soCrqa, soCreditRequestGuarantee: widget.soCreditRequestGuarantee),
+                  CreditRequestAssetsForm(soCreditRequestAsset: soCrqa,
+                      soCreditRequestGuarantee: widget.soCreditRequestGuarantee,
+                      typeInmueble: typeInmueble,
+                  ),
                 ],
               ),
             ),
@@ -168,11 +195,11 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
     //Se actualiza la lista del subcatalogo
     _creditRequestAssetListData.clear();
     setState((){
-      fetchSoCustomerAddress(widget.soCreditRequestGuarantee.id);
+      fetchSoCreditRequestAssets(widget.soCreditRequestGuarantee.id);
     });
   }
 
-  Future<List<SoCreditRequestAsset>> fetchSoCustomerAddress(int forceFilter) async {
+  Future<List<SoCreditRequestAsset>> fetchSoCreditRequestAssets(int forceFilter) async {
     String url = params.getAppUrl(params.instance) +
         'restcrqa;' +
         params.jSessionIdQuery +
@@ -201,7 +228,7 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
         .toList();
   }
 
-  Future<bool> deleteSoCustomerAddress(int forceFilter) async {
+  Future<bool> deleteSoCustomerAssets(int forceFilter) async {
     String url = params.getAppUrl(params.instance) +
         'restcrqa;' +
         params.jSessionIdQuery +

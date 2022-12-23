@@ -47,8 +47,10 @@ Widget noListWidget(){
                     begin: AlignmentDirectional.topEnd,
                     end: AlignmentDirectional.bottomEnd,
                     colors: [
-                      Color.fromRGBO(225, 158, 110, 1),
+                      // Color.fromRGBO(0, 130, 146, 1),
+                      // Color.fromRGBO(112, 169, 179, 1.0)
                       Color.fromRGBO(243, 129, 48, 1),
+                      Color.fromRGBO(255, 209, 97, 1)
                     ]
                 )
             ),
@@ -145,8 +147,10 @@ class _PurpleBox extends StatelessWidget {
           bottomLeft: Radius.elliptical(200, 100)),
       gradient: LinearGradient(
       colors: [
-        Color.fromRGBO(0, 130, 146, 1),
-        Color.fromRGBO(112, 169, 179, 1.0)
+        // Color.fromRGBO(0, 130, 146, 1),
+        // Color.fromRGBO(112, 169, 179, 1.0)
+        Color.fromRGBO(243, 129, 48, 1),
+        Color.fromRGBO(255, 209, 97, 1)
       ]
     )
   );

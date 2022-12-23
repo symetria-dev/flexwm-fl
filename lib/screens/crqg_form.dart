@@ -22,6 +22,7 @@ import '../widgets/card_container.dart';
 import '../widgets/dropdown_widget.dart';
 import '../widgets/show_image.dart';
 import '../widgets/upload_file_widget.dart';
+import '../widgets/upload_id_photo_widget.dart';
 
 class CreditRequestGuarateeForm extends StatefulWidget{
   //Se recibe objeto para el fomulario
@@ -40,7 +41,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
   SoCustomer soCustomer = SoCustomer.empty();
   //Se crean controllers para asignar valores en campos generales de aval
   late String role = SoCreditRequestGuarantee.ROLE_COACREDITED;
-  late String relation = SoCreditRequestGuarantee.RELATION_ACCREDITED;
+  late String relation = SoCreditRequestGuarantee.RELATION_SELF;
   final textFisrtNameCntrll = TextEditingController();
   final textFatherLastNameCntrll = TextEditingController();
   final textMotherLastNameCntrll = TextEditingController();
@@ -76,6 +77,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
   final textCreditAutomotiveCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
   final textCreditFurniturCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
   final textPersonalLoansCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
+  final textSpouseNameCntrll = TextEditingController();
 
   //Keys para formularios de información financiera
   final _formAssets = GlobalKey<FormState>();
@@ -86,15 +88,20 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
   SoCreditRequestGuarantee soCreditRequestGuarantee = SoCreditRequestGuarantee.empty();
 
   //key para actualizar widget uploadFile despues de subir archivo
-  GlobalKey<uploadFile> _keyUploadIdentification = GlobalKey();
-  GlobalKey<uploadFile> _keyUploadProofIncome = GlobalKey();
-  GlobalKey<uploadFile> _keyUploadFiscalSituation = GlobalKey();
-  GlobalKey<uploadFile> _keyUploadVerifiableIncome = GlobalKey();
-  GlobalKey<uploadFile> _keyUploadDeclaratory = GlobalKey();
+  final GlobalKey<uploadIdPhoto> _keyUploadIdentification = GlobalKey();
+  final GlobalKey<uploadIdPhoto> _keyUploadIdentificationBack = GlobalKey();
+  final GlobalKey<uploadFile> _keyUploadProofIncome = GlobalKey();
+  final GlobalKey<uploadFile> _keyUploadFiscalSituation = GlobalKey();
+  final GlobalKey<uploadFile> _keyUploadVerifiableIncome = GlobalKey();
+  final GlobalKey<uploadFile> _keyUploadDeclaratory = GlobalKey();
+  final GlobalKey<uploadFile> _keyUploadProofAddress = GlobalKey();
+  final GlobalKey<uploadFile> _keyUploadIdentityVideo = GlobalKey();
   //indicador de aval creado
   bool avalCreated = false;
   //id aval
   int creditRequestGuaranteeId = 0;
+  //bandera para editar campos de aval
+  bool isSameGuarantee = false;
 
   @override
   void initState(){
@@ -102,11 +109,14 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
       creditRequestGuaranteeId = widget.soCreditRequestGuarantee.id;
       avalCreated = true;
       soCreditRequestGuarantee = widget.soCreditRequestGuarantee;
-      relation = soCreditRequestGuarantee.relation;
-      textEconomicDepCntrll.text = soCreditRequestGuarantee.economicDependents.toString();
+      if(soCreditRequestGuarantee.relation == SoCreditRequestGuarantee.RELATION_SELF){
+        isSameGuarantee = true;
+      }
+      if(soCreditRequestGuarantee.relation != '') relation = soCreditRequestGuarantee.relation;
+      // textEconomicDepCntrll.text = soCreditRequestGuarantee.economicDependents.toString();
       textTypeHousingCntrll.text = soCreditRequestGuarantee.typeHousing;
       textYearsResidenceCntrll.text = soCreditRequestGuarantee.yearsResidence.toString();
-      role = soCreditRequestGuarantee.role;
+      if(soCreditRequestGuarantee.role != '') role = soCreditRequestGuarantee.role;
       soCustomer = soCreditRequestGuarantee.soCustomer;
       textFisrtNameCntrll.text = soCreditRequestGuarantee.soCustomer.firstName;
       textFatherLastNameCntrll.text = soCreditRequestGuarantee.soCustomer.fatherLastName;
@@ -116,14 +126,13 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
       textEmailCntrll.text = soCreditRequestGuarantee.soCustomer.email;
       textRfcCntrll.text = soCreditRequestGuarantee.soCustomer.rfc;
       textCurpCntrll.text = soCreditRequestGuarantee.soCustomer.curp;
-
       if(soCreditRequestGuarantee.soCustomer.maritalStatus != '') {
         setState((){
           maritalStatus = soCreditRequestGuarantee.soCustomer.maritalStatus;
         });
       }
         if(soCreditRequestGuarantee.soCustomer.maritalRegimen != '') regimenMarital = soCreditRequestGuarantee.soCustomer.maritalRegimen;
-
+        if(soCreditRequestGuarantee.soCustomer.spouseName != '') textSpouseNameCntrll.text = soCreditRequestGuarantee.soCustomer.spouseName;
         if(soCreditRequestGuarantee.accountStatement > 0.0) textAccountStatementCntrll.updateValue(soCreditRequestGuarantee.accountStatement);
         if(soCreditRequestGuarantee.payrollReceipts > 0.0) textPayrollReceiptsCntrll.updateValue(soCreditRequestGuarantee.payrollReceipts);
         if(soCreditRequestGuarantee.typeHousing != '') textTypeHousingCntrll.text = soCreditRequestGuarantee.typeHousing;
@@ -142,8 +151,8 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
       }else{
       maritalStatus = SoCreditRequestGuarantee.STATUS_SINGLE;
       regimenMarital = SoCreditRequestGuarantee.REGIMEN_CONJUGAL_SOCIETY;
-      relation = SoCreditRequestGuarantee.RELATION_ACCREDITED;
-      role = SoCreditRequestGuarantee.ROLE_ACREDITED_HOLDER;
+      relation = SoCreditRequestGuarantee.RELATION_SELF;
+      role = SoCreditRequestGuarantee.ROLE_ACREDITED;
       soCreditRequestGuarantee.customerId = params.idLoggedUser;
       soCreditRequestGuarantee.creditRequestId = widget.creditRequestId;
     }
@@ -153,7 +162,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
   //navbar bottom
   int _currentTabIndex = 0;
   //titulos de cada tab
-  String title = 'Datos Generales';
+  String title = 'Aval';
   //indicador de envio de datos
   bool sendingData = false;
 
@@ -497,14 +506,22 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
             child: Form(
                 child:Column(
                   children: [
-                    UploadFile(
+                    UploadIdPhoto(
                       key: _keyUploadIdentification,
                       initialRuta: soCreditRequestGuarantee.identification,
                         programCode: SoCreditRequestGuarantee.programCode,
                         fielName: 'crqg_identification',
-                        label: 'ID Oficial',
+                        label: 'Identificación parte frontal',
                         id: soCreditRequestGuarantee.id.toString(),
                         callBack: updateDataCrqg,),
+                    UploadIdPhoto(
+                      key: _keyUploadIdentificationBack,
+                      initialRuta: soCreditRequestGuarantee.identificationBack,
+                      programCode: SoCreditRequestGuarantee.programCode,
+                      fielName: 'crqg_identificationback',
+                      label: 'Identificación parte trasera',
+                      id: soCreditRequestGuarantee.id.toString(),
+                      callBack: updateDataCrqg,),
                     UploadFile(
                       key: _keyUploadProofIncome,
                       initialRuta: soCreditRequestGuarantee.proofIncome,
@@ -538,6 +555,22 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         label: 'Declaratorias',
                         id: soCreditRequestGuarantee.id.toString(),
                       callBack: updateDataCrqg,),
+                    UploadFile(
+                      key: _keyUploadProofAddress,
+                      initialRuta: soCreditRequestGuarantee.proofAddress,
+                      programCode: SoCreditRequestGuarantee.programCode,
+                      fielName: 'crqg_proofaddress',
+                      label: 'Comprobante de Domicilio',
+                      id: soCreditRequestGuarantee.id.toString(),
+                      callBack: updateDataCrqg,),
+                    UploadFile(
+                      key: _keyUploadIdentityVideo,
+                      initialRuta: soCreditRequestGuarantee.identityVideo,
+                      programCode: SoCreditRequestGuarantee.programCode,
+                      fielName: 'crqg_identityvideo',
+                      label: 'Video de Identidad',
+                      id: soCreditRequestGuarantee.id.toString(),
+                      callBack: updateDataCrqg,),
                     const SizedBox(width: 10,),
                   ],
                 )
@@ -569,6 +602,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                                 "Rol preliminar del crédito",
                                 style: TextStyle(color: Colors.grey, fontSize: 15),
                               )),
+                          if(!isSameGuarantee)
                           DropdownButtonHideUnderline(
                             child: ButtonTheme(
                               child: DropdownButton(
@@ -587,6 +621,12 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                               ),
                             ),
                           ),
+                          if(isSameGuarantee)
+                           Expanded(
+                              child: Text(
+                                SoCreditRequestGuarantee.getLabelRol(role),
+                                style: const TextStyle(color: Colors.grey, fontSize: 15),
+                              )),
                         ],
                       ),
                       const SizedBox(
@@ -624,6 +664,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         height: 10,
                       ),
                       TextFormField(
+                        readOnly: isSameGuarantee,
                         autocorrect: false,
                         keyboardType: TextInputType.name,
                         controller: textFisrtNameCntrll,
@@ -640,6 +681,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         height: 10,
                       ),
                       TextFormField(
+                        readOnly: isSameGuarantee,
                         autocorrect: false,
                         keyboardType: TextInputType.name,
                         controller: textFatherLastNameCntrll,
@@ -656,6 +698,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         height: 10,
                       ),
                       TextFormField(
+                        readOnly: isSameGuarantee,
                         autocorrect: false,
                         keyboardType: TextInputType.name,
                         controller: textMotherLastNameCntrll,
@@ -686,24 +729,27 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                               : 'Por favor ingrese una fecha válida';
                         },
                         onTap: () {
-                          showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(1910),
-                            lastDate: DateTime(2025),
-                          ).then((DateTime? value) {
-                            if (value != null) {
-                              DateTime _formDate = DateTime.now();
-                              _formDate = value;
-                              final String date =
-                              DateFormat('yyyy-MM-dd').format(_formDate);
-                              textBirthdateCntrll.text = date;
-                            }
-                          });
+                          if(!isSameGuarantee){
+                            showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(1910),
+                              lastDate: DateTime(2025),
+                            ).then((DateTime? value) {
+                              if (value != null) {
+                                DateTime _formDate = DateTime.now();
+                                _formDate = value;
+                                final String date =
+                                DateFormat('yyyy-MM-dd').format(_formDate);
+                                textBirthdateCntrll.text = date;
+                              }
+                            });
+                          }
                         },
                       ),
                       const SizedBox(height: 10),
                       TextFormField(
+                        readOnly: isSameGuarantee,
                         autocorrect: false,
                         keyboardType: TextInputType.phone,
                         controller: textCellphoneCntrll,
@@ -720,6 +766,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                       ),
                       const SizedBox(height: 10),
                       TextFormField(
+                        readOnly: isSameGuarantee,
                         autocorrect: false,
                         keyboardType: TextInputType.emailAddress,
                         controller: textEmailCntrll,
@@ -739,6 +786,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                       ),
                       const SizedBox(height: 10),
                       TextFormField(
+                        readOnly: isSameGuarantee,
                         decoration: InputDecorations.authInputDecoration(
                             labelText: 'RFC*',
                             prefixIcon: Icons.perm_identity_outlined),
@@ -753,6 +801,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         height: 10,
                       ),
                       TextFormField(
+                        readOnly: isSameGuarantee,
                         decoration: InputDecorations.authInputDecoration(
                             labelText: 'CURP*',
                             prefixIcon: Icons.perm_identity_outlined),
@@ -773,6 +822,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                                 "Estado Civil*",
                                 style: TextStyle(color: Colors.grey, fontSize: 15),
                               )),
+                          if(!isSameGuarantee)
                           DropdownButtonHideUnderline(
                             child: ButtonTheme(
                               child: DropdownButton(
@@ -792,6 +842,12 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                               ),
                             ),
                           ),
+                          if(isSameGuarantee)
+                          Expanded(
+                              child: Text(
+                                SoCustomer.getLabelStatus(maritalStatus),
+                                style: const TextStyle(color: Colors.grey, fontSize: 15),
+                              )),
                         ],
                       ),
                       const SizedBox(
@@ -805,6 +861,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                                 "Régimen Conyugal*",
                                 style: TextStyle(color: Colors.grey, fontSize: 15),
                               )),
+                          if(!isSameGuarantee)
                           DropdownButtonHideUnderline(
                             child: ButtonTheme(
                               child: DropdownButton(
@@ -824,11 +881,39 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                               ),
                             ),
                           ),
+                          if(isSameGuarantee)
+                          Expanded(
+                              child: Text(
+                                SoCustomer.getLabelRegimen(regimenMarital),
+                                style: const TextStyle(color: Colors.grey, fontSize: 15),
+                              )),
                         ],
                       ),
                       const SizedBox(
                         height: 10,
                       ),
+                      if(maritalStatus == SoCustomer.MARITALSTATUS_MARRIED)
+                        TextFormField(
+                          readOnly: isSameGuarantee,
+                          decoration: InputDecorations.authInputDecoration(
+                              labelText: 'Nombre Conyugue*',
+                              prefixIcon: Icons.account_circle),
+                          controller: textSpouseNameCntrll,
+                          validator: (value) {
+                            return (value != null && value.isNotEmpty)
+                                ? null
+                                : 'Por favor ingrese un nombre válido';
+                          },
+                        ),
+                      TextFormField(
+                        autocorrect: false,
+                        keyboardType: TextInputType.name,
+                        controller: textCiecCntrll,
+                        decoration: InputDecorations.authInputDecoration(
+                            labelText: "CIEC",
+                            prefixIcon: Icons.account_circle_outlined),
+                      ),
+                      const SizedBox(height: 10,),
                       if(sendingData)
                         const LinearProgressIndicator(),
                       Padding(
@@ -894,10 +979,11 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
     soCustomer.maritalStatus = maritalStatus;
     if(maritalStatus == SoCustomer.MARITALSTATUS_MARRIED){
       soCustomer.maritalRegimen = regimenMarital;
+      soCustomer.spouseName = textSpouseNameCntrll.text;
     }else{
       soCustomer.maritalRegimen = '';
+      soCustomer.spouseName = '';
     }
-
     soCustomer.recommendedBy = params.idLoggedUser;
     soCustomer.customerType = SoCustomer.TYPE_PERSON;
     // Envia la sesion como Cookie, con el nombre en UpperCase
@@ -947,8 +1033,10 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
     soCustomer.maritalStatus = maritalStatus;
     if(maritalStatus == SoCustomer.MARITALSTATUS_MARRIED){
       soCustomer.maritalRegimen = regimenMarital;
+      soCustomer.spouseName = textSpouseNameCntrll.text;
     }else{
       soCustomer.maritalRegimen = '';
+      soCustomer.spouseName = '';
     }
     soCreditRequestGuarantee.soCustomer = soCustomer;
     soCreditRequestGuarantee.creditRequestId = widget.creditRequestId;
@@ -1019,17 +1107,23 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
   updateDataCrqg(){
     fetchCrqg(creditRequestGuaranteeId.toString()).then((value) {
       _keyUploadIdentification.currentState?.updateData(soCreditRequestGuarantee.identification);
+      _keyUploadIdentificationBack.currentState?.updateData(soCreditRequestGuarantee.identificationBack);
       _keyUploadProofIncome.currentState?.updateData(soCreditRequestGuarantee.proofIncome);
       _keyUploadFiscalSituation.currentState?.updateData(soCreditRequestGuarantee.fiscalSituation);
       _keyUploadVerifiableIncome.currentState?.updateData(soCreditRequestGuarantee.verifiableIncomeFile);
       _keyUploadDeclaratory.currentState?.updateData(soCreditRequestGuarantee.declaratory);
+      _keyUploadProofAddress.currentState?.updateData(soCreditRequestGuarantee.proofAddress);
+      _keyUploadIdentityVideo.currentState?.updateData(soCreditRequestGuarantee.identityVideo);
       avalCreated = true;
 
       _keyUploadIdentification.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+      _keyUploadIdentificationBack.currentState?.updateId(soCreditRequestGuarantee.id.toString());
       _keyUploadProofIncome.currentState?.updateId(soCreditRequestGuarantee.id.toString());
       _keyUploadFiscalSituation.currentState?.updateId(soCreditRequestGuarantee.id.toString());
       _keyUploadVerifiableIncome.currentState?.updateId(soCreditRequestGuarantee.id.toString());
       _keyUploadDeclaratory.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+      _keyUploadProofAddress.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+      _keyUploadIdentityVideo.currentState?.updateId(soCreditRequestGuarantee.id.toString());
     });
   }
   //Peticon de datos de un cliente especifico

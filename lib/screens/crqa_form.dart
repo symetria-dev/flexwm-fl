@@ -16,8 +16,9 @@ class CreditRequestAssetsForm extends StatefulWidget{
   //Se recibe objeto para el fomulario
   final SoCreditRequestAsset soCreditRequestAsset;
   final SoCreditRequestGuarantee soCreditRequestGuarantee;
+  final bool typeInmueble;
   const CreditRequestAssetsForm({Key? key, required this.soCreditRequestAsset,
-    required this.soCreditRequestGuarantee, }) : super(key: key);
+    required this.soCreditRequestGuarantee, required this.typeInmueble, }) : super(key: key);
 
   @override
   State<CreditRequestAssetsForm> createState() => _CreditRequestAssetsFormState();
@@ -57,13 +58,14 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
 
   @override
   void initState(){
-    if(widget.soCreditRequestGuarantee.role == SoCreditRequestGuarantee.ROLE_GUARANTEE){
+    if(widget.typeInmueble){
       type = SoCreditRequestAsset.TYPE_PROPERTY;
     }else{
       type = SoCreditRequestAsset.TYPE_AUTO;
     }
     if(widget.soCreditRequestAsset.id > 0 ){
       soCreditRequestAsset = widget.soCreditRequestAsset;
+      type = soCreditRequestAsset.type;
       textDescriptionCntrll.text = widget.soCreditRequestAsset.description;
       textValueCntrll.updateValue(widget.soCreditRequestAsset.value);
       textPurchaseDateCntrll.text = widget.soCreditRequestAsset.purchaseDate;
@@ -91,7 +93,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
 
   @override
   Widget build(BuildContext context) {
-    return (widget.soCreditRequestGuarantee.role == SoCreditRequestGuarantee.ROLE_GUARANTEE)
+    return (widget.typeInmueble)
         ? formInmueble()
         : formAuto();
   }

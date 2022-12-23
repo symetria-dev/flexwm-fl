@@ -50,6 +50,7 @@ class SoCustomer {
   String maritalStatus = '';
   String mobile = "";
   String maritalRegimen = '';
+  String spouseName = '';
 
   static List getTypeCustomer = [
     {"value": TYPE_PERSON, "label": "Persona"},
@@ -72,6 +73,28 @@ class SoCustomer {
     {"value": REGIMEN_MIXED_REGIMEN, "label":"Mixto"},
   ];
 
+  static String getLabelStatus(String value){
+    String role = '';
+    List roles = getStatusOptions;
+    for(int i =0;i<roles.length;i++){
+      if(value == roles[i]['value']){
+        role = roles[i]['label'];
+      }
+    }
+    return role;
+  }
+
+  static String getLabelRegimen(String value){
+    String role = '';
+    List roles = getRegimenOptions;
+    for(int i =0;i<roles.length;i++){
+      if(value == roles[i]['value']){
+        role = roles[i]['label'];
+      }
+    }
+    return role;
+  }
+
   SoCustomer.empty();
 
   SoCustomer(this.id, this.code, this.displayName, this.legalName, this.logo,
@@ -79,7 +102,7 @@ class SoCustomer {
       ,this.customerType,this.rfc,this.firstName,this.fatherLastName,
       this.salesManId,this.nss,this.stablishMentDate, this.birthdate
       ,this.passw, this.passwconf, this.curp,this.recommendedBy,this.motherlastname,
-      this.maritalStatus,this.mobile, this.maritalRegimen);
+      this.maritalStatus,this.mobile, this.maritalRegimen, this.spouseName);
 
   factory SoCustomer.fromJson(Map<String, dynamic> json) {
     return SoCustomer(json['id'] as int,
@@ -109,6 +132,7 @@ class SoCustomer {
         json['maritalStatus'] as String,
         json['mobile'] as String,
       json['maritalRegime'] as String,
+      json['spouseName'] as String,
     );
   }
 
@@ -136,9 +160,10 @@ class SoCustomer {
       'curp' : curp,
       'recommendedBy' : recommendedBy,
       'motherlastname' : motherlastname,
-      'maritalStatusId' : maritalStatus,
+      'maritalStatus' : maritalStatus,
       'mobile' : mobile,
       'maritalRegime' : maritalRegimen,
+      'spouseName' : spouseName,
     };
   }
 }
