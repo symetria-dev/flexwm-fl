@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flexwm/common/params.dart' as params;
 
 class AuthFormBackground extends StatelessWidget {
   
@@ -83,17 +84,10 @@ class _PurpleBox extends StatelessWidget {
     );
   }
 
-  BoxDecoration _purpleBackground() => const BoxDecoration(
-     borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
+  BoxDecoration _purpleBackground() => BoxDecoration(
+     borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
       gradient: LinearGradient(
-      colors: [
-        // Color.fromRGBO(0, 130, 146, 1),
-        // Color.fromRGBO(112, 169, 179, 1.0)
-        Color.fromRGBO(243, 129, 48, 1),
-        Color.fromRGBO(255, 209, 97, 1)
-        // Color.fromRGBO(21, 67, 96, 1),
-        // Color.fromRGBO(171, 178, 185, 1)
-      ]
+      colors: params.theme
     )
   );
 }
@@ -128,7 +122,7 @@ class _Bubble extends StatelessWidget {
       height: 100,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(100),
-        color: Color.fromRGBO(255, 255, 255, 0.05)
+        color: const Color.fromRGBO(255, 255, 255, 0.05)
       ),
     );
   }

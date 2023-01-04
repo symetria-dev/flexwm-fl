@@ -37,6 +37,8 @@ class _CreditRequestList extends State<CreditRequestList> {
   List<SoCreditRequest> _soCreditRequest = [];
   late int idCustomer = params.idLoggedUser;
   SoCustomer soCustomer = SoCustomer.empty();
+  //var para tipo de listado
+  bool list = false;
 
   @override
   void initState() {
@@ -114,7 +116,10 @@ class _CreditRequestList extends State<CreditRequestList> {
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   _soCreditRequest = snapshot.data!;
-                  return (_soCreditRequest.isEmpty) ? noListWidget() : getListWidget(_soCreditRequest);
+                  return (_soCreditRequest.isEmpty)
+                      ? noListWidget()
+                      :(list) ? getList(_soCreditRequest)
+                              : getListWidget(_soCreditRequest);
                 } else if (snapshot.hasError) {
                   // Hay errores los muestra
                   return Text('${snapshot.error}');
@@ -138,7 +143,7 @@ class _CreditRequestList extends State<CreditRequestList> {
     return BottomAppBar(
       color: Colors.white,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           IconButton(
              icon: const Icon(Icons.support_agent, size: 30, color: Colors.blueGrey,),
@@ -147,6 +152,20 @@ class _CreditRequestList extends State<CreditRequestList> {
                showAlertDialog(context);
               }
            ),
+          if(list)
+          IconButton(
+              icon: const Icon(Icons.art_track_outlined, size: 30, color: Colors.blueGrey,),
+              onPressed: () {
+                setState(() { list = false;});
+              }
+          ),
+          if(!list)
+            IconButton(
+                icon: const Icon(Icons.view_list_sharp, size: 30, color: Colors.blueGrey,),
+                onPressed: () {
+                  setState(() { list = true;});
+                }
+            ),
         ],
       ),
     );
@@ -411,6 +430,102 @@ class _CreditRequestList extends State<CreditRequestList> {
                   children: [
                     TextButton(
                         onPressed: (){}, 
+                        child: const Text('Ver más')
+                    )
+                  ],
+                )*/
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Obtiene el listado con formato
+  Widget getList(List<SoCreditRequest> soWFlowStepList) {
+    return ListView.builder(
+      itemCount: soWFlowStepList.length,
+      itemBuilder: (context, index) {
+        final item = soWFlowStepList[index];
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Card(
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15)
+            ),
+            elevation: 10,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) =>
+                            CustDataForm(creditRequest:item)),
+                  ).then((value) => setState((){
+                    _futureSoCreditRequests = fetchSoCreditRequests();
+                  })),
+                  leading:
+                  IconButton(
+                    //onPressed: () {Navigator.pushNamed(context, '/wflowstep', arguments: {'id': item.id});},
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              CustDataForm(creditRequest:item)),
+                    ).then((value) => setState((){
+                      _futureSoCreditRequests = fetchSoCreditRequests();
+                    })),
+                    icon: const Icon(Icons.account_balance_wallet_outlined, color: Colors.teal,),
+                  ),
+                  title: Text('Destino del crédito: '+SoCreditRequest.getCreditDestiny(item.destiny)),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Monto financiado: ' +
+                          NumberFormat.currency(locale: 'es_MX',symbol: '\$').format(item.amountRequired)),
+                      Text('Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
+                    ],
+                  ),
+                  // trailing: const Icon(Icons.monetization_on_outlined, color: Colors.indigo,),
+                  trailing: CircularPercentIndicator(
+                    radius: 28.0,
+                    lineWidth: 10.0,
+                    animation: true,
+                    percent: (item.status == SoCreditRequest.STATUS_EDITION) ? 0.35
+                        : (item.status == SoCreditRequest.STATUS_REVISION) ? 0.70
+                        : (item.status == SoCreditRequest.STATUS_AUTHORIZED) ? 1.0
+                        : 0.0,
+                    center: (item.status == SoCreditRequest.STATUS_EDITION) ? const Text('35%')
+                        : (item.status == SoCreditRequest.STATUS_REVISION) ? const Text('70%')
+                        : (item.status == SoCreditRequest.STATUS_AUTHORIZED) ? const Text('100%')
+                        : const Icon(Icons.cancel_outlined),
+                    progressColor: Colors.blue,
+                    circularStrokeCap: CircularStrokeCap.round,
+                  ),
+                  /*PopupMenuButton(
+                    icon: const Icon(Icons.more_vert, color: Colors.indigo),
+                    itemBuilder: (_){
+                      return [
+                        const PopupMenuItem(
+                            value: 'sponsors',
+                            child: Text("Ver Sponsors")
+                        )
+                      ];
+                    },
+                    onSelected: (String value) => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => CreditRequestGuaranteeList(soCreditRequest: item))
+                    ),
+                  ),*/
+                ),const SizedBox(height: 10,)
+                /*ButtonBar(
+                  alignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                        onPressed: (){},
                         child: const Text('Ver más')
                     )
                   ],

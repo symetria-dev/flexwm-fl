@@ -2,6 +2,7 @@
 // Este software es propiedad de Mauricio Lopez Barba y Alonso Ibarra Barba
 // No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
+import 'package:flexwm/screens/reset_pwd.dart';
 import 'package:flexwm/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -167,15 +168,24 @@ class LoginFormState extends State<LoginForm> {
               text: TextSpan(
                 children: [
                   TextSpan(
-                      text: 'Registro Cliente Nuevo',
+                      text: 'Nuevo Registro | ',
                       style: const TextStyle(color: Colors.blue,fontSize: 16),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          params.instance = '_flexwm-js';
-                        // params.instance = '-edupass';
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => const NewCustForm())
+                          );
+                        }
+                  ),
+                  TextSpan(
+                      text: 'Olvide mi Password',
+                      style: const TextStyle(color: Colors.blue,fontSize: 16),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const ResetPassword())
                           );
                         }
                   )
@@ -202,8 +212,7 @@ class LoginFormState extends State<LoginForm> {
   void doLogin() async {
     soLogin.email = emailController.text;
     soLogin.password = passwordController.text;
-    instanceController.text = '_flexwm-js';
-    // instanceController.text = '-edupass';
+    instanceController.text = params.instance;
     final response = await http.post(
       //TODO colocar de forma dinamica que tipo de usuario hara login
       Uri.parse(params.getAppUrl(instanceController.text) + 'restlogincust'),

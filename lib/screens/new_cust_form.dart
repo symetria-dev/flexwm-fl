@@ -196,8 +196,8 @@ class _NewCustForm extends State<NewCustForm>{
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 disabledColor: Colors.grey,
                 elevation: 0,
-                color: Colors.deepOrange,
-                // color: Colors.blueGrey,
+                // color: Colors.deepOrange,
+                color: Colors.blueGrey,
                 child: Container(
                     padding: const EdgeInsets.symmetric( horizontal: 80, vertical: 15),
                     child: const Text(
@@ -346,8 +346,8 @@ class _NewCustForm extends State<NewCustForm>{
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 disabledColor: Colors.grey,
                 elevation: 0,
-                color: Colors.deepOrange,
-                // color: Colors.blueGrey,
+                // color: Colors.deepOrange,
+                color: Colors.blueGrey,
                 child: Container(
                     padding: const EdgeInsets.symmetric( horizontal: 80, vertical: 15),
                     child: Text(

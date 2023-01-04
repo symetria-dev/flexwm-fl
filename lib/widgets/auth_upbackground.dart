@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flexwm/common/params.dart' as params;
 
 class AuthUpBackground extends StatelessWidget {
   
@@ -41,17 +42,12 @@ Widget noListWidget(){
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            decoration: const BoxDecoration(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+            decoration: BoxDecoration(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
                 gradient: LinearGradient(
                     begin: AlignmentDirectional.topEnd,
                     end: AlignmentDirectional.bottomEnd,
-                    colors: [
-                      // Color.fromRGBO(0, 130, 146, 1),
-                      // Color.fromRGBO(112, 169, 179, 1.0)
-                      Color.fromRGBO(243, 129, 48, 1),
-                      Color.fromRGBO(255, 209, 97, 1)
-                    ]
+                    colors: params.theme,
                 )
             ),
             child: SizedBox(
@@ -140,18 +136,13 @@ class _PurpleBox extends StatelessWidget {
     );
   }
 
-  BoxDecoration _purpleBackground() => const BoxDecoration(
+  BoxDecoration _purpleBackground() => BoxDecoration(
     // color: Colors.white,
     //  borderRadius: BorderRadius.vertical(bottom: Radius.circular(80)),
-      borderRadius: BorderRadius.only(bottomRight: Radius.elliptical(200, 100),
+      borderRadius: const BorderRadius.only(bottomRight: Radius.elliptical(200, 100),
           bottomLeft: Radius.elliptical(200, 100)),
       gradient: LinearGradient(
-      colors: [
-        // Color.fromRGBO(0, 130, 146, 1),
-        // Color.fromRGBO(112, 169, 179, 1.0)
-        Color.fromRGBO(243, 129, 48, 1),
-        Color.fromRGBO(255, 209, 97, 1)
-      ]
+      colors: params.theme
     )
   );
 }

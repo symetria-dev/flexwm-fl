@@ -28,7 +28,8 @@ const Color bgColor = Colors.white;
 const Color appBarBgColor = Colors.white;
 
 // Variables de login
-String instance = '';
+// String instance = '-edupass';
+String instance = '_flexwm-js';
 bool isLoggedIn = false;
 String email = '';
 String firstname = '';
@@ -42,6 +43,14 @@ int idLoggedUser = -1;
 int getIdLoggedUser(){
   return idLoggedUser;
 }
+
+//Color para el tema de la app
+List<Color> theme = [
+  // Color.fromRGBO(0, 130, 146, 1),
+  // Color.fromRGBO(112, 169, 179, 1.0)
+  const Color.fromRGBO(243, 129, 48, 1),
+  const Color.fromRGBO(255, 209, 97, 1)
+];
 
 // Obtiene el servidor a utilizar
 String getAppUrl(String instance) {
