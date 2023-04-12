@@ -646,7 +646,8 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
       return true;
     } else {
       // Muestra mensaje
-      msjResponsServer = response.body.toString();
+      print(response.body.toString());
+      msjResponsServer = 'Error al guardar datos del aval';
       return false;
     }
   }
@@ -675,7 +676,8 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
       return true;
     } else {
       // Muestra mensaje
-      msjResponsServer = response.body.toString();
+      print(response.body.toString());
+      msjResponsServer = 'Error al guardar detalles del aval';
       return false;
     }
   }

@@ -37,14 +37,17 @@ class _AutocompleteBasicUserExample extends State<AutocompleteExampleApp> {
   late int _autoValue = -1;
   late List<Data> dataList = [];
   final textValueCntrll = TextEditingController();
+  static String _displayStringForOption(Data option) => option.label;
+  String initialTextValue = '';
 
   @override
-  void initState(){
-    super.initState();
+  void initState() {
     _callback = widget.callback;
     _autoValue = widget.autoValue;
     textValueCntrll.text = widget.textValue;
+    initialTextValue = widget.textValue;
     getData();
+    super.initState();
   }
 
 /*  static const List<User> _userOptions = <User>[
@@ -53,11 +56,12 @@ class _AutocompleteBasicUserExample extends State<AutocompleteExampleApp> {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];*/
 
-  static String _displayStringForOption(Data option) => option.label;
-
   @override
   Widget build(BuildContext context) {
     return Autocomplete<Data>(
+      initialValue: (widget.textValue!='')
+          ?TextEditingValue(text: initialTextValue)
+          : const TextEditingValue(text: '') ,
       fieldViewBuilder: (BuildContext context,
           TextEditingController fieldTextEditingController,
           FocusNode fieldFocusNode,

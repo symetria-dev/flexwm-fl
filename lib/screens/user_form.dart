@@ -6,7 +6,7 @@ import 'package:flexwm/routes/app_routes.dart';
 import 'package:flexwm/routes/routes.dart';
 import 'package:flexwm/common/params.dart' as params;
 import 'package:flexwm/screens/usem_screen.dart';
-import 'package:flexwm/screens/pdf_view.dart';
+// import 'package:flexwm/screens/pdf_view.dart';
 import 'package:flexwm/widgets/dropdown_widget.dart';
 import 'package:flexwm/widgets/sub_catalog_widget.dart';
 import 'package:flexwm/widgets/upload_file_widget.dart';
@@ -159,14 +159,14 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 labelText: 'Email',
               ),
             ),
-            UploadFile(
-              initialRuta: soUser.photo,
-                programCode: 'USER',
-                fielName: 'user_photo',
-                label: 'Foto',
-                id: userData.id.toString()),
+            // UploadFile(
+            //   initialRuta: soUser.photo,
+            //     programCode: 'USER',
+            //     fielName: 'user_photo',
+            //     label: 'Foto',
+            //     id: userData.id.toString()),
             const SizedBox(width: 10,),
-            if(soUser.photo != '')
+            /*if(soUser.photo != '')
             ElevatedButton(
               onPressed: () async {
                 String file = soUser.photo;
@@ -192,7 +192,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   color: Colors.white,
                 ),
               ),
-            ),
+            ),*/
             DropdownWidget(
               callback: (String id) {
                 locationId = int.parse(id);

@@ -13,6 +13,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/common/params.dart' as params;
 import 'package:intl/intl.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 import '../models/crqs.dart';
 import '../routes/app_routes.dart';
@@ -80,9 +81,10 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
   final textSpouseNameCntrll = TextEditingController();
 
   //Keys para formularios de información financiera
+  final _formFinancial = GlobalKey<FormState>();
+  //key formulario gatantias
   final _formAssets = GlobalKey<FormState>();
-
-  //key para el formulario
+  //key para el formulario general
   final _formKey = GlobalKey<FormState>();
   //Objeto de tipo para manipular info
   SoCreditRequestGuarantee soCreditRequestGuarantee = SoCreditRequestGuarantee.empty();
@@ -102,6 +104,8 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
   int creditRequestGuaranteeId = 0;
   //bandera para editar campos de aval
   bool isSameGuarantee = false;
+  //indicador de progress modal overlay
+  bool _isInAsyncCall = false;
 
   @override
   void initState(){
@@ -218,8 +222,13 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
       length: _tabsAppbar.length,
       child: Scaffold(
         appBar: AppBarStyle.authAppBarFlex(title: title,tabs: TabBar(tabs: _tabsAppbar)),
-        body: AuthFormBackground(
-            child: TabBarView(children: _crqgTabPages)
+        body: ModalProgressHUD(
+          opacity: 0.5,
+          progressIndicator: const CircularProgressIndicator(),
+          inAsyncCall: _isInAsyncCall,
+          child: AuthFormBackground(
+              child: TabBarView(children: _crqgTabPages)
+          ),
         ),
         // bottomNavigationBar: bottomNavBar,
       ),
@@ -242,6 +251,8 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
           const SizedBox(height: 40,),
           CardContainer(
             child: Form(
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              key: _formFinancial,
               child: Column(
                 children: [
                   const Text("Ingresos Promedio Mensuales"),
@@ -249,11 +260,12 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                   TextFormField(
                     keyboardType: TextInputType.number,
                     decoration: InputDecorations.authInputDecoration(
-                        labelText: 'Ingresos Comprobables?*',
+                        labelText: 'Ingresos Comprobables*',
                         prefixIcon: Icons.monetization_on_outlined),
                     controller: textVerifiableIncomeCntrll,
                     validator: ( value ) {
-                      return ( value != null && value.isNotEmpty )
+                      final intNumber = double.tryParse(value!.replaceAll(',', ''));
+                      return (intNumber != null && intNumber > 0)
                           ? null
                           : 'Por favor ingrese un valor';
                     },
@@ -262,7 +274,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                   TextFormField(
                     keyboardType: TextInputType.number,
                     decoration: InputDecorations.authInputDecoration(
-                        labelText: 'Estados de Cuenta*',
+                        labelText: 'Estados de Cuenta',
                         prefixIcon: Icons.monetization_on_outlined),
                     controller: textAccountStatementCntrll,
                     validator: ( value ) {
@@ -275,7 +287,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                   TextFormField(
                     keyboardType: TextInputType.number,
                     decoration: InputDecorations.authInputDecoration(
-                        labelText: 'Recibos de Nómina*',
+                        labelText: 'Recibos de Nómina',
                         prefixIcon: Icons.monetization_on_outlined),
                     controller: textPayrollReceiptsCntrll,
                     validator: ( value ) {
@@ -461,22 +473,24 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: ElevatedButton(
                       onPressed: () {
-                        income = false;
-                        employment= false;
-                        expenses = false;
-                        updateCreditRequestGuarantee().then((value) {
-                          if(value){
-                            // Error al guardar
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Registro actualizado con éxito.')),
-                            );
-                          }else{
-                            // Error al guardar
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Error al Guardar')),
-                            );
-                          }
-                        });
+                        if(_formFinancial.currentState!.validate()){
+                          income = false;
+                          employment= false;
+                          expenses = false;
+                          updateCreditRequestGuarantee().then((value) {
+                            if(value){
+                              // Error al guardar
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Registro actualizado con éxito.')),
+                              );
+                            }else{
+                              // Error al guardar
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Error al Guardar')),
+                              );
+                            }
+                          });
+                        }
                       },
                       child: const Text(
                         'Guardar',
@@ -513,7 +527,13 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         fielName: 'crqg_identification',
                         label: 'Identificación parte frontal',
                         id: soCreditRequestGuarantee.id.toString(),
-                        callBack: updateDataCrqg,),
+                      callBack: (bool isLoading) {
+                        setState(() {
+                          _isInAsyncCall = isLoading;
+                        });
+                        updateDataCrqg();
+                      },
+                        idGuarantee: soCreditRequestGuarantee.id.toString(),),
                     UploadIdPhoto(
                       key: _keyUploadIdentificationBack,
                       initialRuta: soCreditRequestGuarantee.identificationBack,
@@ -521,7 +541,13 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                       fielName: 'crqg_identificationback',
                       label: 'Identificación parte trasera',
                       id: soCreditRequestGuarantee.id.toString(),
-                      callBack: updateDataCrqg,),
+                      callBack: (bool isLoading) {
+                        setState(() {
+                          _isInAsyncCall = isLoading;
+                        });
+                        updateDataCrqg();
+                      },
+                      idGuarantee: soCreditRequestGuarantee.id.toString(),),
                     UploadFile(
                       key: _keyUploadProofIncome,
                       initialRuta: soCreditRequestGuarantee.proofIncome,
@@ -529,7 +555,13 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         fielName: 'crqg_proofincome',
                         label: 'Comprobante de Ingresos',
                         id: soCreditRequestGuarantee.id.toString(),
-                      callBack: updateDataCrqg,),
+                      callBack: (bool isLoading) {
+                        setState(() {
+                          _isInAsyncCall = isLoading;
+                        });
+                        updateDataCrqg();
+                      },
+                      idGuarantee: '',),
                     UploadFile(
                       key: _keyUploadFiscalSituation,
                       initialRuta: soCreditRequestGuarantee.fiscalSituation,
@@ -537,7 +569,13 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         fielName: 'crqg_fiscalsituation',
                         label: 'Constancia de Situación Fiscal',
                         id: soCreditRequestGuarantee.id.toString(),
-                      callBack: updateDataCrqg,),
+                      callBack: (bool isLoading) {
+                        setState(() {
+                          _isInAsyncCall = isLoading;
+                        });
+                        updateDataCrqg();
+                      },
+                      idGuarantee: '',),
                     UploadFile(
                       key: _keyUploadVerifiableIncome,
                       initialRuta: soCreditRequestGuarantee.verifiableIncomeFile,
@@ -545,7 +583,13 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         fielName: 'crqg_verifiableincomefile',
                         label: 'Otros Ingresos Comprobables',
                         id: soCreditRequestGuarantee.id.toString(),
-                        callBack: updateDataCrqg,
+                      callBack: (bool isLoading) {
+                        setState(() {
+                          _isInAsyncCall = isLoading;
+                        });
+                        updateDataCrqg();
+                      },
+                      idGuarantee: '',
                       ),
                     UploadFile(
                       key: _keyUploadDeclaratory,
@@ -554,7 +598,13 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         fielName: 'crqg_declaratory',
                         label: 'Declaratorias',
                         id: soCreditRequestGuarantee.id.toString(),
-                      callBack: updateDataCrqg,),
+                      callBack: (bool isLoading) {
+                        setState(() {
+                          _isInAsyncCall = isLoading;
+                        });
+                        updateDataCrqg();
+                      },
+                      idGuarantee: '',),
                     UploadFile(
                       key: _keyUploadProofAddress,
                       initialRuta: soCreditRequestGuarantee.proofAddress,
@@ -562,7 +612,13 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                       fielName: 'crqg_proofaddress',
                       label: 'Comprobante de Domicilio',
                       id: soCreditRequestGuarantee.id.toString(),
-                      callBack: updateDataCrqg,),
+                      callBack: (bool isLoading) {
+                        setState(() {
+                          _isInAsyncCall = isLoading;
+                        });
+                        updateDataCrqg();
+                      },
+                      idGuarantee: '',),
                     UploadFile(
                       key: _keyUploadIdentityVideo,
                       initialRuta: soCreditRequestGuarantee.identityVideo,
@@ -570,7 +626,13 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                       fielName: 'crqg_identityvideo',
                       label: 'Video de Identidad',
                       id: soCreditRequestGuarantee.id.toString(),
-                      callBack: updateDataCrqg,),
+                      callBack: (bool isLoading) {
+                        setState(() {
+                          _isInAsyncCall = isLoading;
+                        });
+                        updateDataCrqg();
+                      },
+                      idGuarantee: soCreditRequestGuarantee.id.toString(),),
                     const SizedBox(width: 10,),
                   ],
                 )
@@ -580,6 +642,33 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
         ],
       ),
     );
+  }
+
+  //funcion para actualizar widget hijo mediante el callback (uploadfile)
+  updateDataCrqg(){
+    //indicamos que se esta realizando el proceso de subir archivo
+    //Se ejecuta el metodo de consulta para actualizar los datos del aval.
+    fetchCrqg(creditRequestGuaranteeId.toString()).then((value) {
+      _keyUploadIdentification.currentState?.updateData(soCreditRequestGuarantee.identification);
+      _keyUploadIdentificationBack.currentState?.updateData(soCreditRequestGuarantee.identificationBack);
+      _keyUploadProofIncome.currentState?.updateData(soCreditRequestGuarantee.proofIncome);
+      _keyUploadFiscalSituation.currentState?.updateData(soCreditRequestGuarantee.fiscalSituation);
+      _keyUploadVerifiableIncome.currentState?.updateData(soCreditRequestGuarantee.verifiableIncomeFile);
+      _keyUploadDeclaratory.currentState?.updateData(soCreditRequestGuarantee.declaratory);
+      _keyUploadProofAddress.currentState?.updateData(soCreditRequestGuarantee.proofAddress);
+      _keyUploadIdentityVideo.currentState?.updateData(soCreditRequestGuarantee.identityVideo);
+      avalCreated = true;
+
+      //Se ejecuta el metodo de consulta para actualizar el id del aval.
+      _keyUploadIdentification.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+      _keyUploadIdentificationBack.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+      _keyUploadProofIncome.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+      _keyUploadFiscalSituation.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+      _keyUploadVerifiableIncome.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+      _keyUploadDeclaratory.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+      _keyUploadProofAddress.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+      _keyUploadIdentityVideo.currentState?.updateId(soCreditRequestGuarantee.id.toString());
+    });
   }
 
   Widget formDatosGenerales(){
@@ -599,7 +688,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         children: [
                           const Expanded(
                               child: Text(
-                                "Rol preliminar del crédito",
+                                "Rol preliminar del crédito*",
                                 style: TextStyle(color: Colors.grey, fontSize: 15),
                               )),
                           if(!isSameGuarantee)
@@ -636,7 +725,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         children: [
                           const Expanded(
                               child: Text(
-                                "Relación con el estudiante",
+                                "Relación con el estudiante*",
                                 style: TextStyle(color: Colors.grey, fontSize: 15),
                               )),
                           DropdownButtonHideUnderline(
@@ -669,7 +758,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         keyboardType: TextInputType.name,
                         controller: textFisrtNameCntrll,
                         decoration: InputDecorations.authInputDecoration(
-                            labelText: "Nombre",
+                            labelText: "Nombre(s)*",
                             prefixIcon: Icons.account_circle_outlined),
                         validator: (value) {
                           return (value != null && value.isNotEmpty)
@@ -686,7 +775,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         keyboardType: TextInputType.name,
                         controller: textFatherLastNameCntrll,
                         decoration: InputDecorations.authInputDecoration(
-                            labelText: "Apellido Paterno",
+                            labelText: "Apellido Paterno*",
                             prefixIcon: Icons.account_circle_outlined),
                         validator: (value) {
                           return (value != null && value.isNotEmpty)
@@ -703,7 +792,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         keyboardType: TextInputType.name,
                         controller: textMotherLastNameCntrll,
                         decoration: InputDecorations.authInputDecoration(
-                            labelText: "Apellido Materno",
+                            labelText: "Apellido Materno*",
                             prefixIcon: Icons.account_circle_outlined),
                         validator: (value) {
                           return (value != null && value.isNotEmpty)
@@ -719,7 +808,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         keyboardType: TextInputType.name,
                         decoration: InputDecorations.authInputDecoration(
                             hintText: "Seleccione una Fecha",
-                            labelText: "Fecha de Nacimiento",
+                            labelText: "Fecha de Nacimiento*",
                             prefixIcon: Icons.calendar_today_outlined),
                         controller: textBirthdateCntrll,
                         readOnly: true,
@@ -755,7 +844,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         controller: textCellphoneCntrll,
                         decoration: InputDecorations.authInputDecoration(
                             hintText: 'Tel. Celular',
-                            labelText: 'Tel. Celular',
+                            labelText: 'Tel. Celular*',
                             prefixIcon: Icons.phone_iphone_outlined),
                         validator: (value) {
                           final intNumber = int.tryParse(value!.replaceAll('-', ''));
@@ -772,7 +861,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         controller: textEmailCntrll,
                         decoration: InputDecorations.authInputDecoration(
                             hintText: 'tucorreo@gmail.com',
-                            labelText: 'Correo electrónico',
+                            labelText: 'Correo electrónico*',
                             prefixIcon: Icons.alternate_email_rounded),
                         validator: (value) {
                           String pattern =
@@ -792,7 +881,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                             prefixIcon: Icons.perm_identity_outlined),
                         controller: textRfcCntrll,
                         validator: (value) {
-                          return (value != null && value.isNotEmpty)
+                          return (value != null && value.isNotEmpty && value.length > 12 && value.length < 14)
                               ? null
                               : 'Por favor ingrese un rfc válido';
                         },
@@ -920,31 +1009,33 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         child: ElevatedButton(
                           onPressed: () {
-                            setState(() {
-                              sendingData = true;
-                            });
-                            addCust(context).then((value) {
-                              if (value) {
-                                updateCreditRequestGuarantee().then((value) {
-                                  setState(() {
-                                    sendingData = false;
-                                  });
-                                  if (value) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(msjResponsServer)),
-                                    );
-                                    updateDataCrqg();
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
+                            if(_formKey.currentState!.validate()){
+                              setState(() {
+                                sendingData = true;
+                              });
+                              addCust(context).then((value) {
+                                if (value) {
+                                  updateCreditRequestGuarantee().then((value) {
+                                    setState(() {
+                                      sendingData = false;
+                                    });
+                                    if (value) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(content: Text(msjResponsServer)),
-                                    );
-                                  }
-                                });
-                              } else {
-                                // Error al guardar
-                                Fluttertoast.showToast(msg: msjResponsServer);
-                              }
-                            });
+                                      );
+                                      updateDataCrqg();
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(msjResponsServer)),
+                                      );
+                                    }
+                                  });
+                                } else {
+                                  // Error al guardar
+                                  Fluttertoast.showToast(msg: msjResponsServer);
+                                }
+                              });
+                            }
                           },
                           child: const Text(
                             'Guardar',
@@ -1015,6 +1106,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
         sendingData = false;
       });
       // Muestra mensaje
+      print(response.body.toString());
       msjResponsServer = response.body.toString();
       return false;
     }
@@ -1094,7 +1186,8 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
       );*/
       return true;
     } else {
-      msjError = response.body.toString();
+      print(response.body.toString());
+      msjError = 'Error al guardar detalles del aval';
       // Error al guardar
 /*      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error al Guardar')),
@@ -1103,29 +1196,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
     }
   }
 
-  //funcion para actualizar widget hijo mediante el callback (uploadfile)
-  updateDataCrqg(){
-    fetchCrqg(creditRequestGuaranteeId.toString()).then((value) {
-      _keyUploadIdentification.currentState?.updateData(soCreditRequestGuarantee.identification);
-      _keyUploadIdentificationBack.currentState?.updateData(soCreditRequestGuarantee.identificationBack);
-      _keyUploadProofIncome.currentState?.updateData(soCreditRequestGuarantee.proofIncome);
-      _keyUploadFiscalSituation.currentState?.updateData(soCreditRequestGuarantee.fiscalSituation);
-      _keyUploadVerifiableIncome.currentState?.updateData(soCreditRequestGuarantee.verifiableIncomeFile);
-      _keyUploadDeclaratory.currentState?.updateData(soCreditRequestGuarantee.declaratory);
-      _keyUploadProofAddress.currentState?.updateData(soCreditRequestGuarantee.proofAddress);
-      _keyUploadIdentityVideo.currentState?.updateData(soCreditRequestGuarantee.identityVideo);
-      avalCreated = true;
 
-      _keyUploadIdentification.currentState?.updateId(soCreditRequestGuarantee.id.toString());
-      _keyUploadIdentificationBack.currentState?.updateId(soCreditRequestGuarantee.id.toString());
-      _keyUploadProofIncome.currentState?.updateId(soCreditRequestGuarantee.id.toString());
-      _keyUploadFiscalSituation.currentState?.updateId(soCreditRequestGuarantee.id.toString());
-      _keyUploadVerifiableIncome.currentState?.updateId(soCreditRequestGuarantee.id.toString());
-      _keyUploadDeclaratory.currentState?.updateId(soCreditRequestGuarantee.id.toString());
-      _keyUploadProofAddress.currentState?.updateId(soCreditRequestGuarantee.id.toString());
-      _keyUploadIdentityVideo.currentState?.updateId(soCreditRequestGuarantee.id.toString());
-    });
-  }
   //Peticon de datos de un cliente especifico
   Future<bool> fetchCrqg(String id) async {
     final response = await http.get(Uri.parse(

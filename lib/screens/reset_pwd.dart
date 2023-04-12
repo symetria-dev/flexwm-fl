@@ -151,11 +151,11 @@ class _ResetoPassword extends State<ResetPassword>{
 
       // Muestra mensaje
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Su solicitud se ha enviada con éxito')),
+        const SnackBar(content: Text('Su solicitud ha sido enviada con éxito')),
       );
       // Muestra mensaje
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Favor de revisar su correo para reestablecer password')),
+        const SnackBar(content: Text('Favor de revisar su correo para restablecer password')),
       );
       // Regresa al login
       //Navigator.pop(context);
@@ -168,7 +168,7 @@ class _ResetoPassword extends State<ResetPassword>{
       // Error al guardar
       print('Error al Guardar ${response.body}');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al Guardar: ${response.body}')),
+        SnackBar(content: Text('Error al solicitar restablecer contraseña')),
       );
     }
   }

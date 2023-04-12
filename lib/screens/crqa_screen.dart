@@ -3,12 +3,15 @@ import 'dart:convert';
 import 'package:flexwm/models/crqa.dart';
 import 'package:flexwm/models/crqg.dart';
 import 'package:flexwm/screens/crqa_form.dart';
+import 'package:flexwm/widgets/upload_file_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/common/params.dart' as params;
 import 'package:intl/intl.dart';
+
+import '../models/data.dart';
 
 class CreditRequestAsset extends StatefulWidget{
   final SoCreditRequestGuarantee soCreditRequestGuarantee;
@@ -21,6 +24,7 @@ class CreditRequestAsset extends StatefulWidget{
 
 class _CreditRequestAssetState extends State<CreditRequestAsset>{
   final List<SoCreditRequestAsset> _creditRequestAssetListData = [];
+  late List<Data> dataList = [];
 
   @override
   void initState(){
@@ -89,11 +93,20 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
               ),
               child: ListTile(
                 onTap: (){
-                  if(nextSoCrqa.type == SoCreditRequestAsset.TYPE_PROPERTY){
-                    _showModalBottomSheet(context, nextSoCrqa, true);
-                  }else{
-                    _showModalBottomSheet(context, nextSoCrqa, false);
-                  }
+                  getData().then((value) {
+                    String cityText = '';
+                    for(int i =0;i<dataList.length;i++){
+                      if(nextSoCrqa.cityId == dataList[i].id){
+                        cityText = dataList[i].label;
+                      }
+                    }
+                    if(nextSoCrqa.type == SoCreditRequestAsset.TYPE_PROPERTY){
+                      _showModalBottomSheet(context, nextSoCrqa, true, cityText);
+                    }else{
+                      _showModalBottomSheet(context, nextSoCrqa, false, cityText);
+                    }
+                  });
+
                 },
                 title: Text((index+1).toString() + ':' +
                     SoCreditRequestAsset.getLabelType(nextSoCrqa.type) + ' ' +
@@ -124,12 +137,12 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
                       IconButton(
                         iconSize: 35,
                           onPressed: ()
-                          => _showModalBottomSheet(context, SoCreditRequestAsset.empty(), true),
+                          => _showModalBottomSheet(context, SoCreditRequestAsset.empty(), true, ''),
                           icon: const Icon(Icons.add_home_work_outlined, color: Colors.blue,)),
                       IconButton(
                           iconSize: 35,
                           onPressed: ()
-                          => _showModalBottomSheet(context, SoCreditRequestAsset.empty(), false),
+                          => _showModalBottomSheet(context, SoCreditRequestAsset.empty(), false, ''),
                           icon: const Icon(Icons.car_rental_outlined, color: Colors.blue,))
                     ],
                   )
@@ -156,7 +169,7 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
     );
   }
 
-  void _showModalBottomSheet(BuildContext context,SoCreditRequestAsset soCrqa,bool typeInmueble) {
+  void _showModalBottomSheet(BuildContext context,SoCreditRequestAsset soCrqa,bool typeInmueble, String cityText) {
     showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
@@ -181,7 +194,7 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
                   const Divider(thickness: 2,color: Colors.blueGrey,),
                   CreditRequestAssetsForm(soCreditRequestAsset: soCrqa,
                       soCreditRequestGuarantee: widget.soCreditRequestGuarantee,
-                      typeInmueble: typeInmueble,
+                      typeInmueble: typeInmueble, label: cityText,
                   ),
                 ],
               ),
@@ -259,5 +272,27 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
     }
 
   }
+
+  Future getData() async {
+    final response = await http.post(
+      Uri.parse(params.getAppUrl(params.instance) +
+          'dropdownlist;' +
+          params.jSessionIdQuery),
+      headers: <String, String>{
+        'programCode': 'CITY',
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Access-Control-Allow-Origin': '*',
+        'Cookie':
+        params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
+      },
+    );
+
+    setState(() {
+      final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
+      dataList =  parsed.map<Data>((json) => Data.fromJson(json)).toList();
+      // dataList = json.decode(response.body);
+    });
+  }
+
 
 }

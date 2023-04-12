@@ -17,8 +17,10 @@ class UploadFile extends StatefulWidget {
   final String programCode;
   final String fielName;
   final String id;
-  final String label;
-  final void Function()? callBack;
+  final String? label;
+  final Function callBack;
+  final String? idGuarantee;
+  final IconData? icono;
   const UploadFile(
       {Key? key,
       this.initialRuta,
@@ -26,7 +28,10 @@ class UploadFile extends StatefulWidget {
       required this.fielName,
       required this.id,
       required this.label,
-      this.callBack,})
+      required this.callBack,
+        this.idGuarantee,
+        this.icono,
+      })
       : super(key: key);
 
   @override
@@ -42,15 +47,21 @@ class uploadFile extends State<UploadFile> {
   late String _id;
   bool _hasUpload = false;
   late String _initialRuta = '';
+  late String _idGuarantee ='';
+  late Function _callback;
 
   @override
   void initState() {
     _programCode = widget.programCode;
     _fielName = widget.fielName;
     _id = widget.id;
-    _label = widget.label;
+    _label = widget.label!;
+    _callback = widget.callBack;
     if(widget.initialRuta != ''){
       _initialRuta = widget.initialRuta!;
+    }
+    if(widget.idGuarantee != ''){
+      _idGuarantee = widget.idGuarantee!;
     }
     super.initState();
   }
@@ -129,14 +140,17 @@ class uploadFile extends State<UploadFile> {
                   });
                 },
                 icon: const Icon(
-                  Icons.file_open, color: Colors.teal,)
+                  Icons.file_open,
+                  color: Colors.teal,)
             ),
             if (_hasUpload)
               IconButton(
                 color: Colors.blue,
                 onPressed: () {
                   //se ejecuta callback por si hay datos que actualizar antes de enviar
-                  widget.callBack!();
+                  setState(() {
+                    _callback(true);
+                  });
                   sendFile(_ruta!, _programCode, _fielName, _id);
                 },
                 icon: const Icon(
@@ -165,7 +179,6 @@ class uploadFile extends State<UploadFile> {
                 icon: const Icon(
                   Icons.remove_red_eye, color: Colors.teal,)
             ),
-
           ],
         ),
       ],
@@ -185,12 +198,17 @@ class uploadFile extends State<UploadFile> {
   }
 
   sendFile(String ruta, String programCode, String fieldName, String id) async {
+
+    _callback(true);
     final request = http.MultipartRequest('POST',
         Uri.parse(params.getAppUrl(params.instance) + 'uploadfileservelet'));
 
     request.fields['programCode'] = programCode;
     request.fields['fieldName'] = fieldName;
     request.fields['id'] = id;
+    if(_idGuarantee != '') {
+      request.fields['idGuarantee'] = _idGuarantee;
+    }
 
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
@@ -208,12 +226,26 @@ class uploadFile extends State<UploadFile> {
     // _initialRuta = response.;
 
     if (response.statusCode == params.servletResponseScOk) {
-      resultMessage('Subido con exito', context);
-      widget.callBack!();
+      resultMessage('Subido con éxito' , context);
+      _callback(false);
       setState(() {
         _hasUpload = false;
       });
-    } else {
+      // }
+      // else if(response.statusCode == 1){
+      //   resultMessage('Identidad validada con éxito' , context);
+      //   _callback(false);
+      //   setState(() {
+      //     _hasUpload = false;
+      //   });
+      // }else if(response.statusCode == 2){
+      //   resultMessage('Los documentos anexos no cumplen los requisitos mínimos' , context);
+      //   _callback(false);
+      //   setState(() {
+      //     _hasUpload = false;
+      //   });
+
+    }else{
       resultMessage(response.toString(), context);
     }
   }

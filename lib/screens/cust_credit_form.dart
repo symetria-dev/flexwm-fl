@@ -55,7 +55,7 @@ class _CustDataFormState extends State<CustDataForm>{
 
   //controllers campos step2
   final textMontoCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
-  late String creditDestiny = 'D';
+  late int creditDestiny = 0;
   int monthSelected = 0;
   int deadLine = 0;
   final textPagoMonthCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
@@ -123,6 +123,9 @@ class _CustDataFormState extends State<CustDataForm>{
   int _periods = 0;
   double _minAmount = 0.0;
   double _maxAmount = 0.0;
+  int _periodsMin = 0;
+  int _periodsMax = 0;
+  bool _validPeriods = false;
 //check para revisión buro de crédito
   bool isSwitched = false;
   //codigo solicitud
@@ -150,6 +153,7 @@ class _CustDataFormState extends State<CustDataForm>{
     institutionType = SoCreditRequestDetail.INSTITUTION_TYPE_NATIONAL;
     //Se inicializa step 2 y 4
     if(widget.creditRequest.id > 0){
+
       getData();
 
       soCreditRequest = widget.creditRequest;
@@ -158,7 +162,8 @@ class _CustDataFormState extends State<CustDataForm>{
           messages = true;
         });
       }
-      if(soCreditRequest.creditBureau > 0 && soCreditRequest.destiny != ''){
+
+      if(soCreditRequest.creditBureau > 0 && soCreditRequest.creditMotiveId > 0){
         setState(() {
           _activeStepIndex = 1;
           stepRealized = 1;
@@ -167,8 +172,8 @@ class _CustDataFormState extends State<CustDataForm>{
 
       codeCrqs = soCreditRequest.code;
       fiscalRegime = soCreditRequest.fiscalRegime;
-      if(soCreditRequest.destiny != ''){
-        creditDestiny = soCreditRequest.destiny;
+      if(soCreditRequest.creditMotiveId > 0){
+        creditDestiny = soCreditRequest.creditMotiveId;
       }
       creditTypeId = soCreditRequest.creditTypeId;
       textMontoCntrll.updateValue(soCreditRequest.amountRequired);
@@ -179,6 +184,14 @@ class _CustDataFormState extends State<CustDataForm>{
 
       fetchCreditRequestDetail(soCreditRequest.id.toString()).then((value) {
         if(value){
+          if(soCreditRequest.status != SoCreditRequest.STATUS_EDITION){
+            if(soCreditRequestDetail.educationalInstitutionType == SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL){
+                _currentTabIndex = 4;
+            }else{
+              _currentTabIndex =3;
+            }
+          }
+
             if(soCreditRequestDetail.educationalInstitution != '' &&
                 soCreditRequestDetail.educationalInstitutionType != '' &&
                 soCreditRequestDetail.dateStartInstitution != '' &&
@@ -196,7 +209,7 @@ class _CustDataFormState extends State<CustDataForm>{
                   if(soCreditRequestDetail.educationalInstitutionType == SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL){
                     setState(() {
                       institutionType = soCreditRequestDetail.educationalInstitutionType;
-                        _currentTabIndex = 4;
+                      _currentTabIndex = 4;
                     });
                   }else{
                     setState((){
@@ -245,7 +258,7 @@ class _CustDataFormState extends State<CustDataForm>{
       rolePreliminar = SoCreditRequestGuarantee.ROLE_ACREDITED;
       relation = SoCreditRequestGuarantee.RELATION_SELF;
     }else{
-      creditDestiny = 'D';
+      creditDestiny = 0;
       rolePreliminar = SoCreditRequestGuarantee.ROLE_ACREDITED;
       relation = SoCreditRequestGuarantee.RELATION_SELF;
     }
@@ -374,32 +387,53 @@ class _CustDataFormState extends State<CustDataForm>{
     bool valid = false;
     switch (step){
       case 0:
-        if(_formKeyCrqs.currentState!.validate()){
-          if(deadLine <= _periods){
+        if(_formKeyCrqs.currentState!.validate() && isSwitched && creditDestiny > 0) {
+          if (deadLine <= _periods) {
+            if(_validPeriods){
             addCreditRequest().then((value) {
-              if(value){
+              if (value) {
                 setState(() {
                   // fetchCreditRequestDetail(soCreditRequest.id.toString()).then((value) => updateDataCrqs());
                   _activeStepIndex += 1;
                   stepRealized = 1;
                   sendingData = false;
                 });
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Datos actualizados correctamente')),
-              );
-              }else{setState(() {
-                sendingData = false;
-              });return false;}
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Datos actualizados correctamente')),
+                );
+              } else {
+                setState(() {
+                  sendingData = false;
+                });
+                return false;
+              }
             });
-          }else{
+            }else{
+              setState(() {
+                sendingData = false;
+              });
+              Fluttertoast.showToast(msg: 'Lo sentimos, el plan de crédito seleccionado \n '
+                  'no permite este plazo, intente con un plazo diferente.');
+              return false;
+            }
+          } else {
             setState(() {
               sendingData = false;
             });
-            Fluttertoast.showToast(msg: 'Lo sentimos, el plan de crédito seleccionado \n '
-                'solo le permite un plazo máximo de $_periods meses.');
-           return false;
+            Fluttertoast.showToast(
+                msg: 'Lo sentimos, el plan de crédito seleccionado \n '
+                    'solo le permite un plazo máximo de $_periods meses.');
+            return false;
           }
+
         }else{
+          setState(() {
+            sendingData = false;
+          });
+          Fluttertoast.showToast(
+              msg: 'Favor de llenar todos los campos \n '
+                  'y confirmar autorización para revisar buro de crédito.');
           return false;
         }
         break;
@@ -526,36 +560,16 @@ class _CustDataFormState extends State<CustDataForm>{
                 key: _formKeyCrqs,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Column(children: [
-/*
                   const SizedBox( height: 10 ),
-                  const Text('Solicitud de Credito', style: TextStyle(color: Colors.grey, fontSize: 20)),*/
-                  const SizedBox( height: 10 ),
-                  Row(
-                    children: [
-                      const Expanded(
-                          child: Text("Destino del Crédito*",
-                            style: TextStyle(color: Colors.grey,fontSize: 15),
-                          )
-                      ),
-                      DropdownButtonHideUnderline(
-                        child: ButtonTheme(
-                          child: DropdownButton(
-                            value: creditDestiny,
-                            items: SoCreditRequest.getDestinyOptions.map((e) {
-                              return DropdownMenuItem(
-                                child: Text(e['label']),
-                                value: e['value'],
-                              );
-                            }).toList(),
-                            onChanged: (Object? value) {
-                              setState(() {
-                                creditDestiny = '$value';
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
+                  DropdownWidget(
+                    callback: (String id) {
+                      setState(() {
+                        creditDestiny = int.parse(id);
+                      });
+                    },
+                    programCode: 'CRMT',
+                    label: 'Destino del Crédito*',
+                    dropdownValue: soCreditRequest.creditMotiveId.toString(),
                   ),
                   const SizedBox(height: 10,),
                   DropdownWidget(
@@ -567,11 +581,13 @@ class _CustDataFormState extends State<CustDataForm>{
                     programCode: 'CRTY',
                     label: 'Plan de Crédito',
                     dropdownValue: soCreditRequest.creditTypeId.toString(),
-                    validations: (int periods, double minAmount, double maxAmount){
+                    validations: (int periods, double minAmount, double maxAmount,int periodsMin, int periodsMax){
                       setState((){
                         _periods = periods;
                         _minAmount = minAmount;
                         _maxAmount = maxAmount;
+                        _periodsMin = periodsMin;
+                        _periodsMax = periodsMax;
                       });
                     },
                   ),
@@ -741,11 +757,26 @@ class _CustDataFormState extends State<CustDataForm>{
             backgroundColor: Colors.blueGrey,
             selected: deadLine == _chipsList[i],
           onSelected: (bool value){
+              /*  if(_chipsList[i] == _profilePeriods[ii]){
+                  setState(() { _validPeriods = true; });
+                  break;
+                }else{
+                  setState(() { _validPeriods = false; });
+                }*/
               if(_chipsList[i] <= _periods){
-                setState((){
-                  monthSelected = i;
-                  deadLine = _chipsList[i];
-                });
+                if(_chipsList[i] <= _periodsMax && _chipsList[i] >= _periodsMin){
+                  setState((){
+                    _validPeriods = true;
+                    monthSelected = i;
+                    deadLine = _chipsList[i];
+                  });
+                }else{
+                  setState((){
+                    _validPeriods = false;
+                  });
+                  Fluttertoast.showToast(msg: 'Lo sentimos, el plan de crédito seleccionado \n '
+                      'no permite este plazo, intente con un plazo diferente.');
+                }
               }else{
                 Fluttertoast.showToast(msg: 'Lo sentimos, el plan de crédito seleccionado \n '
                     'solo le permite un plazo máximo de $_periods meses.');
@@ -866,7 +897,7 @@ class _CustDataFormState extends State<CustDataForm>{
                     context: context,
                     initialDate: DateTime.now(),
                     firstDate: DateTime(1910),
-                    lastDate: DateTime(2025),
+                    lastDate: DateTime(2050),
                   ).then((DateTime? value){
                     if(value != null){
                       DateTime _formDate = DateTime.now();
@@ -1170,7 +1201,7 @@ class _CustDataFormState extends State<CustDataForm>{
                           context: context,
                           initialDate: DateTime.now(),
                           firstDate: DateTime(1910),
-                          lastDate: DateTime(2025),
+                          lastDate: DateTime(2050),
                         ).then((DateTime? value){
                           if(value != null){
                             DateTime _formDate = DateTime.now();
@@ -1379,7 +1410,7 @@ class _CustDataFormState extends State<CustDataForm>{
   Future<bool> addCreditRequest() async {
     soCreditRequest.customerId = idCustomer;
     soCreditRequest.amountRequired = textMontoCntrll.numberValue;
-    soCreditRequest.destiny = creditDestiny;
+    soCreditRequest.creditMotiveId = creditDestiny;
     soCreditRequest.deadlineRequired = deadLine;
     soCreditRequest.monthlyPayment = textPagoMonthCntrll.numberValue;
     soCreditRequest.creditTypeId = creditTypeId;
@@ -1423,10 +1454,11 @@ class _CustDataFormState extends State<CustDataForm>{
       );*/
       return true;
     } else {
-      errorMsg = response.body.toString();
+      print(response.body.toString());
+      errorMsg = 'Error al guardar solicitud';
       // Error al guardar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error ${response.body}')),
+        const SnackBar(content: Text('Error al guardar solicitud')),
       );
       return false;
     }
@@ -1570,7 +1602,8 @@ class _CustDataFormState extends State<CustDataForm>{
       // );
       return true;
     } else {
-      errorMsg = response.body.toString();
+      print(response.body.toString());
+      errorMsg = 'Error al guardar detalles de su solicitud';
       return false;
     }
   }
@@ -1664,6 +1697,8 @@ class _CustDataFormState extends State<CustDataForm>{
           _periods = dataList[i]['periods'];
           _minAmount = dataList[i]['minAmount'];
           _maxAmount = dataList[i]['maxAmount'];
+          _periodsMin = dataList[i]['periodsMin'];
+          _periodsMax = dataList[i]['periodsMax'];
         });
       }
     }

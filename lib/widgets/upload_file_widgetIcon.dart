@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flexwm/models/crqg.dart';
-import 'package:flexwm/screens/cameraPhotoId.dart';
 import 'package:flexwm/ui/input_decorations.dart';
 import 'package:flexwm/widgets/alert_diaog.dart';
 import 'package:flexwm/widgets/show_image.dart';
@@ -13,31 +12,34 @@ import 'package:http/http.dart' as http;
 import '../routes/app_routes.dart';
 import '../screens/pdf_view.dart';
 
-class UploadIdPhoto extends StatefulWidget {
+class UploadFileIcon extends StatefulWidget {
   final String? initialRuta;
   final String programCode;
   final String fielName;
   final String id;
-  final String label;
+  final String? label;
   final Function callBack;
   final String? idGuarantee;
-  const UploadIdPhoto(
+  final IconData? icono;
+  const UploadFileIcon(
       {Key? key,
-      this.initialRuta,
-      required this.programCode,
-      required this.fielName,
-      required this.id,
-      required this.label,
-      required this.callBack,
-      this.idGuarantee,})
+        this.initialRuta,
+        required this.programCode,
+        required this.fielName,
+        required this.id,
+        required this.label,
+        required this.callBack,
+        this.idGuarantee,
+        this.icono,
+      })
       : super(key: key);
 
   @override
-  State<UploadIdPhoto> createState() => uploadIdPhoto();
+  State<UploadFileIcon> createState() => uploadFileIcon();
 }
 
 // ignore: camel_case_types
-class uploadIdPhoto extends State<UploadIdPhoto> {
+class uploadFileIcon extends State<UploadFileIcon> {
   String? _ruta;
   late String _programCode;
   late String _fielName;
@@ -47,14 +49,18 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
   late String _initialRuta = '';
   late String _idGuarantee ='';
   late Function _callback;
-
+  bool iconValid = false;
   @override
   void initState() {
     _programCode = widget.programCode;
     _fielName = widget.fielName;
     _id = widget.id;
-    _label = widget.label;
+    _label = widget.label!;
     _callback = widget.callBack;
+
+    if(widget.icono != null){
+      iconValid = true;
+    }
     if(widget.initialRuta != ''){
       _initialRuta = widget.initialRuta!;
     }
@@ -73,9 +79,21 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Expanded(
-          child: Text(
-            _label,
-            style: const TextStyle(fontWeight: FontWeight.w500),
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(13.0),
+                child: Icon( iconValid
+                    ?widget.icono
+                    :Icons.photo_rounded,
+                  color: const Color.fromRGBO(37, 131, 170, 1),
+                )
+              ),
+              Text(
+                _label,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ],
           ),
         ),
         Row(
@@ -101,7 +119,7 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
                 },
               ),
             ),*/
-           /* Padding(
+            /* Padding(
               padding: const EdgeInsets.fromLTRB(
                 10,
                 10,
@@ -128,10 +146,18 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
             ),*/
             IconButton(
                 onPressed: () async {
-                  _navigateAndDisplaySelection(context);
+                  final result = await FilePicker.platform
+                      .pickFiles(allowMultiple: false);
+                  if (result == null) return;
+                  final file = result.files.first;
+                  setState(() {
+                    _ruta = file.path;
+                    if (_ruta != null) _hasUpload = true;
+                  });
                 },
                 icon: const Icon(
-                  Icons.file_open, color: Colors.teal,)
+                  Icons.file_open,
+                  color: Colors.teal,)
             ),
             if (_hasUpload)
               IconButton(
@@ -149,45 +175,30 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
                 ),
               ),
             if(_initialRuta != '')
-            IconButton(
-                onPressed: () async {
-                  String file = _initialRuta;
-                  final dot = file.indexOf('.');
-                  String type = file.substring(dot, file.length);
-                  if(type == '.pdf' || type == '.PDF'){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PdfView(url: urlDoc,),
-                      ),
-                    );
-                    // _showModalPdf(context,urlDoc);
-                  }else{
-                    ShowImageAlert(context, urlDoc);
-                  }
-                },
-                icon: const Icon(
-                  Icons.remove_red_eye, color: Colors.teal,)
-            ),
-
+              IconButton(
+                  onPressed: () async {
+                    String file = _initialRuta;
+                    final dot = file.indexOf('.');
+                    String type = file.substring(dot, file.length);
+                    if(type == '.pdf' || type == '.PDF'){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PdfView(url: urlDoc,),
+                        ),
+                      );
+                      // _showModalPdf(context,urlDoc);
+                    }else{
+                      ShowImageAlert(context, urlDoc);
+                    }
+                  },
+                  icon: const Icon(
+                    Icons.remove_red_eye, color: Colors.teal,)
+              ),
           ],
         ),
       ],
     );
-  }
-
-  _navigateAndDisplaySelection(BuildContext context) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const CameraPhotoId()),
-    );
-
-    // Después de que la pantalla de selección devuelva un resultado,
-    // oculta cualquier snackbar previo y muestra el nuevo resultado.
-    setState(() {
-      _ruta = result;
-      if(_ruta != null) _hasUpload = true;
-    });
   }
 
   void updateData(String initialRuta){
@@ -203,6 +214,7 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
   }
 
   sendFile(String ruta, String programCode, String fieldName, String id) async {
+
     _callback(true);
     final request = http.MultipartRequest('POST',
         Uri.parse(params.getAppUrl(params.instance) + 'uploadfileservelet'));
@@ -213,6 +225,7 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
     if(_idGuarantee != '') {
       request.fields['idGuarantee'] = _idGuarantee;
     }
+
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
       'Access-Control-Allow-Origin': '*',
@@ -234,22 +247,22 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
       setState(() {
         _hasUpload = false;
       });
-    // }
-    // else if(response.statusCode == 1){
-    //   resultMessage('Identidad validada con éxito' , context);
-    //   _callback(false);
-    //   setState(() {
-    //     _hasUpload = false;
-    //   });
-    // }else if(response.statusCode == 2){
-    //   resultMessage('Los documentos anexos no cumplen los requisitos mínimos' , context);
-    //   _callback(false);
-    //   setState(() {
-    //     _hasUpload = false;
-    //   });
+      // }
+      // else if(response.statusCode == 1){
+      //   resultMessage('Identidad validada con éxito' , context);
+      //   _callback(false);
+      //   setState(() {
+      //     _hasUpload = false;
+      //   });
+      // }else if(response.statusCode == 2){
+      //   resultMessage('Los documentos anexos no cumplen los requisitos mínimos' , context);
+      //   _callback(false);
+      //   setState(() {
+      //     _hasUpload = false;
+      //   });
 
     }else{
-    resultMessage(response.toString(), context);
+      resultMessage(response.toString(), context);
     }
   }
 }

@@ -211,30 +211,6 @@ class _CustAddressFormState extends State<CustAddressForm>{
                   textValue: textCityCntrll.text,
                   inValid: false
               ),
-              const SizedBox(height: 10,),
-              Row(
-                children: [
-                  Switch(
-                    value: isSwitched,
-                    onChanged: (value) {
-                      if(value) {
-                        deliveryAddress = 1;
-                      } else {
-                        deliveryAddress = 0;
-                      }
-                      setState(() {
-                        isSwitched = value;
-                      });
-                    },
-                  ),
-                  const Expanded(
-                      child: Text("Dirección de entrega?",
-                        style: TextStyle(color: Colors.grey),
-                      )
-                  )
-                ],
-              ),
-              // if(widget.soCustAddress.id < 1)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: ElevatedButton(

@@ -80,6 +80,8 @@ class _DropdownWidgetState extends State<DropdownWidget> {
                             _validation(int.parse(e['periods'].toString()),
                                 double.parse(e['minAmount'].toString()),
                                 double.parse(e['maxAmount'].toString()),
+                              int.parse(e['periodsMin'].toString()),
+                              int.parse(e['periodsMax'].toString()),
                             );
                           }
                         },

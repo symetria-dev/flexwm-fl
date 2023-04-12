@@ -42,6 +42,8 @@ class _CustCrqsForm extends State<CustCrqsForm> {
   late int idCustomer = 0;
   //id de referencia (Como conoció la empresa)
   late int referralId = 0;
+  //addresses registradas
+  late int custAddresses = 0;
 
   @override
   void initState(){
@@ -93,7 +95,7 @@ class _CustCrqsForm extends State<CustCrqsForm> {
                 prefixIcon: Icons.perm_identity_outlined),
             controller: textRfcCntrll,
             validator: ( value ) {
-              return ( value != null && value.isNotEmpty )
+              return (value != null && value.isNotEmpty && value.length > 12 && value.length < 14)
                   ? null
                   : 'Por favor ingrese un rfc válido';
             },
@@ -107,7 +109,7 @@ class _CustCrqsForm extends State<CustCrqsForm> {
                 prefixIcon: Icons.perm_identity_outlined),
             controller: textCurpCntrll,
             validator: ( value ) {
-              return ( value != null && value.isNotEmpty )
+              return ( value != null && value.isNotEmpty && value.length > 17)
                   ? null
                   : 'Por favor ingrese un curp válido';
             },
@@ -117,6 +119,11 @@ class _CustCrqsForm extends State<CustCrqsForm> {
               title: 'Domicilio(s)*',
               child: CustomerAddress(
                 forceFilter: idCustomer,
+                callback: (int addresses){
+                  setState(() {
+                    custAddresses = addresses;
+                  });
+                },
               )
           ),
           const SizedBox(height: 10,),
@@ -141,9 +148,20 @@ class _CustCrqsForm extends State<CustCrqsForm> {
             child: ElevatedButton(
               onPressed: () {
                 if (_formKeyCustDetail.currentState!.validate()) {
-                  // Actualiza registro
-
-                  addCust(context);
+                  if(custAddresses>0){
+                    if(referralId > 0){
+                      // Actualiza registro
+                      addCust(context);
+                    }else{
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Favor de seleccionar referencia')),
+                      );
+                    }
+                  }else{
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Favor de agregar por lo menos un domicilio')),
+                    );
+                  }
                 }
               },
               child: const Text(
@@ -214,7 +232,8 @@ class _CustCrqsForm extends State<CustCrqsForm> {
       showAlertDialog(context);
       return true;
     } else {
-      /// Error al guardar
+      // Error al guardar
+      print(response.body.toString());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(response.body.toString())),
       );

@@ -1,4 +1,5 @@
 class SoCreditRequestAsset {
+  static const String programCode = 'CRQA';
   int id = -1;
   String type = "";
   String description = "";

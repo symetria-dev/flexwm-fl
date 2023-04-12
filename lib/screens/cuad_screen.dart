@@ -10,7 +10,12 @@ import 'package:flexwm/common/params.dart' as params;
 
 class CustomerAddress extends StatefulWidget{
   final int forceFilter;
-  const CustomerAddress({Key? key, required this.forceFilter}) : super(key: key);
+  final Function callback;
+  const CustomerAddress({
+    Key? key,
+    required this.forceFilter,
+    required this.callback
+  }) : super(key: key);
 
   @override
   State<CustomerAddress> createState() => _CustomerAddressState();
@@ -18,10 +23,14 @@ class CustomerAddress extends StatefulWidget{
 
 class _CustomerAddressState extends State<CustomerAddress>{
   final List<SoCustAddres> _customerAddressListData = [];
+  late Function _callback;
 
   @override
   void initState(){
-    fetchSoCustomerAddress(widget.forceFilter);
+    fetchSoCustomerAddress(widget.forceFilter).then((value) {
+        _callback(_customerAddressListData.length);
+    });
+    _callback = widget.callback;
     super.initState();
   }
 
@@ -58,7 +67,9 @@ class _CustomerAddressState extends State<CustomerAddress>{
                             //Se actualiza la lista del subcatalogo
                             _customerAddressListData.clear();
                             setState((){
-                              fetchSoCustomerAddress(widget.forceFilter);
+                              fetchSoCustomerAddress(widget.forceFilter).then((value) {
+                                _callback(_customerAddressListData.length);
+                              });
                             });
                           }
                         });
@@ -150,7 +161,9 @@ class _CustomerAddressState extends State<CustomerAddress>{
     //Se actualiza la lista del subcatalogo
     _customerAddressListData.clear();
     setState((){
-      fetchSoCustomerAddress(widget.forceFilter);
+      fetchSoCustomerAddress(widget.forceFilter).then((value) {
+        _callback(_customerAddressListData.length);
+      });
     });
   }
 

@@ -385,13 +385,13 @@ class _CreditRequestList extends State<CreditRequestList> {
                     })),
                       icon: const Icon(Icons.account_balance_wallet_outlined, color: Colors.teal,),
                   ),
-                  title: Text('Destino del crédito: '+SoCreditRequest.getCreditDestiny(item.destiny)),
+                  title: Text('Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Monto financiado: ' +
                           NumberFormat.currency(locale: 'es_MX',symbol: '\$').format(item.amountRequired)),
-                      Text('Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
+                      // Text('Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
                     ],
                   ),
                   // trailing: const Icon(Icons.monetization_on_outlined, color: Colors.indigo,),
@@ -481,13 +481,13 @@ class _CreditRequestList extends State<CreditRequestList> {
                     })),
                     icon: const Icon(Icons.account_balance_wallet_outlined, color: Colors.teal,),
                   ),
-                  title: Text('Destino del crédito: '+SoCreditRequest.getCreditDestiny(item.destiny)),
+                  title: Text('Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Monto financiado: ' +
                           NumberFormat.currency(locale: 'es_MX',symbol: '\$').format(item.amountRequired)),
-                      Text('Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
+                      // Text('Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
                     ],
                   ),
                   // trailing: const Icon(Icons.monetization_on_outlined, color: Colors.indigo,),

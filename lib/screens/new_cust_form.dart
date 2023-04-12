@@ -26,6 +26,7 @@ class NewCustForm extends StatefulWidget {
 
 class _NewCustForm extends State<NewCustForm>{
   bool stepForm = false;
+  bool stepFinalForm = false;
   //controllers para manejo de datos
   final nameCtrll = TextEditingController();
   final lastNameCtrll = TextEditingController();
@@ -36,10 +37,13 @@ class _NewCustForm extends State<NewCustForm>{
   final cellPhoneCtrll = TextEditingController();
   final textMotherLastNameCntrll = TextEditingController();
   final textPhoneContrll = TextEditingController();
+  final textPswContrll = TextEditingController();
+  final textPswConfContrll = TextEditingController();
 
   //Keys para formularios
   final _firstForm = GlobalKey<FormState>();
   final _secondForm = GlobalKey<FormState>();
+  final _thirdForm = GlobalKey<FormState>();
   //mostrar carga visual
   bool isLoading = false;
 
@@ -59,12 +63,18 @@ class _NewCustForm extends State<NewCustForm>{
           backgroundColor: Colors.white,
           child: const Icon(Icons.arrow_back,color: Colors.grey,),
           onPressed: (){
-            if(stepForm){
+            if(stepFinalForm){
               setState(() {
-                stepForm = false;
+                stepFinalForm=false;
               });
             }else{
-              Navigator.pop(context);
+              if(stepForm){
+                setState(() {
+                  stepForm=false;
+                });
+              }else{
+                Navigator.pop(context);
+              }
             }
           },
           mini: true,
@@ -86,9 +96,12 @@ class _NewCustForm extends State<NewCustForm>{
                     const SizedBox( height: 20 ),
 
                     if(!stepForm)
-                     stepOneForm()
+                      stepOneForm()
                     else
-                     stepTwoForm()
+                      if(stepFinalForm)
+                        stepThreeForm()
+                      else
+                        stepTwoForm()
                   ],
                 )
               ),
@@ -213,11 +226,93 @@ class _NewCustForm extends State<NewCustForm>{
                   }
                 }
             )
-
           ],
         ),
       ),
     );
+  }
+
+  Widget stepThreeForm(){
+    return Container(
+        child: Form(
+        key: _thirdForm,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Column(
+        children: [
+          TextFormField(
+            validator: (value) {
+              String? passw = value;
+              return validateStructure(passw!)
+                  ? null
+                  : 'La contraseña debe contener mínimo 8 caracteres\n'
+                  'Mínimo 1 minúscula\n'
+                  'Mínimo 1 mayúscula\n'
+                  'Mínimo 1 número\n'
+                  'Mínimo 1 carácter especial (! @ # \$ & * ~)';
+            },
+            decoration: InputDecorations.authInputDecoration(
+                hintText: "Password",
+                labelText: "*Password",
+                prefixIcon: Icons.account_circle_outlined
+            ),
+            obscureText: true,
+            controller: textPswContrll,
+            ),
+          const SizedBox(height: 10,),
+          TextFormField(
+            validator: (value) {
+              if (value != textPswContrll.text) {
+                return 'Las contraseñas deben coincidir';
+              }
+              return null;
+            },
+            decoration: InputDecorations.authInputDecoration(
+                hintText: "Confirmar Password",
+                labelText: "*Confirmar Password",
+                prefixIcon: Icons.account_circle_outlined
+            ),
+            obscureText: true,
+            controller: textPswConfContrll,
+          ),
+          if(isLoading)
+            const LinearProgressIndicator(),
+          const SizedBox( height: 40 ),
+          MaterialButton(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              disabledColor: Colors.grey,
+              elevation: 0,
+              // color: Colors.deepOrange,
+              color: Colors.blueGrey,
+              child: Container(
+                  padding: const EdgeInsets.symmetric( horizontal: 80, vertical: 15),
+                  child: Text(
+                    isLoading
+                        ? 'Espere'
+                        : 'Agregar',
+                    style: const TextStyle( color: Colors.white ),
+                  )
+              ),
+              onPressed: () async {
+                if(_thirdForm.currentState!.validate()){
+                  setState(() {
+                    isLoading = true;
+                  });
+                  addCust(context);
+                }
+              }
+          )
+          ],
+        ),
+      ),
+    );
+  }
+
+  bool validateStructure(String value){
+    print(value);
+    // String pattern = r'^(?=.?[A-Z])(?=.?[a-z])(?=.?[0-9])(?=.?[!@#\$&*~]).{8,}$';
+    String pattern = r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
+    RegExp regExp = RegExp(pattern);
+    return regExp.hasMatch(value);
   }
 
   Widget stepTwoForm (){
@@ -339,9 +434,8 @@ class _NewCustForm extends State<NewCustForm>{
 
               },
             ),
-            if(isLoading)
-              const LinearProgressIndicator(),
             const SizedBox( height: 40 ),
+
             MaterialButton(
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 disabledColor: Colors.grey,
@@ -350,19 +444,16 @@ class _NewCustForm extends State<NewCustForm>{
                 color: Colors.blueGrey,
                 child: Container(
                     padding: const EdgeInsets.symmetric( horizontal: 80, vertical: 15),
-                    child: Text(
-                      isLoading
-                          ? 'Espere'
-                          : 'Agregar',
-                      style: const TextStyle( color: Colors.white ),
+                    child: const Text(
+                      'Siguiente',
+                      style: TextStyle( color: Colors.white ),
                     )
                 ),
                 onPressed: () async {
                   if(_secondForm.currentState!.validate()){
-                    setState(() {
-                      isLoading = true;
+                    setState((){
+                      stepFinalForm = true;
                     });
-                    addCust(context);
                   }
                 }
             )
@@ -384,6 +475,8 @@ class _NewCustForm extends State<NewCustForm>{
     soCustomer.birthdate = dateContr.text;
     soCustomer.phone = textPhoneContrll.text;
     soCustomer.motherlastname = textMotherLastNameCntrll.text;
+    soCustomer.passw = textPswContrll.text;
+    soCustomer.passwconf = textPswConfContrll.text;
     print('params instance -> ${params.instance}');
     // Envia la sesion como Cookie, con el nombre en UpperCase
     final response = await http.post(
@@ -424,7 +517,7 @@ class _NewCustForm extends State<NewCustForm>{
       Navigator.pop(context);
       print('Error al Guardar ${response.body}');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al Guardar ${response.body}')),
+        SnackBar(content: Text('Error al crear registro')),
       );
     }
   }

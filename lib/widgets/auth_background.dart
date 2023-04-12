@@ -71,6 +71,33 @@ class _PurpleBox extends StatelessWidget {
           Positioned(child: _Bubble(), top: -50, right: -20 ),
           Positioned(child: _Bubble(), bottom: -50, left: 10 ),
           Positioned(child: _Bubble(), bottom: 120, right: 20 ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Row(
+                children: [
+                  const Opacity(
+                      opacity: 0.5,
+                      child: Text('Powered by FlexWM')
+                  ),
+                  const SizedBox(width: 5,),
+                  Flexible(
+                      child: Opacity(
+                          opacity: 0.5,
+                          child: Image.asset(
+                            'images/icon-black.png',
+                            height: 30,
+                          )
+                      )
+                  )
+                ],
+                mainAxisAlignment: MainAxisAlignment.center,
+              ),
+              const SizedBox(height: 10,)
+            ],
+          )
         ],
       ),
     );

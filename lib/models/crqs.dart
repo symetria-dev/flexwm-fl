@@ -2,7 +2,8 @@ import 'package:flexwm/models/wflw.dart';
 
 class SoCreditRequest {
   int id = -1;
-  String destiny = "D";
+  // String destiny = "D";
+  int creditMotiveId = 0;
   double amountRequired = 0.0;
   int deadlineRequired = 0;
   double monthlyPayment = 0.0;
@@ -98,7 +99,7 @@ class SoCreditRequest {
 
   SoCreditRequest.empty();
 
-  SoCreditRequest(this.id, this.destiny,this.customerId,this.amountRequired,
+  SoCreditRequest(this.id, this.creditMotiveId,this.customerId,this.amountRequired,
       this.deadlineRequired,this.monthlyPayment,this.currencyId,this.creditTypeId,
       this.creditProfileId, this.code, this.status,
       this.wFlowId, this.fiscalRegime, this.creditBureau, this.soWFlow);
@@ -106,7 +107,7 @@ class SoCreditRequest {
   factory SoCreditRequest.fromJson(Map<String, dynamic> json) {
     return SoCreditRequest(
       json['id'] as int,
-      json['destiny'] as String,
+      json['creditMotiveId'] as int,
       json['customerId'] as int,
       json['amountRequired'] as double,
       json['deadlineRequired'] as int,
@@ -133,7 +134,7 @@ class SoCreditRequest {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'destiny': destiny,
+      'creditMotiveId': creditMotiveId,
       'customerId': customerId,
       'amountRequired' : amountRequired,
       'deadlineRequired' : deadlineRequired,

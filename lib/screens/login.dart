@@ -213,6 +213,7 @@ class LoginFormState extends State<LoginForm> {
     soLogin.email = emailController.text;
     soLogin.password = passwordController.text;
     instanceController.text = params.instance;
+
     final response = await http.post(
       //TODO colocar de forma dinamica que tipo de usuario hara login
       Uri.parse(params.getAppUrl(instanceController.text) + 'restlogincust'),
@@ -229,6 +230,9 @@ class LoginFormState extends State<LoginForm> {
       Navigator.pushReplacementNamed(context, '/crqs_list');
       //setState(() {sendingData = false;});
     } else {
+
+      print(response.body.toString());
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error de Login')),
       );
