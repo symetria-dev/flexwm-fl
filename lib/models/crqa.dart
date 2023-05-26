@@ -39,7 +39,7 @@ class SoCreditRequestAsset {
   static String STATUS_REJECTED = 'R';
 
   static List getTypeOptions = [
-    {"value": "-", "label": "Seleccione una agencia"},
+    {"value": "-", "label": "Seleccione una opción"},
     {"value": TYPE_AUTO, "label": "Automovil"},
     {"value": TYPE_PROPERTY, "label": "Inmueble"},
   ];

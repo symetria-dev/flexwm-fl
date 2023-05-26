@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flexwm/models/crqg.dart';
-import 'package:flexwm/screens/crqg_form.dart';
+import 'package:flexwm/screens/crqg_form2.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -129,10 +129,14 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => CreditRequestGuarateeForm(
+                          builder: (_) => CreditRequestGuarateeForm2(
                               soCreditRequestGuarantee: nextSoCreditRequest,
                               creditRequestId: idCreditRequest),
-                        ));
+                        )).then((value) => setState((){
+                      _creditRequestGuarantee.clear();
+                      fetchSoCreditRequestGuarantee(idCreditRequest);
+                      fetchSoCustomers();
+                    }));
                 },
                 leading: const Icon(
                   Icons.assignment_ind,
@@ -161,11 +165,23 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
                                 color: Colors.blue, fontSize: 16),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                              _soCustomerList.clear();
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) =>
+                                    CreditRequestGuarateeForm2(
+                                        soCreditRequestGuarantee: SoCreditRequestGuarantee.empty(),
+                                        creditRequestId: idCreditRequest),
+                                  )
+                                ).then((value) => setState((){
+                                  _creditRequestGuarantee.clear();
+                                  fetchSoCreditRequestGuarantee(idCreditRequest);
+                                  fetchSoCustomers();
+                                }));
+                              /*_soCustomerList.clear();
                               setState(() {
                                 fetchSoCustomers().then((value) =>
                                     showModalCustomerSponsors(context));
-                              });
+                              });*/
                               })
                       ],
                     ),
@@ -187,7 +203,7 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => CreditRequestGuarateeForm(
+              builder: (_) => CreditRequestGuarateeForm2(
                   soCreditRequestGuarantee: SoCreditRequestGuarantee.empty(),
                   creditRequestId: idCreditRequest),
             )).then((value) {

@@ -17,19 +17,11 @@ class SoCreditRequest {
   String fiscalRegime = '';
   int creditBureau = 0;
   SoWFlow soWFlow = SoWFlow.empty();
-  /*String employmentStatus = 'E';
-  String company = "";
-  String economicActivity = "";
-  String yearsEmployment = "";
-  double creditCards = 0.0;
-  double rent = 0.0;
-  double creditAutomotive = 0.0;
-  double creditFurniture = 0.0;
-  double personalLoans = 0.0;
+  String starDate = '';
 
-  double monthlyIncome = 0.0;
-  double otherIncome = 0.0;
-  double aproximateMonthlyPay = 0.0;*/
+  String periodType = '';
+  int periods = 0;
+  int disbursements = 0;
 
   static String STATUS_EDITION = 'E';
   static String STATUS_REVISION = 'R';
@@ -39,6 +31,23 @@ class SoCreditRequest {
   static String FISCALREGIME_PERSON = 'P';
   static String FISCALREGIME_PERSONACTIVITY = 'A';
   static String FISCALREGIME_COMPANY = 'C';
+
+  static String PERIODTYPE_ANNUAL = 'A';
+  static String PERIODTYPE_SEMESTER = 'S';
+  static String PERIODTYPE_BIMONTH = 'B';
+  static String PERIODTYPE_MONTH = 'M';
+  static String PERIODTYPE_FORTNIGHT = 'F';
+  static String PERIODTYPE_WEEK = 'W';
+
+  static List getPeriodType = [
+    {"value": "-", "label": "Seleccione una opción"},
+    {"value": PERIODTYPE_ANNUAL , "label": "Anual"},
+    {"value": PERIODTYPE_SEMESTER , "label": "Semestral"},
+    {"value": PERIODTYPE_BIMONTH , "label": "Bimestral"},
+    {"value": PERIODTYPE_MONTH , "label": "Mensual"},
+    {"value": PERIODTYPE_FORTNIGHT , "label": "Quincenal"},
+    {"value": PERIODTYPE_WEEK , "label": "Semanal"},
+  ];
 
   static List getDestinyOptions = [
     {"value": "D", "label": "Diplomado"},
@@ -102,7 +111,8 @@ class SoCreditRequest {
   SoCreditRequest(this.id, this.creditMotiveId,this.customerId,this.amountRequired,
       this.deadlineRequired,this.monthlyPayment,this.currencyId,this.creditTypeId,
       this.creditProfileId, this.code, this.status,
-      this.wFlowId, this.fiscalRegime, this.creditBureau, this.soWFlow);
+      this.wFlowId, this.fiscalRegime, this.creditBureau, this.soWFlow, this.starDate,
+      this.periodType, this.periods, this.disbursements);
 
   factory SoCreditRequest.fromJson(Map<String, dynamic> json) {
     return SoCreditRequest(
@@ -128,6 +138,10 @@ class SoCreditRequest {
         json['soWFlow']['userMsgs'] as bool,
         json['soWFlow']['customerMsgs'] as bool,
       ),
+      json['starDate'] as String,
+      json['periodType'] as String,
+      json['periods'] as int,
+      json['disbursements'] as int,
     );
   }
 
@@ -148,6 +162,10 @@ class SoCreditRequest {
       'fiscalRegime' : fiscalRegime,
       'creditBureau' : creditBureau,
       'soWFlow' : soWFlow,
+      'starDate' : starDate,
+      'periodType' : periodType,
+      'periods' : periods,
+      'disbursements' : disbursements,
     };
   }
 

@@ -13,6 +13,8 @@ import 'package:flexwm/common/params.dart' as params;
 import 'package:http/http.dart' as http;
 
 import '../models/cust.dart';
+import '../routes/app_routes.dart';
+import '../widgets/dropdown_widget.dart';
 
 class NewCustForm extends StatefulWidget {
 
@@ -46,6 +48,8 @@ class _NewCustForm extends State<NewCustForm>{
   final _thirdForm = GlobalKey<FormState>();
   //mostrar carga visual
   bool isLoading = false;
+  //id de referencia (Como conoció la empresa)
+  late int referralId = 0;
 
   @override
   void initState() {
@@ -115,6 +119,9 @@ class _NewCustForm extends State<NewCustForm>{
   }
 
   Widget stepOneForm(){
+
+    var now = DateTime.now();
+    var formatterAno = DateFormat("y");
     return Container(
       child: Form(
         key: _firstForm,
@@ -175,7 +182,7 @@ class _NewCustForm extends State<NewCustForm>{
               },
             ),
             const SizedBox(height: 10),
-            Row(
+            /*Row(
               children: [
                 const SizedBox(height: 10,),
                 const Expanded(
@@ -202,6 +209,39 @@ class _NewCustForm extends State<NewCustForm>{
                   ),
                 ),
               ],
+            ),*/
+            TextFormField(
+              autocorrect: false,
+              keyboardType: TextInputType.name,
+              decoration: InputDecorations.authInputDecoration(
+                  hintText: "Seleccione una Fecha",
+                  labelText: (custTypeController.text == SoCustomer.TYPE_PERSON)
+                      ? "Fecha de Nacimiento"
+                      : "Fecha Constitución",
+                  prefixIcon: Icons.calendar_today_outlined
+              ),
+              controller: dateContr,
+              readOnly: true,
+              validator: (value) {
+                return (value != null && value.isNotEmpty)
+                    ? null
+                    : 'Por favor ingrese una fecha válida';
+              },
+              onTap: (){
+                showDatePicker(
+                  context: context,
+                  initialDate: DateTime(int.parse(formatterAno.format(now))-18),
+                  firstDate: DateTime(1910),
+                  lastDate: DateTime(int.parse(formatterAno.format(now))-18),
+                ).then((DateTime? value){
+                  if(value != null){
+                    DateTime _formDate = DateTime.now();
+                    _formDate = value;
+                    final String date = DateFormat('yyyy-MM-dd').format(_formDate);
+                    dateContr.text = date;
+                  }
+                });
+              },
             ),
             const SizedBox( height: 40 ),
 
@@ -316,67 +356,12 @@ class _NewCustForm extends State<NewCustForm>{
   }
 
   Widget stepTwoForm (){
-    var now = DateTime.now();
-    var formatterAno = DateFormat("y");
     return Container(
       child: Form(
         key: _secondForm,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         child: Column(
           children: [
-            if(custTypeController.text == SoCustomer.TYPE_COMPANY)
-              TextFormField(
-                autocorrect: false,
-                keyboardType: TextInputType.name,
-                controller: legalNameCtrll,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: "Razón Social",
-                    labelText: "Razón Social",
-                    prefixIcon: Icons.account_circle_outlined
-                ),
-                validator: ( value ) {
-
-                  return ( value != null && value.isNotEmpty )
-                      ? null
-                      : 'Por favor ingrese una razón social válida';
-
-                },
-              ),
-              TextFormField(
-                autocorrect: false,
-                keyboardType: TextInputType.name,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: "Seleccione una Fecha",
-                    labelText: (custTypeController.text == SoCustomer.TYPE_PERSON)
-                        ? "Fecha de Nacimiento"
-                        : "Fecha Constitución",
-                    prefixIcon: Icons.calendar_today_outlined
-                ),
-                controller: dateContr,
-                readOnly: true,
-                validator: (value) {
-                  return (value != null && value.isNotEmpty)
-                      ? null
-                      : 'Por favor ingrese una fecha válida';
-                },
-                onTap: (){
-                  showDatePicker(
-                    context: context,
-                    initialDate: DateTime(int.parse(formatterAno.format(now))-18),
-                    firstDate: DateTime(1910),
-                    lastDate: DateTime(int.parse(formatterAno.format(now))-18),
-                  ).then((DateTime? value){
-                    if(value != null){
-                      DateTime _formDate = DateTime.now();
-                      _formDate = value;
-                      final String date = DateFormat('yyyy-MM-dd').format(_formDate);
-                      dateContr.text = date;
-                    }
-                  });
-                },
-              ),
-
-            const SizedBox(height: 10),
 
             TextFormField(
               autocorrect: false,
@@ -398,7 +383,7 @@ class _NewCustForm extends State<NewCustForm>{
 
               },
             ),
-            const SizedBox(height: 10),
+            /*const SizedBox(height: 10),
             TextFormField(
               autocorrect: false,
               keyboardType: TextInputType.phone,
@@ -415,7 +400,7 @@ class _NewCustForm extends State<NewCustForm>{
                     : 'Por favor ingrese un número de teléfono válido';
 
               },
-            ),
+            ),*/
             const SizedBox(height: 10),
             TextFormField(
               autocorrect: false,
@@ -433,6 +418,17 @@ class _NewCustForm extends State<NewCustForm>{
                     : 'Por favor ingrese un número de teléfono válido';
 
               },
+            ),
+            const SizedBox(height: 10,),
+            DropdownWidget(
+              callback: (String id) {
+                setState(() {
+                  referralId = int.parse(id);
+                });
+              },
+              programCode: 'REFE',
+              label: 'Referencia*',
+              dropdownValue: referralId.toString(),
             ),
             const SizedBox( height: 40 ),
 
@@ -466,17 +462,18 @@ class _NewCustForm extends State<NewCustForm>{
   // Actualiza el wflowstep en el servidor
   void addCust(BuildContext context) async {
     SoCustomer soCustomer = SoCustomer.empty();
-    soCustomer.customerType = custTypeController.text;
-    soCustomer.legalName = legalNameCtrll.text;
+    soCustomer.customerType = SoCustomer.TYPE_PERSON;
+    // soCustomer.legalName = legalNameCtrll.text;
     soCustomer.firstName = nameCtrll.text;
     soCustomer.fatherLastName = lastNameCtrll.text;
     soCustomer.email = emailCtrll.text;
     soCustomer.mobile = cellPhoneCtrll.text;
     soCustomer.birthdate = dateContr.text;
-    soCustomer.phone = textPhoneContrll.text;
+    // soCustomer.phone = textPhoneContrll.text;
     soCustomer.motherlastname = textMotherLastNameCntrll.text;
     soCustomer.passw = textPswContrll.text;
     soCustomer.passwconf = textPswConfContrll.text;
+    soCustomer.referralId = referralId;
     print('params instance -> ${params.instance}');
     // Envia la sesion como Cookie, con el nombre en UpperCase
     final response = await http.post(
@@ -498,19 +495,13 @@ class _NewCustForm extends State<NewCustForm>{
       soCustomer = SoCustomer.fromJson(jsonDecode(response.body));
 
       // Muestra mensaje
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Cliente "' + soCustomer.email + '" registrado')),
-      );
-      // Muestra mensaje
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Favor de revisar su correo para activar su cuenta')),
-      );
+      showAlertDialog(context);
       // Regresa al login
       //Navigator.pop(context);
-      Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginForm())
-      );
+      // Navigator.push(
+      //     context,
+      //     MaterialPageRoute(builder: (context) => const LoginForm())
+      // );
     } else {
       setState((){isLoading = false;});
       // Error al guardar
@@ -520,5 +511,36 @@ class _NewCustForm extends State<NewCustForm>{
         SnackBar(content: Text('Error al crear registro')),
       );
     }
+  }
+
+  showAlertDialog(BuildContext context) {
+    // set up the buttons
+   /* Widget cancelButton = TextButton(
+      child: const Text("Cancelar"),
+      onPressed:  () {
+        Navigator.pop(context);
+      },
+    );*/
+    Widget continueButton = TextButton(
+      child: const Text("Continuar"),
+      onPressed:  () {
+        Navigator.pushNamed(context, AppRoutes.initialRoute);
+      },
+    );
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text("Registro Creado con Éxito "),
+      content: const Text("Favor de revisar su correo para activar su cuenta"),
+      actions: [
+        continueButton,
+      ],
+    );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 }

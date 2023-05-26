@@ -1,4 +1,5 @@
 import 'package:flexwm/common/params.dart' as params;
+import 'package:flexwm/models/crqd.dart';
 import 'package:flexwm/routes/routes.dart';
 import 'package:flexwm/screens/crqs_list.dart';
 import 'package:flexwm/screens/cust_credit_form.dart';
@@ -6,6 +7,9 @@ import 'package:flexwm/screens/cust_crqs_form.dart';
 import 'package:flexwm/screens/dashboard.dart';
 import 'package:flexwm/screens/cameraPhotoId.dart';
 import 'package:flexwm/widgets/upload_image_widget.dart';
+
+import '../models/crqs.dart';
+import '../screens/crqs_form.dart';
 
 class AppRoutes {
   static const initialRoute = '/';
@@ -24,7 +28,8 @@ class AppRoutes {
         route: '/wfsp_list',
         name: 'Tareas Activas',
         leadingWidget: params.getProperIcon(SoWFlowStep.programCode),
-        screen: const WFlowStepList()),
+        screen: CrqsForm(creditRequest: SoCreditRequest.empty(),
+          creditRequestDetail: SoCreditRequestDetail.empty(),)),
     //Se comentan para versión clientes edupass
  /*   MenuOption(
         route: '/cust_list',
