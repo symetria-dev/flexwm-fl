@@ -8,6 +8,8 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/common/params.dart' as params;
 
+import '../models/data.dart';
+
 class CustomerAddress extends StatefulWidget{
   final int forceFilter;
   final Function callback;
@@ -24,6 +26,7 @@ class CustomerAddress extends StatefulWidget{
 class _CustomerAddressState extends State<CustomerAddress>{
   final List<SoCustAddres> _customerAddressListData = [];
   late Function _callback;
+  late List<Data> dataList = [];
 
   @override
   void initState(){
@@ -83,7 +86,15 @@ class _CustomerAddressState extends State<CustomerAddress>{
               ),
               child: ListTile(
                 onTap: (){
-                  _showModalBottomSheet(context, nextSoCustAddress);
+                  getData().then((value) {
+                    String cityText = '';
+                    for(int i =0;i<dataList.length;i++){
+                      if(nextSoCustAddress.cityId == dataList[i].id){
+                        cityText = dataList[i].label;
+                      }
+                    }
+                    _showModalBottomSheet(context, nextSoCustAddress, cityText);
+                  });
                 },
                 title: Text(index.toString() + ':' + nextSoCustAddress.type + ' ' + nextSoCustAddress.street),
                 subtitle: Text(nextSoCustAddress.neighborhood+" "+nextSoCustAddress.number),
@@ -110,7 +121,7 @@ class _CustomerAddressState extends State<CustomerAddress>{
                             style: const TextStyle(color: Colors.blue,fontSize: 16),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                _showModalBottomSheet(context, SoCustAddres.empty());
+                                _showModalBottomSheet(context, SoCustAddres.empty(), '');
                               }
                         )
                       ],
@@ -125,7 +136,7 @@ class _CustomerAddressState extends State<CustomerAddress>{
     );
   }
 
-  void _showModalBottomSheet(BuildContext context,SoCustAddres soCustAddress) {
+  void _showModalBottomSheet(BuildContext context,SoCustAddres soCustAddress, String labelCity) {
     showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
@@ -148,7 +159,7 @@ class _CustomerAddressState extends State<CustomerAddress>{
                     ),
                   ),
                   const Divider(thickness: 2,color: Colors.blueGrey,),
-                  CustAddressForm(soCustAddress: soCustAddress),
+                  CustAddressForm(soCustAddress: soCustAddress, customerId: widget.forceFilter, label: labelCity,),
                 ],
               ),
             ),
@@ -226,6 +237,27 @@ class _CustomerAddressState extends State<CustomerAddress>{
       return false;
     }
 
+  }
+
+  Future getData() async {
+    final response = await http.post(
+      Uri.parse(params.getAppUrl(params.instance) +
+          'dropdownlist;' +
+          params.jSessionIdQuery),
+      headers: <String, String>{
+        'programCode': 'CITY',
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Access-Control-Allow-Origin': '*',
+        'Cookie':
+        params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
+      },
+    );
+
+    setState(() {
+      final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
+      dataList =  parsed.map<Data>((json) => Data.fromJson(json)).toList();
+      // dataList = json.decode(response.body);
+    });
   }
 
 }

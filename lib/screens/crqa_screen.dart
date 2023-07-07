@@ -25,9 +25,12 @@ class CreditRequestAsset extends StatefulWidget{
 class _CreditRequestAssetState extends State<CreditRequestAsset>{
   final List<SoCreditRequestAsset> _creditRequestAssetListData = [];
   late List<Data> dataList = [];
+  //id de aval
+  int creditRequestGuaranteeId = 0;
 
   @override
   void initState(){
+    creditRequestGuaranteeId = widget.soCreditRequestGuarantee.id;
     fetchSoCreditRequestAssets(widget.soCreditRequestGuarantee.id);
     super.initState();
   }
@@ -101,10 +104,36 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
                       }
                     }
                     if(nextSoCrqa.type == SoCreditRequestAsset.TYPE_PROPERTY){
-                      _showModalBottomSheet(context, nextSoCrqa, true, cityText);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) =>
+                              CreditRequestAssetsForm(
+                                soCreditRequestAsset: nextSoCrqa,
+                                soCreditRequestGuarantee: widget.soCreditRequestGuarantee,
+                                label: cityText,),
+                          )
+                      ).then((value) {
+                        _creditRequestAssetListData.clear();
+                        setState(() {
+                          fetchSoCreditRequestAssets(creditRequestGuaranteeId);
+                        });
+                      });
                     }else{
-                      _showModalBottomSheet(context, nextSoCrqa, false, cityText);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) =>
+                              CreditRequestAssetsForm(
+                                soCreditRequestAsset: nextSoCrqa,
+                                soCreditRequestGuarantee: widget.soCreditRequestGuarantee,),
+                          )
+                      ).then((value) {
+                        _creditRequestAssetListData.clear();
+                        setState(() {
+                          fetchSoCreditRequestAssets(creditRequestGuaranteeId);
+                        });
+                      });
                     }
+
                   });
 
                 },
@@ -130,36 +159,34 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
             children: [
               Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        iconSize: 35,
-                          onPressed: ()
-                          => _showModalBottomSheet(context, SoCreditRequestAsset.empty(), true, ''),
-                          icon: const Icon(Icons.add_home_work_outlined, color: Colors.blue,)),
-                      IconButton(
-                          iconSize: 35,
-                          onPressed: ()
-                          => _showModalBottomSheet(context, SoCreditRequestAsset.empty(), false, ''),
-                          icon: const Icon(Icons.car_rental_outlined, color: Colors.blue,))
-                    ],
-                  )
-              /*    RichText(
+                  child:
+                  RichText(
                     text: TextSpan(
                       children: [
                         TextSpan(
-                            text: 'Registrar Nueva Garantia',
+                            text: 'Nueva Garantia',
                             style: const TextStyle(color: Colors.blue,fontSize: 16),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                _showModalBottomSheet(context, SoCreditRequestAsset.empty());
+                                // _showModalBottomSheet(context, SoCreditRequestAsset.empty(),true,'');
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) =>
+                                        CreditRequestAssetsForm(
+                                            soCreditRequestAsset: SoCreditRequestAsset.empty(),
+                                            soCreditRequestGuarantee: widget.soCreditRequestGuarantee),
+                                    )
+                                ).then((value) {
+                                  _creditRequestAssetListData.clear();
+                                  setState(() {
+                                    fetchSoCreditRequestAssets(creditRequestGuaranteeId);
+                                  });
+                                });
                               }
-                        )
+                        ),
                       ],
                     ),
-                  )*/
+                  )
               ),
               const SizedBox(height: 20,)
             ],
@@ -193,8 +220,7 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
                   ),
                   const Divider(thickness: 2,color: Colors.blueGrey,),
                   CreditRequestAssetsForm(soCreditRequestAsset: soCrqa,
-                      soCreditRequestGuarantee: widget.soCreditRequestGuarantee,
-                      typeInmueble: typeInmueble, label: cityText,
+                      soCreditRequestGuarantee: widget.soCreditRequestGuarantee, label: cityText,
                   ),
                 ],
               ),
@@ -236,6 +262,7 @@ class _CreditRequestAssetState extends State<CreditRequestAsset>{
     _creditRequestAssetListData.addAll(
         parsed.map<SoCreditRequestAsset>((json) => SoCreditRequestAsset.fromJson(json)).toList());
     setState((){});
+    print('consultadads garantias ---> ${_creditRequestAssetListData.length}');
     return parsed
         .map<SoCreditRequestAsset>((json) => SoCreditRequestAsset.fromJson(json))
         .toList();

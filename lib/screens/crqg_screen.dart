@@ -8,11 +8,13 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/common/params.dart' as params;
+import '../models/crqa.dart';
 import '../models/cust.dart';
 
 class CreditRequestGuarantee extends StatefulWidget {
   final int forceFilter;
-  const CreditRequestGuarantee({Key? key, required this.forceFilter})
+  final bool requiredAsset;
+  const CreditRequestGuarantee({Key? key, required this.forceFilter, required this.requiredAsset})
       : super(key: key);
 
   @override
@@ -23,6 +25,8 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
   final List<SoCreditRequestGuarantee> _creditRequestGuarantee = [];
   SoCreditRequestGuarantee soCreditRequestGuarantee =
       SoCreditRequestGuarantee.empty();
+  //requiere garantia
+  bool requiredAsset = false;
   //variables para el manejo de lcientes avales
   final List<SoCustomer> _soCustomerList = [];
   int idCustomer = 0;
@@ -46,9 +50,12 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
   late String maritalStatus = '';
   late String regimenMarital = '';
   String msjResponsServer = '';
+  //Lista de garantias por solicitud de crédito
+  final List<SoCreditRequestAsset> _creditRequestAssetListData = [];
 
   @override
   void initState() {
+    requiredAsset = widget.requiredAsset;
     idCustomer = params.idLoggedUser;
     idCreditRequest = widget.forceFilter;
     role = SoCreditRequestGuarantee.ROLE_COACREDITED;
@@ -131,8 +138,19 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
                         MaterialPageRoute(
                           builder: (_) => CreditRequestGuarateeForm2(
                               soCreditRequestGuarantee: nextSoCreditRequest,
-                              creditRequestId: idCreditRequest),
+                              creditRequestId: idCreditRequest, requiredAsset: requiredAsset,
+                            requiredAcredited: false,),
                         )).then((value) => setState((){
+                          if(widget.requiredAsset){
+                            fetchSoCreditRequestAssets(idCreditRequest).then((value) {
+                              if(_creditRequestAssetListData.isNotEmpty){
+                                setState(() {
+                                  requiredAsset = false;
+                                });
+                              }
+                            });
+                          }
+
                       _creditRequestGuarantee.clear();
                       fetchSoCreditRequestGuarantee(idCreditRequest);
                       fetchSoCustomers();
@@ -170,9 +188,19 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
                                   MaterialPageRoute(builder: (context) =>
                                     CreditRequestGuarateeForm2(
                                         soCreditRequestGuarantee: SoCreditRequestGuarantee.empty(),
-                                        creditRequestId: idCreditRequest),
+                                        creditRequestId: idCreditRequest, requiredAsset: requiredAsset,
+                                      requiredAcredited: false,),
                                   )
                                 ).then((value) => setState((){
+                                  if(widget.requiredAsset){
+                                    fetchSoCreditRequestAssets(idCreditRequest).then((value) {
+                                      if(_creditRequestAssetListData.isNotEmpty){
+                                        setState(() {
+                                          requiredAsset = false;
+                                        });
+                                      }
+                                    });
+                                  }
                                   _creditRequestGuarantee.clear();
                                   fetchSoCreditRequestGuarantee(idCreditRequest);
                                   fetchSoCustomers();
@@ -205,11 +233,21 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
             MaterialPageRoute(
               builder: (_) => CreditRequestGuarateeForm2(
                   soCreditRequestGuarantee: SoCreditRequestGuarantee.empty(),
-                  creditRequestId: idCreditRequest),
+                  creditRequestId: idCreditRequest, requiredAsset: requiredAsset,
+                requiredAcredited: false,),
             )).then((value) {
               _creditRequestGuarantee.clear();
               _soCustomerList.clear();
               setState(() {
+                if(widget.requiredAsset){
+                  fetchSoCreditRequestAssets(idCreditRequest).then((value) {
+                    if(_creditRequestAssetListData.isNotEmpty){
+                      setState(() {
+                        requiredAsset = false;
+                      });
+                    }
+                  });
+                }
                 fetchSoCustomers();
                 fetchSoCreditRequestGuarantee(idCreditRequest);
               });
@@ -696,5 +734,35 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
       msjResponsServer = 'Error al guardar detalles del aval';
       return false;
     }
+  }
+
+  //Consulta las garantias por solicitud
+  Future<List<SoCreditRequestAsset>> fetchSoCreditRequestAssets(int forceFilter) async {
+    String url = params.getAppUrl(params.instance) +
+        'restcrqa;' +
+        params.jSessionIdQuery +
+        '=' +
+        params.jSessionId +
+        '?' +
+        'crqs' +
+        '=' +
+        forceFilter.toString();
+    final response = await http.Client().get(Uri.parse(url));
+
+    // Si no es exitoso envia a login
+    if (response.statusCode == params.servletResponseScForbidden) {
+      Navigator.pushNamed(context, '/');
+    } else if (response.statusCode != params.servletResponseScOk) {
+      print('Error listado: ' + response.toString());
+    }
+
+    final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
+
+    _creditRequestAssetListData.addAll(
+        parsed.map<SoCreditRequestAsset>((json) => SoCreditRequestAsset.fromJson(json)).toList());
+    setState((){});
+    return parsed
+        .map<SoCreditRequestAsset>((json) => SoCreditRequestAsset.fromJson(json))
+        .toList();
   }
 }

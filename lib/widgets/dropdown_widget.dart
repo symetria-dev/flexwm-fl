@@ -127,9 +127,10 @@ class _DropdownWidgetState extends State<DropdownWidget> {
               params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
         },
         body: json.encode(widget.filterList));
+
     setState(() {
       dataList = json.decode(response.body);
-      dataList.add({"id": -1, "label": "| " + widget.label + " | "});
+      dataList.add({"id": -1, "label": widget.label });
     });
   }
 }

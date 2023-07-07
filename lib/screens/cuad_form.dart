@@ -11,7 +11,10 @@ import '../ui/input_decorations.dart';
 class CustAddressForm extends StatefulWidget{
   //Se recibe objeto para el fomulario
   final SoCustAddres soCustAddress;
-  const CustAddressForm({Key? key, required this.soCustAddress}) : super(key: key);
+  final int customerId;
+  final String? label;
+  const CustAddressForm({Key? key, required this.soCustAddress,
+    required this.customerId, this.label}) : super(key: key);
 
   @override
   State<CustAddressForm> createState() => _CustAddressFormState();
@@ -37,6 +40,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
   int cityId = 0;
   bool isSwitched = false;
   int deliveryAddress = 0;
+  String cityText = '';
 
   @override
   void initState(){
@@ -48,14 +52,15 @@ class _CustAddressFormState extends State<CustAddressForm>{
       textNeighborhoodCntrll.text = widget.soCustAddress.neighborhood;
       textZipCntrll.text = widget.soCustAddress.zip;
       textDescriptionCntrll.text = widget.soCustAddress.description;
-      textCityCntrll.text = widget.soCustAddress.cityId.toString();
+      cityId = soCustAddres.cityId;
+      textCityCntrll.text = widget.label!;
       if(widget.soCustAddress.deliveryAddress == 1) {
         isSwitched = true;
         deliveryAddress = 1;
       }
       textInteriorNumberCntrll.text = widget.soCustAddress.interiorNumber;
     }else{
-      soCustAddres.customerId = params.idLoggedUser;
+      soCustAddres.customerId = widget.customerId;
       type = 'P';
     }
     super.initState();
@@ -118,7 +123,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
               const SizedBox(height: 10,),
               TextFormField(
                 autocorrect: false,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.name,
                 controller: textNumberCntrll,
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "No. exterior",
@@ -136,7 +141,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
               const SizedBox(height: 10,),
               TextFormField(
                 autocorrect: false,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.name,
                 controller: textInteriorNumberCntrll,
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "No. interior",
@@ -166,7 +171,7 @@ class _CustAddressFormState extends State<CustAddressForm>{
               const SizedBox(height: 10,),
               TextFormField(
                 autocorrect: false,
-                keyboardType: TextInputType.name,
+                keyboardType: TextInputType.number,
                 controller: textZipCntrll,
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "C.P.",

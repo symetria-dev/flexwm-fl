@@ -17,6 +17,7 @@ import 'package:intl/intl.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 import '../models/crqs.dart';
+import '../models/cuad.dart';
 import '../routes/app_routes.dart';
 import '../ui/appbar_flexwm.dart';
 import '../ui/input_decorations.dart';
@@ -34,9 +35,12 @@ class CreditRequestGuarateeForm2 extends StatefulWidget{
   //Se recibe objeto para el fomulario
   final SoCreditRequestGuarantee soCreditRequestGuarantee;
   final int creditRequestId;
+  final bool requiredAsset;
+  final bool requiredAcredited;
   const CreditRequestGuarateeForm2({Key? key,
     required this.soCreditRequestGuarantee,
-    required this.creditRequestId}) : super(key: key);
+    required this.creditRequestId, required this.requiredAsset,
+    required this.requiredAcredited}) : super(key: key);
 
   @override
   State<CreditRequestGuarateeForm2> createState() => _CreditRequestGuarateeForm2State();
@@ -44,6 +48,9 @@ class CreditRequestGuarateeForm2 extends StatefulWidget{
 
 class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>{
 
+  final List<SoCustAddres> _customerAddressListData = [];
+  //Lista de garantias por solicitud de crédito
+  final List<SoCreditRequestAsset> _creditRequestAssetListData = [];
   //Se crean controllers de garantías para asignar valores en campos
   final textDescriptionCntrll = TextEditingController();
   final textValueCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
@@ -121,6 +128,8 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
   final _formAssets = GlobalKey<FormState>();
   //key para el formulario general
   final _formKeyOne = GlobalKey<FormState>();
+  //key para el formulario general
+  final _formKeyOneOne = GlobalKey<FormState>();
   //Objeto de tipo para manipular info
   SoCreditRequestGuarantee soCreditRequestGuarantee = SoCreditRequestGuarantee.empty();
 
@@ -147,56 +156,97 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
   final _formKeyInmueble = GlobalKey<FormState>();
   final _formKeyAuto = GlobalKey<FormState>();
 
+  String title = '';
+
   @override
   void initState(){
+    if(widget.requiredAcredited){
+      title = 'Acreditado Titular';
+    }else{
+      title = 'Coacreditado';
+    }
+
     if(widget.soCreditRequestGuarantee.id > 0 ){
+
       creditRequestGuaranteeId = widget.soCreditRequestGuarantee.id;
       avalCreated = true;
       soCreditRequestGuarantee = widget.soCreditRequestGuarantee;
       if(soCreditRequestGuarantee.relation == SoCreditRequestGuarantee.RELATION_SELF){
         isSameGuarantee = true;
       }
+
+      fetchSoCreditRequestAssets(soCreditRequestGuarantee.id);
+
+      title = SoCreditRequestGuarantee.getLabelRol(soCreditRequestGuarantee.role);
+
       if(soCreditRequestGuarantee.relation != '') relation = soCreditRequestGuarantee.relation;
-      // textEconomicDepCntrll.text = soCreditRequestGuarantee.economicDependents.toString();
+      textEconomicDepCntrll.text = soCreditRequestGuarantee.economicDependents.toString();
       textTypeHousingCntrll.text = soCreditRequestGuarantee.typeHousing;
       textYearsResidenceCntrll.text = soCreditRequestGuarantee.yearsResidence.toString();
       if(soCreditRequestGuarantee.role != '') role = soCreditRequestGuarantee.role;
       soCustomer = soCreditRequestGuarantee.soCustomer;
-      textFisrtNameCntrll.text = soCreditRequestGuarantee.soCustomer.firstName;
-      textFatherLastNameCntrll.text = soCreditRequestGuarantee.soCustomer.fatherLastName;
-      textMotherLastNameCntrll.text = soCreditRequestGuarantee.soCustomer.motherlastname;
-      textBirthdateCntrll.text = soCreditRequestGuarantee.soCustomer.birthdate;
-      textCellphoneCntrll.text = soCreditRequestGuarantee.soCustomer.mobile;
-      textEmailCntrll.text = soCreditRequestGuarantee.soCustomer.email;
-      textRfcCntrll.text = soCreditRequestGuarantee.soCustomer.rfc;
-      textCurpCntrll.text = soCreditRequestGuarantee.soCustomer.curp;
-      if(soCreditRequestGuarantee.soCustomer.maritalStatus != '') {
-        setState((){
-          maritalStatus = soCreditRequestGuarantee.soCustomer.maritalStatus;
-        });
-      }
+      fetchSoCustomerAddress(soCustomer.id).then((value) {
+
+        if(soCustomer.curp != '' && _customerAddressListData.isNotEmpty){
+          _activeStepIndex = 2;
+        }else if(soCustomer.mobile != '' && soCustomer.email != '' ){
+          _activeStepIndex=1;
+        }else{
+          _activeStepIndex = 0;
+        }
+        textFisrtNameCntrll.text = soCreditRequestGuarantee.soCustomer.firstName;
+        textFatherLastNameCntrll.text = soCreditRequestGuarantee.soCustomer.fatherLastName;
+        textMotherLastNameCntrll.text = soCreditRequestGuarantee.soCustomer.motherlastname;
+        textBirthdateCntrll.text = soCreditRequestGuarantee.soCustomer.birthdate;
+        textCellphoneCntrll.text = soCreditRequestGuarantee.soCustomer.mobile;
+        textEmailCntrll.text = soCreditRequestGuarantee.soCustomer.email;
+        textRfcCntrll.text = soCreditRequestGuarantee.soCustomer.rfc;
+        textCurpCntrll.text = soCreditRequestGuarantee.soCustomer.curp;
+        if(soCreditRequestGuarantee.soCustomer.maritalStatus != '') {
+          setState((){
+            maritalStatus = soCreditRequestGuarantee.soCustomer.maritalStatus;
+          });
+        }
         if(soCreditRequestGuarantee.soCustomer.maritalRegimen != '') regimenMarital = soCreditRequestGuarantee.soCustomer.maritalRegimen;
         if(soCreditRequestGuarantee.soCustomer.spouseName != '') textSpouseNameCntrll.text = soCreditRequestGuarantee.soCustomer.spouseName;
         if(soCreditRequestGuarantee.accountStatement > 0.0) textAccountStatementCntrll.updateValue(soCreditRequestGuarantee.accountStatement);
         if(soCreditRequestGuarantee.payrollReceipts > 0.0) textPayrollReceiptsCntrll.updateValue(soCreditRequestGuarantee.payrollReceipts);
         if(soCreditRequestGuarantee.typeHousing != '') textTypeHousingCntrll.text = soCreditRequestGuarantee.typeHousing;
         if(soCreditRequestGuarantee.heritage != '') textHeritageCntrll.text = soCreditRequestGuarantee.heritage;
-        if(soCreditRequestGuarantee.economicDependents > 0) textEconomicDepCntrll.text = soCreditRequestGuarantee.economicDependents.toString();
+        if(soCreditRequestGuarantee.economicDependents > 0) {
+          textEconomicDepCntrll.text = soCreditRequestGuarantee.economicDependents.toString();
+        } else{
+          textEconomicDepCntrll.text = '';
+        }
         if(soCreditRequestGuarantee.employmentStatus != '') employmentStatus = soCreditRequestGuarantee.employmentStatus;
         if(soCreditRequestGuarantee.company != '') textCompanyCntrll.text = soCreditRequestGuarantee.company;
-        if(soCreditRequestGuarantee.economicActivity != '')textEconomicActCntrll.text = soCreditRequestGuarantee.economicActivity;
+        if(soCreditRequestGuarantee.economicActivity != '' && soCreditRequestGuarantee.typeHousing != ''
+        && soCreditRequestGuarantee.economicDependents >= 0){
+          textEconomicActCntrll.text = soCreditRequestGuarantee.economicActivity;
+          //si este dato existe es que ya va en el paso 3 de la forma
+          _activeStepIndex = 3;
+        }
+
         if(soCreditRequestGuarantee.yearsEmployment > 0)textYearsEmploymentCntrll.text = soCreditRequestGuarantee.yearsEmployment.toString();
         if(soCreditRequestGuarantee.creditCards > 0.0)textCreditCardsCntrll.updateValue(soCreditRequestGuarantee.creditCards);
         if(soCreditRequestGuarantee.rent > 0.0)textRentCntrll.updateValue(soCreditRequestGuarantee.rent);
         if(soCreditRequestGuarantee.creditAutomotive > 0.0)textCreditAutomotiveCntrll.updateValue(soCreditRequestGuarantee.creditAutomotive);
         if(soCreditRequestGuarantee.creditFurniture > 0.0)textCreditFurniturCntrll.updateValue(soCreditRequestGuarantee.creditFurniture);
         if(soCreditRequestGuarantee.personalLoans > 0.0)textPersonalLoansCntrll.updateValue(soCreditRequestGuarantee.personalLoans);
+        if(soCreditRequestGuarantee.verifiableIncome > 0.0)textVerifiableIncomeCntrll.updateValue(soCreditRequestGuarantee.verifiableIncome);
         if(soCreditRequestGuarantee.ciec != '') textCiecCntrll.text = soCreditRequestGuarantee.ciec;
+
+      });
+
       }else{
       maritalStatus = SoCreditRequestGuarantee.STATUS_SINGLE;
       regimenMarital = SoCreditRequestGuarantee.REGIMEN_CONJUGAL_SOCIETY;
       relation = SoCreditRequestGuarantee.RELATION_SELF;
-      role = SoCreditRequestGuarantee.ROLE_ACREDITED;
+      if(widget.requiredAcredited){
+        role = SoCreditRequestGuarantee.ROLE_ACREDITED;
+      }else{
+        role = SoCreditRequestGuarantee.ROLE_COACREDITED;
+      }
       soCreditRequestGuarantee.customerId = params.idLoggedUser;
       soCreditRequestGuarantee.creditRequestId = widget.creditRequestId;
     }
@@ -205,8 +255,6 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
 
   //navbar bottom
   int _currentTabIndex = 0;
-  //titulos de cada tab
-  String title = 'Aval';
   //indicador de envio de datos
   bool sendingData = false;
   //addresses registradas
@@ -220,78 +268,86 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
     //lista de pasos para formularios
     List<Step> stepList()=> [
       stepOne(),
+      stepOneOne(),
       stepTwo(),
       stepThree(),
       // stepEmploymentSituation(),
-      stepFour(),
+      if(widget.requiredAsset || _creditRequestAssetListData.isNotEmpty)
+        stepFour(),
+      if(!widget.requiredAsset && _creditRequestAssetListData.isEmpty)
+        finalStep(),
     ];
 
     return Scaffold(
-      appBar: AppBarStyle.authAppBarFlex(title: 'Avales'),
-      body: AuthFormBackground(
-        child: Stepper(
-          steps: stepList(),
-          type: StepperType.horizontal,
-          currentStep: _activeStepIndex,
-          onStepContinue: (){
-           if(validStep(_activeStepIndex)) {
+      appBar: AppBarStyle.authAppBarFlex(title: title,),
+      body: ModalProgressHUD(
+        inAsyncCall: _isInAsyncCall,
+        progressIndicator: const CircularProgressIndicator(),
+        child: AuthFormBackground(
+          child: Stepper(
+            steps: stepList(),
+            type: StepperType.horizontal,
+            currentStep: _activeStepIndex,
+            onStepContinue: (){
+             if(validStep(_activeStepIndex)) {
+                  setState(() {
+                    // _activeStepIndex += 1;
+                  });
+              }
+            },
+            onStepCancel: () {
+              final isLastStep = _activeStepIndex == stepList().length - 1;
+              if (_activeStepIndex == 0) {
+                return;
+              }
+              //uncionalidad para guardar garantía y redireccionar
+              if(isLastStep){
+                Navigator.pop(context);
+              }else{
                 setState(() {
-                  // _activeStepIndex += 1;
+                  _activeStepIndex -= 1;
                 });
-            }
-          },
-          onStepCancel: () {
-            final isLastStep = _activeStepIndex == stepList().length - 1;
-            if (_activeStepIndex == 0) {
+              }
+            },
+            onStepTapped: (int index) {
               return;
-            }
-            //TODO: Agregar funcionalidad para guardar garantía con el valor de isLastStep
-            if(isLastStep){
-              Navigator.pop(context);
-            }else{
-              setState(() {
-                _activeStepIndex -= 1;
-              });
-            }
-          },
-          onStepTapped: (int index) {
-            return;
-            //Funcion para ir al step al dar click en el icono
-            /*          setState(() {
-              _activeStepIndex = index;
-            });*/
-          },
-          controlsBuilder: (context, details){
-            //valor del último paso
-            final isLastStep = _activeStepIndex == stepList().length - 1;
-            return Row(
-              children: [
-                const SizedBox(height: 100,),
-                //Si es el último paso muestra Guardar en el texto del botón
-                if (_activeStepIndex > 0)
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: details.onStepCancel,
-                      child:  (isLastStep)
-                          ? const Text('Guardar')
-                          : const Text('Atras'),
+              //Funcion para ir al step al dar click en el icono
+              /*          setState(() {
+                _activeStepIndex = index;
+              });*/
+            },
+            controlsBuilder: (context, details){
+              //valor del último paso
+              final isLastStep = _activeStepIndex == stepList().length - 1;
+              return Row(
+                children: [
+                  const SizedBox(height: 100,),
+                  //Si es el último paso muestra Guardar en el texto del botón
+                  if (_activeStepIndex > 0)
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: details.onStepCancel,
+                        child:  (isLastStep)
+                            ? const Text('Guardar')
+                            : const Text('Atras'),
+                      ),
                     ),
+                  const SizedBox(
+                    width: 10,
                   ),
-                const SizedBox(
-                  width: 10,
-                ),
-                if(!isLastStep)
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: details.onStepContinue,
-                      child: (_activeStepIndex == (stepList().length - 1))
-                          ? const Text('Guardar')
-                          : const Text('Siguiente'),
+                  if(!isLastStep)
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: details.onStepContinue,
+                        child: (_activeStepIndex == (stepList().length - 1))
+                            ? const Text('Guardar')
+                            : const Text('Siguiente'),
+                      ),
                     ),
-                  ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -302,33 +358,63 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
     bool valid = false;
     switch (step){
       case 0:
-        if(_formKeyOne.currentState!.validate()) {
-          setState(() { sendingData = true;});
+          if (_formKeyOne.currentState!.validate()) {
+            setState(() {
+              sendingData = true;
+            });
+            addCust(context).then((value) {
+              if (value) {
+                setState(() {
+                  _activeStepIndex += 1;
+                  sendingData = false;
+                });
+              return true;
+              } else {
+                setState(() {
+                  sendingData = false;
+                });
+                Fluttertoast.showToast(msg: msjResponsServer);
+                return false;
+              }
+            });
+          } else {
+            Fluttertoast.showToast(msg: 'Favor de llenar todos los campos');
+            return false;
+          }
+        break;
+      case 1:
+        if(_formKeyOneOne.currentState!.validate() && custAddresses>0){
+          setState((){sendingData = true;});
           addCust(context).then((value) {
             if(value){
               updateCreditRequestGuarantee().then((value) {
-                if(value){
+                if (value) {
                   setState(() {
                     _activeStepIndex += 1;
                     sendingData = false;
                   });
                   return true;
-                }else{
-                  Fluttertoast.showToast(msg: 'Error al guardar datos');
+                } else {
+                  setState(() {
+                    sendingData = false;
+                  });
+                  Fluttertoast.showToast(msg: msjError);
                   return false;
                 }
               });
             }else{
-              Fluttertoast.showToast(msg: 'Error al guardar datos');
+              Fluttertoast.showToast(msg: msjResponsServer);
               return false;
             }
           });
+          return false;
         }else{
-          Fluttertoast.showToast(msg: 'Favor de llenar todos los campos');
+          Fluttertoast.showToast(msg: 'Favor de llenar todos los campos y agregar'
+              ' por lo menos una dirección');
           return false;
         }
         break;
-      case 1:
+      case 2:
         if(_formKeyTwo.currentState!.validate() ){
           setState(() { sendingData = true;});
           //Se guardan datos de solicitud de crédito
@@ -340,7 +426,10 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
               });
               return true;
             }else{
-              Fluttertoast.showToast(msg: 'Error al guardar datos');
+              setState(() {
+                sendingData = false;
+              });
+              Fluttertoast.showToast(msg: msjError);
               return false;
             }
           });
@@ -352,7 +441,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
           });
           return false;
         }
-      case 2:
+      case 3:
         setState(() {
           sendingData = false;
           _activeStepIndex += 1;
@@ -368,430 +457,335 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
         isActive: _activeStepIndex >= 0,
         title: const Text(""),
         content: CardStepContainer(
-            child: Form(
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                key: _formKeyOne,
-                child: Container(
-                  margin: const EdgeInsets.only(top: 0),
-                  child: Column(
-                    children: [
-                      /*Row(
-                        children: [
-                          const Expanded(
-                              child: Text(
-                                "Rol preliminar del crédito*",
-                                style: TextStyle(color: Colors.grey, fontSize: 15),
-                              )),
-                          if(!isSameGuarantee)
-                            DropdownButtonHideUnderline(
-                              child: ButtonTheme(
-                                child: DropdownButton(
-                                  value: role,
-                                  items: SoCreditRequestGuarantee.getRoleOptions.map((e) {
-                                    return DropdownMenuItem(
-                                      child: Text(e['label']),
-                                      value: e['value'],
-                                    );
-                                  }).toList(),
-                                  onChanged: (Object? value) {
-                                    setState(() {
-                                      role = '$value';
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          if(isSameGuarantee)
-                            Expanded(
-                                child: Text(
-                                  SoCreditRequestGuarantee.getLabelRol(role),
-                                  style: const TextStyle(color: Colors.grey, fontSize: 15),
-                                )),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        children: [
-                          const Expanded(
-                              child: Text(
-                                "Relación con el estudiante*",
-                                style: TextStyle(color: Colors.grey, fontSize: 15),
-                              )),
-                          DropdownButtonHideUnderline(
-                            child: ButtonTheme(
-                              child: DropdownButton(
-                                value: relation,
-                                items: SoCreditRequestGuarantee.getRelationOptions
-                                    .map((e) {
-                                  return DropdownMenuItem(
-                                    child: Text(e['label']),
-                                    value: e['value'],
-                                  );
-                                }).toList(),
-                                onChanged: (Object? value) {
-                                  setState(() {
-                                    relation = '$value';
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),*/
-                      TextFormField(
-                        readOnly: isSameGuarantee,
-                        autocorrect: false,
-                        keyboardType: TextInputType.name,
-                        controller: textFisrtNameCntrll,
-                        decoration: InputDecorations.authInputDecoration(
-                            labelText: "Nombre(s)*",
-                            prefixIcon: Icons.account_circle_outlined),
-                        validator: (value) {
-                          return (value != null && value.isNotEmpty)
-                              ? null
-                              : 'Por favor ingrese un nombre válido';
-                        },
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      TextFormField(
-                        readOnly: isSameGuarantee,
-                        autocorrect: false,
-                        keyboardType: TextInputType.name,
-                        controller: textFatherLastNameCntrll,
-                        decoration: InputDecorations.authInputDecoration(
-                            labelText: "Apellido Paterno*",
-                            prefixIcon: Icons.account_circle_outlined),
-                        validator: (value) {
-                          return (value != null && value.isNotEmpty)
-                              ? null
-                              : 'Por favor ingrese un apellido válido';
-                        },
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      TextFormField(
-                        readOnly: isSameGuarantee,
-                        autocorrect: false,
-                        keyboardType: TextInputType.name,
-                        controller: textMotherLastNameCntrll,
-                        decoration: InputDecorations.authInputDecoration(
-                            labelText: "Apellido Materno*",
-                            prefixIcon: Icons.account_circle_outlined),
-                        validator: (value) {
-                          return (value != null && value.isNotEmpty)
-                              ? null
-                              : 'Por favor ingrese un apellido válido';
-                        },
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      TextFormField(
-                        autocorrect: false,
-                        keyboardType: TextInputType.name,
-                        decoration: InputDecorations.authInputDecoration(
-                            hintText: "Seleccione una Fecha",
-                            labelText: "Fecha de Nacimiento*",
-                            prefixIcon: Icons.calendar_today_outlined),
-                        controller: textBirthdateCntrll,
-                        readOnly: true,
-                        validator: (value) {
-                          return (value != null && value.isNotEmpty)
-                              ? null
-                              : 'Por favor ingrese una fecha válida';
-                        },
-                        onTap: () {
-                          if(!isSameGuarantee){
-                            showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(1910),
-                              lastDate: DateTime(2025),
-                            ).then((DateTime? value) {
-                              if (value != null) {
-                                DateTime _formDate = DateTime.now();
-                                _formDate = value;
-                                final String date =
-                                DateFormat('yyyy-MM-dd').format(_formDate);
-                                textBirthdateCntrll.text = date;
-                              }
-                            });
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        readOnly: isSameGuarantee,
-                        autocorrect: false,
-                        keyboardType: TextInputType.phone,
-                        controller: textCellphoneCntrll,
-                        decoration: InputDecorations.authInputDecoration(
-                            hintText: 'Tel. Celular',
-                            labelText: 'Tel. Celular*',
-                            prefixIcon: Icons.phone_iphone_outlined),
-                        validator: (value) {
-                          final intNumber = int.tryParse(value!.replaceAll('-', ''));
-                          return (intNumber != null && value.length > 9)
-                              ? null
-                              : 'Por favor ingrese un número de teléfono válido';
-                        },
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        readOnly: isSameGuarantee,
-                        autocorrect: false,
-                        keyboardType: TextInputType.emailAddress,
-                        controller: textEmailCntrll,
-                        decoration: InputDecorations.authInputDecoration(
-                            hintText: 'tucorreo@gmail.com',
-                            labelText: 'Correo electrónico*',
-                            prefixIcon: Icons.alternate_email_rounded),
-                        validator: (value) {
-                          String pattern =
-                              r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-                          RegExp regExp = RegExp(pattern);
+            child: Column(
+              children: [
+                  formunocero(),
+              ],
+            ),
+        )
+    );
+  }
 
-                          return regExp.hasMatch(value ?? '')
-                              ? null
-                              : 'El valor ingresado no luce como un correo';
+  Step stepOneOne(){
+    return Step(
+        state: _activeStepIndex <=1 ? StepState.indexed : StepState.complete,
+        isActive: _activeStepIndex >= 1,
+        title: const Text(""),
+        content: CardStepContainer(
+          child: Column(
+            children: [
+              formUnoUno(),
+            ],
+          ),
+        )
+    );
+  }
+
+  Widget formUnoUno(){
+    return Form(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        key: _formKeyOneOne,
+        child: Container(
+          margin: const EdgeInsets.only(top: 0),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  const Expanded(
+                      child: Text(
+                        "Relación con el solicitante*",
+                        style: TextStyle(color: Colors.grey, fontSize: 15),
+                      )),
+                  DropdownButtonHideUnderline(
+                    child: ButtonTheme(
+                      child: DropdownButton(
+                        value: relation,
+                        items: SoCreditRequestGuarantee.getRelationOptions
+                            .map((e) {
+                          return DropdownMenuItem(
+                            child: Text(e['label']),
+                            value: e['value'],
+                          );
+                        }).toList(),
+                        onChanged: (Object? value) {
+                          setState(() {
+                            relation = '$value';
+                          });
                         },
                       ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        children: [
-                          const Expanded(
-                              child: Text(
-                                "Relación con el solicitante*",
-                                style: TextStyle(color: Colors.grey, fontSize: 15),
-                              )),
-                          DropdownButtonHideUnderline(
-                            child: ButtonTheme(
-                              child: DropdownButton(
-                                value: relation,
-                                items: SoCreditRequestGuarantee.getRelationOptions
-                                    .map((e) {
-                                  return DropdownMenuItem(
-                                    child: Text(e['label']),
-                                    value: e['value'],
-                                  );
-                                }).toList(),
-                                onChanged: (Object? value) {
-                                  setState(() {
-                                    relation = '$value';
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        readOnly: isSameGuarantee,
-                        decoration: InputDecorations.authInputDecoration(
-                            labelText: 'RFC con homoclave*',
-                            prefixIcon: Icons.perm_identity_outlined),
-                        controller: textRfcCntrll,
-                        validator: (value) {
-                          return (value != null && value.isNotEmpty && value.length > 12 && value.length < 14)
-                              ? null
-                              : 'Por favor ingrese un rfc válido';
-                        },
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      TextFormField(
-                        readOnly: isSameGuarantee,
-                        decoration: InputDecorations.authInputDecoration(
-                            labelText: 'CURP*',
-                            prefixIcon: Icons.perm_identity_outlined),
-                        controller: textCurpCntrll,
-                        validator: (value) {
-                          return (value != null && value.isNotEmpty && value.length > 17)
-                              ? null
-                              : 'Por favor ingrese un curp válido';
-                        },
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        children: [
-                          const Expanded(
-                              child: Text(
-                                "Estado Civil*",
-                                style: TextStyle(color: Colors.grey, fontSize: 15),
-                              )),
-                          if(!isSameGuarantee)
-                            DropdownButtonHideUnderline(
-                              child: ButtonTheme(
-                                child: DropdownButton(
-                                  value: maritalStatus,
-                                  items: SoCustomer.getStatusOptions
-                                      .map((e) {
-                                    return DropdownMenuItem(
-                                      child: Text(e['label']),
-                                      value: e['value'],
-                                    );
-                                  }).toList(),
-                                  onChanged: (Object? value) {
-                                    setState(() {
-                                      maritalStatus = '$value';
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          if(isSameGuarantee)
-                            Expanded(
-                                child: Text(
-                                  SoCustomer.getLabelStatus(maritalStatus),
-                                  style: const TextStyle(color: Colors.grey, fontSize: 15),
-                                )),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      if(maritalStatus == SoCustomer.MARITALSTATUS_MARRIED)
-                        Row(
-                          children: [
-                            const Expanded(
-                                child: Text(
-                                  "Régimen Conyugal*",
-                                  style: TextStyle(color: Colors.grey, fontSize: 15),
-                                )),
-                            if(!isSameGuarantee)
-                              DropdownButtonHideUnderline(
-                                child: ButtonTheme(
-                                  child: DropdownButton(
-                                    value: regimenMarital,
-                                    items: SoCustomer.getRegimenOptions
-                                        .map((e) {
-                                      return DropdownMenuItem(
-                                        child: Text(e['label']),
-                                        value: e['value'],
-                                      );
-                                    }).toList(),
-                                    onChanged: (Object? value) {
-                                      setState(() {
-                                        regimenMarital = '$value';
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                            if(isSameGuarantee)
-                              Expanded(
-                                  child: Text(
-                                    SoCustomer.getLabelRegimen(regimenMarital),
-                                    style: const TextStyle(color: Colors.grey, fontSize: 15),
-                                  )),
-                          ],
-                        ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      if(maritalStatus == SoCustomer.MARITALSTATUS_MARRIED)
-                        TextFormField(
-                          readOnly: isSameGuarantee,
-                          decoration: InputDecorations.authInputDecoration(
-                              labelText: 'Nombre Conyugue*',
-                              prefixIcon: Icons.account_circle),
-                          controller: textSpouseNameCntrll,
-                          validator: (value) {
-                            return (value != null && value.isNotEmpty)
-                                ? null
-                                : 'Por favor ingrese un nombre válido';
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                // readOnly: isSameGuarantee,
+                decoration: InputDecorations.authInputDecoration(
+                    labelText: 'RFC con homoclave*',
+                    prefixIcon: Icons.perm_identity_outlined),
+                controller: textRfcCntrll,
+                validator: (value) {
+                  return (value != null && value.isNotEmpty && value.length > 12 && value.length < 14)
+                      ? null
+                      : 'Por favor ingrese un rfc válido';
+                },
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              TextFormField(
+                // readOnly: isSameGuarantee,
+                decoration: InputDecorations.authInputDecoration(
+                    labelText: 'CURP*',
+                    prefixIcon: Icons.perm_identity_outlined),
+                controller: textCurpCntrll,
+                validator: (value) {
+                  return (value != null && value.isNotEmpty && value.length > 17 && value.length < 19)
+                      ? null
+                      : 'Por favor ingrese un curp válido';
+                },
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                children: [
+                  const Expanded(
+                      child: Text(
+                        "Estado Civil*",
+                        style: TextStyle(color: Colors.grey, fontSize: 15),
+                      )),
+                    DropdownButtonHideUnderline(
+                      child: ButtonTheme(
+                        child: DropdownButton(
+                          value: maritalStatus,
+                          items: SoCustomer.getStatusOptions
+                              .map((e) {
+                            return DropdownMenuItem(
+                              child: Text(e['label']),
+                              value: e['value'],
+                            );
+                          }).toList(),
+                          onChanged: (Object? value) {
+                            setState(() {
+                              maritalStatus = '$value';
+                            });
                           },
                         ),
-                     /* TextFormField(
-                        autocorrect: false,
-                        keyboardType: TextInputType.name,
-                        controller: textCiecCntrll,
-                        decoration: InputDecorations.authInputDecoration(
-                            labelText: "CIEC",
-                            prefixIcon: Icons.account_circle_outlined),
-                      ),*/
-                      const SizedBox(height: 10,),
-                      SubCatalogContainerWidget(
-                          title: 'Domicilio(s)*',
-                          child: CustomerAddress(
-                            forceFilter: soCreditRequestGuarantee.id,
-                            callback: (int addresses){
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              if(maritalStatus == SoCustomer.MARITALSTATUS_MARRIED)
+                Row(
+                  children: [
+                    const Expanded(
+                        child: Text(
+                          "Régimen Conyugal*",
+                          style: TextStyle(color: Colors.grey, fontSize: 15),
+                        )),
+                      DropdownButtonHideUnderline(
+                        child: ButtonTheme(
+                          child: DropdownButton(
+                            value: regimenMarital,
+                            items: SoCustomer.getRegimenOptions
+                                .map((e) {
+                              return DropdownMenuItem(
+                                child: Text(e['label']),
+                                value: e['value'],
+                              );
+                            }).toList(),
+                            onChanged: (Object? value) {
                               setState(() {
-                                custAddresses = addresses;
+                                regimenMarital = '$value';
                               });
                             },
-                          )
-                      ),
-                      const SizedBox(height: 10,),
-                      if(sendingData)
-                        const LinearProgressIndicator(),
-                     /* Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if(_formKey.currentState!.validate()){
-                              setState(() {
-                                sendingData = true;
-                              });
-                              addCust(context).then((value) {
-                                if (value) {
-                                  updateCreditRequestGuarantee().then((value) {
-                                    setState(() {
-                                      sendingData = false;
-                                    });
-                                    if (value) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(msjResponsServer)),
-                                      );
-                                      updateDataCrqg();
-                                    } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(msjResponsServer)),
-                                      );
-                                    }
-                                  });
-                                } else {
-                                  // Error al guardar
-                                  Fluttertoast.showToast(msg: msjResponsServer);
-                                }
-                              });
-                            }
-                          },
-                          child: const Text(
-                            'Guardar',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
-                            ),
                           ),
                         ),
-                      ),*/
-                    ],
-                  ),
-                )
-            ),
+                      ),
+                  ],
+                ),
+              const SizedBox(
+                height: 10,
+              ),
+              if(maritalStatus == SoCustomer.MARITALSTATUS_MARRIED)
+                TextFormField(
+                  decoration: InputDecorations.authInputDecoration(
+                      labelText: 'Nombre Conyugue*',
+                      prefixIcon: Icons.account_circle),
+                  controller: textSpouseNameCntrll,
+                  validator: (value) {
+                    return (value != null && value.isNotEmpty)
+                        ? null
+                        : 'Por favor ingrese un nombre válido';
+                  },
+                ),
+              const SizedBox(height: 10,),
+              SubCatalogContainerWidget(
+                  title: 'Domicilio(s)*',
+                  child: CustomerAddress(
+                    forceFilter: soCustomer.id,
+                    callback: (int addresses){
+                      setState(() {
+                        custAddresses = addresses;
+                      });
+                    },
+                  )
+              ),
+              const SizedBox(height: 10,),
+              if(sendingData)
+                const LinearProgressIndicator(),
+            ],
+          ),
+        )
+    );
+  }
+
+  Widget formunocero(){
+    return Form(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        key: _formKeyOne,
+        child: Container(
+          margin: const EdgeInsets.only(top: 0),
+          child: Column(
+            children: [
+              TextFormField(
+                readOnly: isSameGuarantee,
+                autocorrect: false,
+                keyboardType: TextInputType.name,
+                controller: textFisrtNameCntrll,
+                decoration: InputDecorations.authInputDecoration(
+                    labelText: "Nombre(s)*",
+                    prefixIcon: Icons.account_circle_outlined),
+                validator: (value) {
+                  return (value != null && value.isNotEmpty)
+                      ? null
+                      : 'Por favor ingrese un nombre válido';
+                },
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              TextFormField(
+                readOnly: isSameGuarantee,
+                autocorrect: false,
+                keyboardType: TextInputType.name,
+                controller: textFatherLastNameCntrll,
+                decoration: InputDecorations.authInputDecoration(
+                    labelText: "Apellido Paterno*",
+                    prefixIcon: Icons.account_circle_outlined),
+                validator: (value) {
+                  return (value != null && value.isNotEmpty)
+                      ? null
+                      : 'Por favor ingrese un apellido válido';
+                },
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              TextFormField(
+                readOnly: isSameGuarantee,
+                autocorrect: false,
+                keyboardType: TextInputType.name,
+                controller: textMotherLastNameCntrll,
+                decoration: InputDecorations.authInputDecoration(
+                    labelText: "Apellido Materno*",
+                    prefixIcon: Icons.account_circle_outlined),
+                validator: (value) {
+                  return (value != null && value.isNotEmpty)
+                      ? null
+                      : 'Por favor ingrese un apellido válido';
+                },
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              TextFormField(
+                autocorrect: false,
+                keyboardType: TextInputType.name,
+                decoration: InputDecorations.authInputDecoration(
+                    hintText: "Seleccione una Fecha",
+                    labelText: "Fecha de Nacimiento*",
+                    prefixIcon: Icons.calendar_today_outlined),
+                controller: textBirthdateCntrll,
+                readOnly: true,
+                validator: (value) {
+                  return (value != null && value.isNotEmpty)
+                      ? null
+                      : 'Por favor ingrese una fecha válida';
+                },
+                onTap: () {
+                  if(!isSameGuarantee){
+                    showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(1910),
+                      lastDate: DateTime(2025),
+                    ).then((DateTime? value) {
+                      if (value != null) {
+                        DateTime _formDate = DateTime.now();
+                        _formDate = value;
+                        final String date =
+                        DateFormat('yyyy-MM-dd').format(_formDate);
+                        textBirthdateCntrll.text = date;
+                      }
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                readOnly: isSameGuarantee,
+                autocorrect: false,
+                keyboardType: TextInputType.phone,
+                controller: textCellphoneCntrll,
+                decoration: InputDecorations.authInputDecoration(
+                    hintText: 'Tel. Celular',
+                    labelText: 'Tel. Celular*',
+                    prefixIcon: Icons.phone_iphone_outlined),
+                validator: (value) {
+                  final intNumber = int.tryParse(value!.replaceAll('-', ''));
+                  return (intNumber != null && value.length > 9)
+                      ? null
+                      : 'Por favor ingrese un número de teléfono válido';
+                },
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                readOnly: isSameGuarantee,
+                autocorrect: false,
+                keyboardType: TextInputType.emailAddress,
+                controller: textEmailCntrll,
+                decoration: InputDecorations.authInputDecoration(
+                    hintText: 'tucorreo@gmail.com',
+                    labelText: 'Correo electrónico*',
+                    prefixIcon: Icons.alternate_email_rounded),
+                validator: (value) {
+                  String pattern =
+                      r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+                  RegExp regExp = RegExp(pattern);
+
+                  return regExp.hasMatch(value ?? '')
+                      ? null
+                      : 'El valor ingresado no luce como un correo';
+                },
+              ),
+              const SizedBox(height: 10,),
+              if(sendingData)
+                const LinearProgressIndicator(),
+            ],
+          ),
         )
     );
   }
 
   Step stepTwo(){
     return Step(
-        state: _activeStepIndex <= 1 ? StepState.indexed : StepState.complete,
-        isActive: _activeStepIndex >= 1,
+        state: _activeStepIndex <= 2 ? StepState.indexed : StepState.complete,
+        isActive: _activeStepIndex >= 2,
         title: const Text(""),
         content: CardStepContainer(
             child:  Form(
@@ -834,7 +828,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                     controller: textEconomicDepCntrll,
                     validator: ( value ) {
                       final intNumber = int.tryParse(value!);
-                      return (intNumber != null && value.length > 0)
+                      return (intNumber != null && intNumber >= 0)
                           ? null
                           : 'Por favor ingrese un número válido';
                     },
@@ -900,6 +894,20 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                     controller: textHeritageCntrll,
                     validator: ( value ) {
                       return ( value != null && value.isNotEmpty )
+                          ? null
+                          : 'Por favor ingrese un valor';
+                    },
+                  ),
+                  const SizedBox(height: 10,),
+                  TextFormField(
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecorations.authInputDecoration(
+                        labelText: 'Ingresos Comprobables',
+                        prefixIcon: Icons.monetization_on_outlined),
+                    controller: textVerifiableIncomeCntrll,
+                    validator: ( value ) {
+                      final intNumber = double.tryParse(value!.replaceAll(',', ''));
+                      return (intNumber != null && intNumber >= 0)
                           ? null
                           : 'Por favor ingrese un valor';
                     },
@@ -1126,8 +1134,8 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
 
   Step stepThree(){
     return Step(
-        state: _activeStepIndex <= 2 ? StepState.indexed : StepState.complete,
-        isActive: _activeStepIndex >= 2,
+        state: _activeStepIndex <= 3 ? StepState.indexed : StepState.complete,
+        isActive: _activeStepIndex >= 3,
         title: const Text(""),
         content: CardStepContainer(
             child: Form(
@@ -1256,128 +1264,34 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
 
   Step stepFour(){
     return Step(
-        state: _activeStepIndex <=3 ? StepState.indexed : StepState.complete,
-        isActive: _activeStepIndex >= 3,
+        state: _activeStepIndex <=4 ? StepState.indexed : StepState.complete,
+        isActive: _activeStepIndex >= 4,
         title: const Text(""),
-        content: CardStepContainer(
-            child: Form(
-                child: Column(
-                  children: [
-                    const Text("Garantías"),
-                    const SizedBox(height: 10,),
-                    Row(
-                      children: [
-                        const Expanded(
-                            child: Text("Tipo*",
-                              style: TextStyle(color: Colors.grey,fontSize: 15),
-                            )
-                        ),
-                        DropdownButtonHideUnderline(
-                          child: ButtonTheme(
-                            child: DropdownButton(
-                              value: assetType,
-                              items: SoCreditRequestAsset.getTypeOptions.map((e) {
-                                return DropdownMenuItem(
-                                  child: Text(e['label']),
-                                  value: e['value'],
-                                );
-                              }).toList(),
-                              onChanged: (Object? value) {
-                                setState(() {
-                                  assetType = '$value';
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    TextFormField(
-                      autocorrect: false,
-                      keyboardType: TextInputType.name,
-                      controller: textDescriptionCntrll,
-                      decoration: InputDecorations.authInputDecoration(
-                          hintText: "Descripción",
-                          labelText: "Descripción*",
-                          prefixIcon: Icons.description
-                      ),
-                      // onChanged: ( value ) => newCustForm.firstName = value,
-                      validator: ( value ) {
-                        return ( value != null && value.isNotEmpty )
-                            ? null
-                            : 'Por favor ingrese una descripción válida';
-
-                      },
-                    ),
-                    const SizedBox(height: 10,),
-                    TextFormField(
-                      autocorrect: false,
-                      keyboardType: TextInputType.number,
-                      controller: textValueCntrll,
-                      decoration: InputDecorations.authInputDecoration(
-                          hintText: "Valor",
-                          labelText: "Valor*",
-                          prefixIcon: Icons.monetization_on_outlined
-                      ),
-                      // onChanged: ( value ) => newCustForm.firstName = value,
-                      validator: ( value ) {
-                        final intNumber = double.tryParse(value!.replaceAll(',', ''));
-                        return (intNumber != null && intNumber > 0)
-                            ? null
-                            : 'Por favor ingrese el valor';
-                      },
-                    ),
-                    const SizedBox(height: 10,),
-                    TextFormField(
-                      autocorrect: false,
-                      keyboardType: TextInputType.name,
-                      decoration: InputDecorations.authInputDecoration(
-                          hintText: "Seleccione una Fecha",
-                          labelText: "Fecha de Compra*",
-                          prefixIcon: Icons.calendar_today_outlined),
-                      controller: textPurchaseDateCntrll,
-                      readOnly: true,
-                      validator: (value) {
-                        return (value != null && value.isNotEmpty)
-                            ? null
-                            : 'Por favor ingrese una fecha válida';
-                      },
-                      onTap: () {
-                        showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(1910),
-                          lastDate: DateTime(2050),
-                        ).then((DateTime? value) {
-                          if (value != null) {
-                            DateTime _formDate = DateTime.now();
-                            _formDate = value;
-                            final String date =
-                            DateFormat('yyyy-MM-dd').format(_formDate);
-                            textPurchaseDateCntrll.text = date;
-                          }
-                        });
-                      },
-                    ),
-                    UploadFileIcon(
-                      key: _keyUploadPhoto,
-                      initialRuta: soCreditRequestAsset.photo,
-                      programCode: SoCreditRequestAsset.programCode,
-                      fielName: 'crqa_photo',
-                      label: 'Foto',
-                      id: soCreditRequestAsset.id.toString(),
-                      idGuarantee: '',
-                      callBack: (bool isLoading){
-                        updateDataCRQA();
-                      },
-                    ),
-                    if(assetType != '-' && assetType == 'A')
-                      formAuto(),
-                    if(assetType != '-' && assetType == 'P')
-                      formInmueble(),
-                  ],
-                )
+        content: SizedBox(
+            height: 400,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: getFormAsset(),
             )
+        )
+    );
+  }
+
+  Widget getFormAsset(){
+    if(soCreditRequestGuarantee.id > 0){
+      return CreditRequestAsset(
+          soCreditRequestGuarantee: soCreditRequestGuarantee);
+    }
+    return const Text('');
+  }
+
+  Step finalStep() {
+    return Step(
+        state: _activeStepIndex <=4 ? StepState.indexed : StepState.complete,
+        isActive: _activeStepIndex >= 4,
+        title: const Text(""),
+        content: const CardStepContainer(
+          child: Text('Se han guardado sus datos correctamente'),
         )
     );
   }
@@ -1389,283 +1303,6 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
 
     });*/
 
-  }
-
-  /*Widget typeProperty(){
-    return Column(
-      children: [
-        const SizedBox( height: 10 ),
-        const Text('Inmueble', style: TextStyle(color: Colors.grey, fontSize: 20)),
-        const SizedBox( height: 10 ),
-        *//*  Row(
-                children: [
-                  const Expanded(
-                      child: Text("Tipo*",
-                        style: TextStyle(color: Colors.grey,fontSize: 15),
-                      )
-                  ),
-                  DropdownButtonHideUnderline(
-                    child: ButtonTheme(
-                      child: DropdownButton(
-                        value: type,
-                        items: SoCreditRequestAsset.getTypeOptions.map((e) {
-                          return DropdownMenuItem(
-                            child: Text(e['label']),
-                            value: e['value'],
-                          );
-                        }).toList(),
-                        onChanged: (Object? value) {
-                          setState(() {
-                            type = '$value';
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-             *//*
-        TextFormField(
-          autocorrect: false,
-          keyboardType: TextInputType.name,
-          controller: textDescriptionCntrll,
-          decoration: InputDecorations.authInputDecoration(
-              hintText: "Descripción",
-              labelText: "Descripción*",
-              prefixIcon: Icons.description
-          ),
-          // onChanged: ( value ) => newCustForm.firstName = value,
-          validator: ( value ) {
-            return ( value != null && value.isNotEmpty )
-                ? null
-                : 'Por favor ingrese una descripción válida';
-
-          },
-        ),
-        const SizedBox(height: 10,),
-        TextFormField(
-          autocorrect: false,
-          keyboardType: TextInputType.number,
-          controller: textValueCntrll,
-          decoration: InputDecorations.authInputDecoration(
-              hintText: "Valor",
-              labelText: "Valor*",
-              prefixIcon: Icons.monetization_on_outlined
-          ),
-          // onChanged: ( value ) => newCustForm.firstName = value,
-          validator: ( value ) {
-            final intNumber = double.tryParse(value!.replaceAll(',', ''));
-            return (intNumber != null && intNumber > 0)
-                ? null
-                : 'Por favor ingrese el valor';
-          },
-        ),
-        const SizedBox(height: 10,),
-        TextFormField(
-          autocorrect: false,
-          keyboardType: TextInputType.name,
-          decoration: InputDecorations.authInputDecoration(
-              hintText: "Seleccione una Fecha",
-              labelText: "Fecha de Compra*",
-              prefixIcon: Icons.calendar_today_outlined),
-          controller: textPurchaseDateCntrll,
-          readOnly: true,
-          validator: (value) {
-            return (value != null && value.isNotEmpty)
-                ? null
-                : 'Por favor ingrese una fecha válida';
-          },
-          onTap: () {
-            showDatePicker(
-              context: context,
-              initialDate: DateTime.now(),
-              firstDate: DateTime(1910),
-              lastDate: DateTime(2050),
-            ).then((DateTime? value) {
-              if (value != null) {
-                DateTime _formDate = DateTime.now();
-                _formDate = value;
-                final String date =
-                DateFormat('yyyy-MM-dd').format(_formDate);
-                textPurchaseDateCntrll.text = date;
-              }
-            });
-          },
-        ),
-        const SizedBox(height: 10,),
-        TextFormField(
-          autocorrect: false,
-          keyboardType: TextInputType.number,
-          controller: textFolioCntrll,
-          decoration: InputDecorations.authInputDecoration(
-              hintText: "Folio",
-              labelText: "Folio*",
-              prefixIcon: Icons.numbers_outlined
-          ),
-          validator: (value) {
-            return (value != null && value.isNotEmpty)
-                ? null
-                : 'Por favor ingrese un folio válido';
-          },
-          // onChanged: ( value ) => newCustForm.firstName = value,
-        ),
-        const SizedBox(height: 10,),
-        TextFormField(
-          autocorrect: false,
-          keyboardType: TextInputType.name,
-          controller: textDeedNumberCntrll,
-          decoration: InputDecorations.authInputDecoration(
-              hintText: "No. Escritura",
-              labelText: "No. Escritura*",
-              prefixIcon: Icons.file_open
-          ),
-          // onChanged: ( value ) => newCustForm.firstName = value,
-          validator: ( value ) {
-            return ( value != null && value.isNotEmpty )
-                ? null
-                : 'Por favor ingrese No. Escritura';
-
-          },
-        ),
-        const SizedBox(height: 10,),
-        TextFormField(
-          autocorrect: false,
-          keyboardType: TextInputType.name,
-          controller: textCivicNumberCntrll,
-          decoration: InputDecorations.authInputDecoration(
-              hintText: "Cta. Catastral",
-              labelText: "Cta. Catastral*",
-              prefixIcon: Icons.numbers_outlined
-          ),
-          validator: (value) {
-            return (value != null && value.isNotEmpty)
-                ? null
-                : 'Por favor ingrese Cta. Catastral.';
-          },
-          // onChanged: ( value ) => newCustForm.firstName = value,
-        ),
-        const SizedBox(height: 10,),
-        TextFormField(
-          autocorrect: false,
-          keyboardType: TextInputType.name,
-          controller: textStreetCntrll,
-          decoration: InputDecorations.authInputDecoration(
-              hintText: "Calle",
-              labelText: "Calle*",
-              prefixIcon: Icons.add_road
-          ),
-          // onChanged: ( value ) => newCustForm.firstName = value,
-          validator: ( value ) {
-            return ( value != null && value.isNotEmpty )
-                ? null
-                : 'Por favor ingrese una calle válida';
-
-          },
-        ),
-        const SizedBox(height: 10,),
-        TextFormField(
-          autocorrect: false,
-          keyboardType: TextInputType.number,
-          controller: textExtNumberCntrll,
-          decoration: InputDecorations.authInputDecoration(
-              hintText: "No. Exterior",
-              labelText: "No. Exterior*",
-              prefixIcon: Icons.add_road
-          ),
-          // onChanged: ( value ) => newCustForm.firstName = value,
-          validator: ( value ) {
-            return ( value != null && value.isNotEmpty )
-                ? null
-                : 'Por favor ingrese un número válido';
-
-          },
-        ),
-        const SizedBox(height: 10,),
-        TextFormField(
-          autocorrect: false,
-          keyboardType: TextInputType.name,
-          controller: textIntNumberCntrll,
-          decoration: InputDecorations.authInputDecoration(
-              hintText: "No. Interior",
-              labelText: "No. Interior",
-              prefixIcon: Icons.add_road
-          ),
-        ),
-        const SizedBox(height: 10,),
-        TextFormField(
-          autocorrect: false,
-          keyboardType: TextInputType.name,
-          controller: textZipCntrll,
-          decoration: InputDecorations.authInputDecoration(
-              hintText: "C.P.",
-              labelText: "C.P.*",
-              prefixIcon: Icons.home_work_outlined
-          ),
-          // onChanged: ( value ) => newCustForm.firstName = value,
-          validator: ( value ) {
-            return ( value != null && value.isNotEmpty )
-                ? null
-                : 'Por favor ingrese un c.p. válido';
-
-          },
-        ),
-        const SizedBox(height: 10,),
-        AutocompleteExampleApp(
-            programCode: 'CITY',
-            label: 'Ciudad*',
-            callback: (int id){
-              cityId = id;
-            },
-            autoValue: cityId,
-            textValue: cityText,
-            inValid: false
-        ),
-        const SizedBox(height: 10,),
-        if(isCreated)
-          UploadFileIcon(
-            key: _keyUploadPhoto,
-            initialRuta: soCreditRequestAsset.photo,
-            programCode: SoCreditRequestAsset.programCode,
-            fielName: 'crqa_photo',
-            label: 'Foto',
-            id: soCreditRequestAsset.id.toString(),
-            idGuarantee: '',
-            callBack: (bool isLoading){
-              updateDataCRQA();
-            },
-          ),
-        // if(widget.soCustAddress.id < 1)
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: ElevatedButton(
-            onPressed: () {
-              if(_formKeyInmueble.currentState!.validate()){
-                if(cityId > 0){
-                  updateCreditRequestAsset().then((value) => updateDataCRQA()) ;
-                }else{
-                  Fluttertoast.showToast(msg: 'Favor de ingresar su ciudad');
-                }
-              }
-            },
-            child: const Text(
-              'Guardar',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }*/
-
-  Widget typeAuto(){
-    return Column(
-      children: [
-
-      ],
-    );
   }
 
   Widget formInmueble(){
@@ -2045,7 +1682,9 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
       }else{
         msjResponsServer = 'Nuevo aval registrado.';
       }
-      soCustomer = SoCustomer.fromJson(jsonDecode(response.body));
+      setState(() {
+        soCustomer = SoCustomer.fromJson(jsonDecode(response.body));
+      });
       // Muestra mensaje
 
       return true;
@@ -2061,6 +1700,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
   }
 
   Future<bool> updateCreditRequestGuarantee() async {
+
     soCreditRequestGuarantee.customerId = soCustomer.id;
     soCustomer.firstName = textFisrtNameCntrll.text;
     soCustomer.fatherLastName = textFatherLastNameCntrll.text;
@@ -2135,7 +1775,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
       return true;
     } else {
       print(response.body.toString());
-      msjError = 'Error al guardar detalles del aval';
+      msjError = response.body.toString();
       // Error al guardar
 /*      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error al Guardar')),
@@ -2165,6 +1805,65 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
       soCreditRequestGuarantee = SoCreditRequestGuarantee.fromJson(jsonDecode(response.body));
     });
     return true;
+  }
+
+  //Consulta las garantias por solicitud
+  Future<List<SoCreditRequestAsset>> fetchSoCreditRequestAssets(int forceFilter) async {
+    String url = params.getAppUrl(params.instance) +
+        'restcrqa;' +
+        params.jSessionIdQuery +
+        '=' +
+        params.jSessionId +
+        '?' +
+        'ff' +
+        '=' +
+        forceFilter.toString();
+    final response = await http.Client().get(Uri.parse(url));
+
+    // Si no es exitoso envia a login
+    if (response.statusCode == params.servletResponseScForbidden) {
+      Navigator.pushNamed(context, '/');
+    } else if (response.statusCode != params.servletResponseScOk) {
+      print('Error listado: ' + response.toString());
+    }
+
+    final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
+
+    _creditRequestAssetListData.addAll(
+        parsed.map<SoCreditRequestAsset>((json) => SoCreditRequestAsset.fromJson(json)).toList());
+    setState((){});
+    return parsed
+        .map<SoCreditRequestAsset>((json) => SoCreditRequestAsset.fromJson(json))
+        .toList();
+  }
+
+  Future<List<SoCustAddres>> fetchSoCustomerAddress(int forceFilter) async {
+    String url = params.getAppUrl(params.instance) +
+        'restcuad;' +
+        params.jSessionIdQuery +
+        '=' +
+        params.jSessionId +
+        '?' +
+        params.forceFilter +
+        '=' +
+        forceFilter.toString();
+    final response = await http.Client().get(Uri.parse(url));
+
+    // Si no es exitoso envia a login
+    if (response.statusCode == params.servletResponseScForbidden) {
+      Navigator.pushNamed(context, '/');
+    } else if (response.statusCode != params.servletResponseScOk) {
+      print('Error listado: ' + response.toString());
+    }
+
+    final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
+
+    _customerAddressListData.addAll(
+        parsed.map<SoCustAddres>((json) => SoCustAddres.fromJson(json)).toList());
+    setState((){});
+    return parsed
+        .map<SoCustAddres>((json) => SoCustAddres.fromJson(json))
+        .toList();
   }
 
 }

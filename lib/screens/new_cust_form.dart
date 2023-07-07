@@ -508,7 +508,7 @@ class _NewCustForm extends State<NewCustForm>{
       Navigator.pop(context);
       print('Error al Guardar ${response.body}');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al crear registro')),
+        SnackBar(content: Text(response.body)),
       );
     }
   }

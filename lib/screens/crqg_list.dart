@@ -20,7 +20,7 @@ class _CreditRequestGuaranteeList extends State<CreditRequestGuaranteeList>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBarStyle.authAppBarFlex(title: 'Sponsors Solicitud ${widget.soCreditRequest.id}'),
-      body: CreditRequestGuarantee(forceFilter: widget.soCreditRequest.id),
+      body: CreditRequestGuarantee(forceFilter: widget.soCreditRequest.id, requiredAsset: false,),
     );
   }
 

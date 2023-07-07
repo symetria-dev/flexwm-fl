@@ -3,12 +3,16 @@ import 'dart:convert';
 import 'package:flexwm/models/crqa.dart';
 import 'package:flexwm/models/crqg.dart';
 import 'package:flexwm/screens/autocomplete_example.dart';
+import 'package:flexwm/ui/appbar_flexwm.dart';
+import 'package:flexwm/widgets/card_stepcontainer.dart';
+import 'package:flexwm/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flexwm/common/params.dart' as params;
 import 'package:intl/intl.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 import '../models/data.dart';
 import '../routes/app_routes.dart';
@@ -20,16 +24,17 @@ class CreditRequestAssetsForm extends StatefulWidget{
   //Se recibe objeto para el fomulario
   final SoCreditRequestAsset soCreditRequestAsset;
   final SoCreditRequestGuarantee soCreditRequestGuarantee;
-  final bool typeInmueble;
   final String? label;
   const CreditRequestAssetsForm({Key? key, required this.soCreditRequestAsset,
-    required this.soCreditRequestGuarantee, required this.typeInmueble, this.label, }) : super(key: key);
+    required this.soCreditRequestGuarantee, this.label, }) : super(key: key);
 
   @override
   State<CreditRequestAssetsForm> createState() => _CreditRequestAssetsFormState();
 }
 
 class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
+  //indicador de progress modal overlay
+  bool _isInAsyncCall = false;
   //Se crean controllers para asignar valores en campos
   final textDescriptionCntrll = TextEditingController();
   final textValueCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
@@ -52,15 +57,19 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
   //Variables de campos cambiantes
   int cityId = 0;
   String cityText = '';
-  late String type = '';
+  late String assetType = '-';
   int creditRequestId = 0;
   int creditRequestGuarantee = 0;
+  bool firstStep = true;
 
   //key para el formulario
   final _formKeyInmueble = GlobalKey<FormState>();
   final _formKeyAuto = GlobalKey<FormState>();
+  final _assetForm = GlobalKey<FormState>();
   //Objeto de tipo para manipular info
   SoCreditRequestAsset soCreditRequestAsset = SoCreditRequestAsset.empty();
+  //mostrar carga visual
+  bool isLoading = false;
 
   //key para subir archivo foto
   final GlobalKey<uploadFileIcon> _keyUploadPhoto = GlobalKey();
@@ -68,15 +77,10 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
 
   @override
   void initState(){
-    if(widget.typeInmueble){
-      type = SoCreditRequestAsset.TYPE_PROPERTY;
-    }else{
-      type = SoCreditRequestAsset.TYPE_AUTO;
-    }
     if(widget.soCreditRequestAsset.id > 0 ){
       isCreated = true;
       soCreditRequestAsset = widget.soCreditRequestAsset;
-      type = soCreditRequestAsset.type;
+      assetType = soCreditRequestAsset.type;
       textDescriptionCntrll.text = widget.soCreditRequestAsset.description;
       textValueCntrll.updateValue(widget.soCreditRequestAsset.value);
       textPurchaseDateCntrll.text = widget.soCreditRequestAsset.purchaseDate;
@@ -107,10 +111,274 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
 
   @override
   Widget build(BuildContext context) {
-    return (widget.typeInmueble)
-        ? formInmueble()
-        : formAuto();
+    return Scaffold(
+        appBar: AppBarStyle.authAppBarFlex(title: 'Garantía'),
+        body: ModalProgressHUD(
+          inAsyncCall: _isInAsyncCall,
+          progressIndicator: const CircularProgressIndicator(),
+          child: AuthFormBackground(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 30,),
+                  CardContainer(
+                      child: firstForm(),
+                  ),
+                  const SizedBox(height: 30,),
+                  if(isLoading)
+                    const LinearProgressIndicator(),
+                  if(soCreditRequestAsset.id < 1 || firstStep)
+                  MaterialButton(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      disabledColor: Colors.grey,
+                      elevation: 0,
+                      // color: Colors.deepOrange,
+                      color: Colors.blueGrey,
+                      child: Container(
+                          padding: const EdgeInsets.symmetric( horizontal: 80, vertical: 15),
+                          child: Text(
+                            isLoading
+                                ? 'Espere'
+                                : 'Agregar',
+                            style: const TextStyle( color: Colors.white ),
+                          )
+                      ),
+                      onPressed: () async {
+                        if(_assetForm.currentState!.validate() && assetType != '-'){
+                          updateCreditRequestAsset().then((value) {
+                            if (value) {
+                              setState(() {
+                                firstStep = false;
+                              });
+                              Fluttertoast.showToast(
+                                  msg: 'Registro agregado con éxito.');
+                            } else {
+                              Fluttertoast.showToast(
+                                  msg: 'Ocurrió un error a guardar registro.');
+                            }
+                          });
+                        }else{
+                          Fluttertoast.showToast(msg: 'Seleccione tipo de garantía');
+                        }
+                      }
+                  ),
+                  if(soCreditRequestAsset.id > 0 && !firstStep)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        MaterialButton(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            disabledColor: Colors.grey,
+                            elevation: 0,
+                            // color: Colors.deepOrange,
+                            color: Colors.blueGrey,
+                            child: Container(
+                                padding: const EdgeInsets.symmetric( horizontal: 50, vertical: 15),
+                                child: const Text('Volver',
+                                  style: TextStyle( color: Colors.white ),
+                                )
+                            ),
+                            onPressed: () async {
+                                setState(() {
+                                  firstStep=true;
+                                });
+                            }
+                        ),
+                        MaterialButton(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            disabledColor: Colors.grey,
+                            elevation: 0,
+                            // color: Colors.deepOrange,
+                            color: Colors.blueGrey,
+                            child: Container(
+                                padding: const EdgeInsets.symmetric( horizontal: 50, vertical: 15),
+                                child: const Text('Guardar',
+                                  style: TextStyle( color: Colors.white ),
+                                )
+                            ),
+                            onPressed: () async {
+                                if(assetType == SoCreditRequestAsset.TYPE_AUTO && assetType != '-'){
+                                  if(_formKeyAuto.currentState!.validate()){
+                                    updateCreditRequestAsset().then((value) {
+                                      if(value){
+                                        Fluttertoast.showToast(msg: 'Registro agregado con éxito.');
+                                        Navigator.pop(context);
+                                      }else{
+                                        Fluttertoast.showToast(msg: 'Ocurrió un error a guardar registro.');
+                                        Navigator.pop(context);
+                                      }
+                                    });
+                                  }
+                                }else if(assetType == SoCreditRequestAsset.TYPE_PROPERTY && assetType != '-'){
+                                  if(_formKeyInmueble.currentState!.validate()){
+                                    updateCreditRequestAsset().then((value) {
+                                      if(value){
+                                        Fluttertoast.showToast(msg: 'Registro agregado con éxito.');
+                                        Navigator.pop(context);
+                                      }else{
+                                        Fluttertoast.showToast(msg: 'Ocurrió un error a guardar registro.');
+                                        Navigator.pop(context);
+                                      }
+                                    });
+                                  }
+                                }else{
+                                  Fluttertoast.showToast(msg: 'Seleccione tipo de garantía');
+                                }
+                              }
+                        ),
+                      ],
+                    ),
+                  const SizedBox( height: 40 ),
+                ],
+              ),
+            ),
+          ),
+        )
+    );
   }
+
+  Widget firstForm(){
+    if(soCreditRequestAsset.id < 1 || firstStep){
+      return assetForm();
+    }else{
+      if(assetType != '-' && assetType == 'A') {
+        return formAuto();
+      }
+      if(assetType != '-' && assetType == 'P') {
+        return formInmueble();
+      }
+    }
+    return const Text('');
+  }
+
+  Widget assetForm(){
+    return Form(
+      key: _assetForm,
+                child: Container(
+                  margin: const EdgeInsets.only(top: 0),
+                  child: Column(
+                    children: [
+                      // const Text("Garantía"),
+                      // const SizedBox(height: 10,),
+                      Row(
+                        children: [
+                          const Expanded(
+                              child: Text("Tipo*",
+                                style: TextStyle(color: Colors.grey,fontSize: 15),
+                              )
+                          ),
+                          DropdownButtonHideUnderline(
+                            child: ButtonTheme(
+                              child: DropdownButton(
+                                value: assetType,
+                                items: SoCreditRequestAsset.getTypeOptions.map((e) {
+                                  return DropdownMenuItem(
+                                    child: Text(e['label']),
+                                    value: e['value'],
+                                  );
+                                }).toList(),
+                                onChanged: (Object? value) {
+                                  setState(() {
+                                    assetType = '$value';
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      TextFormField(
+                        autocorrect: false,
+                        keyboardType: TextInputType.name,
+                        controller: textDescriptionCntrll,
+                        decoration: InputDecorations.authInputDecoration(
+                            hintText: "Descripción",
+                            labelText: "Descripción*",
+                            prefixIcon: Icons.description
+                        ),
+                        // onChanged: ( value ) => newCustForm.firstName = value,
+                        validator: ( value ) {
+                          return ( value != null && value.isNotEmpty )
+                              ? null
+                              : 'Por favor ingrese una descripción válida';
+
+                        },
+                      ),
+                      const SizedBox(height: 10,),
+                      TextFormField(
+                        autocorrect: false,
+                        keyboardType: TextInputType.number,
+                        controller: textValueCntrll,
+                        decoration: InputDecorations.authInputDecoration(
+                            hintText: "Valor",
+                            labelText: "Valor*",
+                            prefixIcon: Icons.monetization_on_outlined
+                        ),
+                        // onChanged: ( value ) => newCustForm.firstName = value,
+                        validator: ( value ) {
+                          final intNumber = double.tryParse(value!.replaceAll(',', ''));
+                          return (intNumber != null && intNumber > 0)
+                              ? null
+                              : 'Por favor ingrese el valor';
+                        },
+                      ),
+                      const SizedBox(height: 10,),
+                      TextFormField(
+                        autocorrect: false,
+                        keyboardType: TextInputType.name,
+                        decoration: InputDecorations.authInputDecoration(
+                            hintText: "Seleccione una Fecha",
+                            labelText: "Fecha de Compra*",
+                            prefixIcon: Icons.calendar_today_outlined),
+                        controller: textPurchaseDateCntrll,
+                        readOnly: true,
+                        validator: (value) {
+                          return (value != null && value.isNotEmpty)
+                              ? null
+                              : 'Por favor ingrese una fecha válida';
+                        },
+                        onTap: () {
+                          showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(1910),
+                            lastDate: DateTime(2050),
+                          ).then((DateTime? value) {
+                            if (value != null) {
+                              DateTime _formDate = DateTime.now();
+                              _formDate = value;
+                              final String date =
+                              DateFormat('yyyy-MM-dd').format(_formDate);
+                              textPurchaseDateCntrll.text = date;
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                )
+            );
+  }
+
+/* updateDataCRQA(){
+    fetchCrqa(soCreditRequestAsset.id.toString()).then((value) {
+      _keyUploadPhoto.currentState?.updateData(soCreditRequestAsset.photo);
+      _keyUploadPhoto.currentState?.updateId(soCreditRequestAsset.id.toString());
+
+    });
+
+  }*/
+
+  updateDataCRQA(){
+    fetchCrqa(soCreditRequestAsset.id.toString()).then((value) {
+      _keyUploadPhoto.currentState?.updateData(soCreditRequestAsset.photo);
+      _keyUploadPhoto.currentState?.updateId(soCreditRequestAsset.id.toString());
+
+    });
+
+  }
+
 
   Widget formInmueble(){
     return Form(
@@ -120,112 +388,29 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
           margin: const EdgeInsets.only(top: 0),
           child: Column(
             children: [
-              const SizedBox( height: 10 ),
-              const Text('Inmueble', style: TextStyle(color: Colors.grey, fontSize: 20)),
-              const SizedBox( height: 10 ),
-            /*  Row(
-                children: [
-                  const Expanded(
-                      child: Text("Tipo*",
-                        style: TextStyle(color: Colors.grey,fontSize: 15),
-                      )
-                  ),
-                  DropdownButtonHideUnderline(
-                    child: ButtonTheme(
-                      child: DropdownButton(
-                        value: type,
-                        items: SoCreditRequestAsset.getTypeOptions.map((e) {
-                          return DropdownMenuItem(
-                            child: Text(e['label']),
-                            value: e['value'],
-                          );
-                        }).toList(),
-                        onChanged: (Object? value) {
-                          setState(() {
-                            type = '$value';
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-             */
-              TextFormField(
-                autocorrect: false,
-                keyboardType: TextInputType.name,
-                controller: textDescriptionCntrll,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: "Descripción",
-                    labelText: "Descripción*",
-                    prefixIcon: Icons.description
+              UploadFileIcon(
+                  key: _keyUploadPhoto,
+                  initialRuta: soCreditRequestAsset.photo,
+                  programCode: SoCreditRequestAsset.programCode,
+                  fielName: 'crqa_photo',
+                  label: 'Foto',
+                  id: soCreditRequestAsset.id.toString(),
+                  idGuarantee: '',
+                  callBack: (bool isLoading) {
+                    setState(() {
+                      _isInAsyncCall = isLoading;
+                    });
+                    updateDataCRQA();
+                  },
                 ),
-                // onChanged: ( value ) => newCustForm.firstName = value,
-                validator: ( value ) {
-                  return ( value != null && value.isNotEmpty )
-                      ? null
-                      : 'Por favor ingrese una descripción válida';
-
-                },
-              ),
-              const SizedBox(height: 10,),
-              TextFormField(
-                autocorrect: false,
-                keyboardType: TextInputType.number,
-                controller: textValueCntrll,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: "Valor",
-                    labelText: "Valor*",
-                    prefixIcon: Icons.monetization_on_outlined
-                ),
-                // onChanged: ( value ) => newCustForm.firstName = value,
-                validator: ( value ) {
-                  final intNumber = double.tryParse(value!.replaceAll(',', ''));
-                  return (intNumber != null && intNumber > 0)
-                      ? null
-                      : 'Por favor ingrese el valor';
-                },
-              ),
-              const SizedBox(height: 10,),
-              TextFormField(
-                autocorrect: false,
-                keyboardType: TextInputType.name,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: "Seleccione una Fecha",
-                    labelText: "Fecha de Compra*",
-                    prefixIcon: Icons.calendar_today_outlined),
-                controller: textPurchaseDateCntrll,
-                readOnly: true,
-                validator: (value) {
-                  return (value != null && value.isNotEmpty)
-                      ? null
-                      : 'Por favor ingrese una fecha válida';
-                },
-                onTap: () {
-                  showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(1910),
-                    lastDate: DateTime(2050),
-                  ).then((DateTime? value) {
-                    if (value != null) {
-                      DateTime _formDate = DateTime.now();
-                      _formDate = value;
-                      final String date =
-                      DateFormat('yyyy-MM-dd').format(_formDate);
-                      textPurchaseDateCntrll.text = date;
-                    }
-                  });
-                },
-              ),
               const SizedBox(height: 10,),
               TextFormField(
                 autocorrect: false,
                 keyboardType: TextInputType.number,
                 controller: textFolioCntrll,
                 decoration: InputDecorations.authInputDecoration(
-                    hintText: "Folio",
-                    labelText: "Folio*",
+                    hintText: "Folio real RPP",
+                    labelText: "Folio real RPP*",
                     prefixIcon: Icons.numbers_outlined
                 ),
                 validator: (value) {
@@ -260,14 +445,9 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                 controller: textCivicNumberCntrll,
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "Cta. Catastral",
-                    labelText: "Cta. Catastral*",
+                    labelText: "Cta. Catastral",
                     prefixIcon: Icons.numbers_outlined
                 ),
-                validator: (value) {
-                  return (value != null && value.isNotEmpty)
-                      ? null
-                      : 'Por favor ingrese Cta. Catastral.';
-                },
                 // onChanged: ( value ) => newCustForm.firstName = value,
               ),
               const SizedBox(height: 10,),
@@ -291,7 +471,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
               const SizedBox(height: 10,),
               TextFormField(
                 autocorrect: false,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.name,
                 controller: textExtNumberCntrll,
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "No. Exterior",
@@ -346,55 +526,10 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                   textValue: cityText,
                   inValid: false
               ),
-              const SizedBox(height: 10,),
-              if(isCreated)
-               UploadFileIcon(
-                key: _keyUploadPhoto,
-                initialRuta: soCreditRequestAsset.photo,
-                programCode: SoCreditRequestAsset.programCode,
-                fielName: 'crqa_photo',
-                label: 'Foto',
-                id: soCreditRequestAsset.id.toString(),
-                idGuarantee: '',
-                callBack: (bool isLoading){
-                  updateDataCRQA();
-                },
-              ),
-              // if(widget.soCustAddress.id < 1)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    if(_formKeyInmueble.currentState!.validate()){
-                      if(cityId > 0){
-                        updateCreditRequestAsset().then((value) => updateDataCRQA()) ;
-                      }else{
-                        Fluttertoast.showToast(msg: 'Favor de ingresar su ciudad');
-                      }
-                    }
-                  },
-                  child: const Text(
-                    'Guardar',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         )
     );
-  }
-
-  updateDataCRQA(){
-    fetchCrqa(soCreditRequestAsset.id.toString()).then((value) {
-      _keyUploadPhoto.currentState?.updateData(soCreditRequestAsset.photo);
-      _keyUploadPhoto.currentState?.updateId(soCreditRequestAsset.id.toString());
-
-    });
-
   }
 
   Widget formAuto(){
@@ -405,81 +540,25 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
           margin: const EdgeInsets.only(top: 0),
           child: Column(
             children: [
-              const SizedBox( height: 10 ),
-              const Text('Auto', style: TextStyle(color: Colors.grey, fontSize: 20)),
-              const SizedBox( height: 10 ),
-              TextFormField(
-                autocorrect: false,
-                keyboardType: TextInputType.name,
-                controller: textDescriptionCntrll,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: "Descripción",
-                    labelText: "Descripción*",
-                    prefixIcon: Icons.description
+              UploadFileIcon(
+                  key: _keyUploadPhoto,
+                  initialRuta: soCreditRequestAsset.photo,
+                  programCode: SoCreditRequestAsset.programCode,
+                  fielName: 'crqa_photo',
+                  label: 'Foto',
+                  id: soCreditRequestAsset.id.toString(),
+                  idGuarantee: '',
+                  callBack: (bool isLoading) {
+                    setState(() {
+                      _isInAsyncCall = isLoading;
+                    });
+                    updateDataCRQA();
+                  },
                 ),
-                // onChanged: ( value ) => newCustForm.firstName = value,
-                validator: ( value ) {
-                  return ( value != null && value.isNotEmpty )
-                      ? null
-                      : 'Por favor ingrese una descripción válida';
-
-                },
-              ),
-              const SizedBox(height: 10,),
-              TextFormField(
-                autocorrect: false,
-                keyboardType: TextInputType.number,
-                controller: textValueCntrll,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: "Valor",
-                    labelText: "Valor*",
-                    prefixIcon: Icons.monetization_on_outlined
-                ),
-                // onChanged: ( value ) => newCustForm.firstName = value,
-                validator: ( value ) {
-                  final intNumber = double.tryParse(value!.replaceAll(',', ''));
-                  return (intNumber != null && intNumber > 0)
-                      ? null
-                      : 'Por favor ingrese un valor válido';
-
-                },
-              ),
               const SizedBox(height: 10,),
               TextFormField(
                 autocorrect: false,
                 keyboardType: TextInputType.name,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: "Seleccione una Fecha",
-                    labelText: "Fecha de Compra*",
-                    prefixIcon: Icons.calendar_today_outlined),
-                controller: textPurchaseDateCntrll,
-                readOnly: true,
-                validator: (value) {
-                  return (value != null && value.isNotEmpty)
-                      ? null
-                      : 'Por favor ingrese una fecha válida';
-                },
-                onTap: () {
-                  showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(1910),
-                    lastDate: DateTime(2025),
-                  ).then((DateTime? value) {
-                    if (value != null) {
-                      DateTime _formDate = DateTime.now();
-                      _formDate = value;
-                      final String date =
-                      DateFormat('yyyy-MM-dd').format(_formDate);
-                      textPurchaseDateCntrll.text = date;
-                    }
-                  });
-                },
-              ),
-              const SizedBox(height: 10,),
-              TextFormField(
-                autocorrect: false,
-                keyboardType: TextInputType.number,
                 controller: textInvoiceCntrll,
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "Número de Factura",
@@ -487,16 +566,16 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                     prefixIcon: Icons.numbers_outlined
                 ),
                 validator: (value) {
-                  return (value != null && value.isNotEmpty)
+                  return (value != null && value.isNotEmpty && value.length <= 10)
                       ? null
-                      : 'Por favor ingrese número de factura';
+                      : 'Por favor ingrese número de factura (menos o igual a 10 caracteres)';
                 },
                 // onChanged: ( value ) => newCustForm.firstName = value,
               ),
               const SizedBox(height: 10,),
               TextFormField(
                 autocorrect: false,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.name,
                 controller: textSerialCntrll,
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "No. de Serie",
@@ -514,7 +593,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
               const SizedBox(height: 10,),
               TextFormField(
                 autocorrect: false,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.name,
                 controller: textMotorCntrll,
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "No. de Motor",
@@ -575,42 +654,11 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
                 ),
                 // onChanged: ( value ) => newCustForm.firstName = value,
                 validator: ( value ) {
-                  return ( value != null && value.isNotEmpty )
+                  final intNumber = int.tryParse(value!);
+                  return (intNumber != null && intNumber > 0)
                       ? null
-                      : 'Por favor ingrese el año';
-
+                      : 'Favor de ingresar un año válido (solo números)';
                 },
-              ),
-              const SizedBox(height: 10,),
-              if(isCreated)
-                UploadFileIcon(
-                  key: _keyUploadPhoto,
-                  initialRuta: soCreditRequestAsset.photo,
-                  programCode: SoCreditRequestAsset.programCode,
-                  fielName: 'crqa_photo',
-                  label: 'Foto',
-                  id: soCreditRequestAsset.id.toString(),
-                  idGuarantee: '',
-                  callBack: (bool isLoading){
-                    updateDataCRQA();
-                  },
-                ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    if(_formKeyAuto.currentState!.validate()){
-                      updateCreditRequestAsset().then((value) => updateDataCRQA()) ;
-                    }
-                  },
-                  child: const Text(
-                    'Guardar',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
               ),
             ],
           ),
@@ -641,7 +689,10 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
   }
 
   Future<bool> updateCreditRequestAsset() async {
-    soCreditRequestAsset.type = type;
+    setState(() {
+      isLoading = true;
+    });
+    soCreditRequestAsset.type = assetType;
     soCreditRequestAsset.description = textDescriptionCntrll.text;
     soCreditRequestAsset.value = textValueCntrll.numberValue;
     soCreditRequestAsset.purchaseDate = textPurchaseDateCntrll.text;
@@ -681,6 +732,7 @@ class _CreditRequestAssetsFormState extends State<CreditRequestAssetsForm>{
       // Navigator.pop(context);
       // Muestra mensaje
       setState(() {
+        isLoading = false;
         isCreated = true;
         soCreditRequestAsset = SoCreditRequestAsset.fromJson(jsonDecode(response.body));
       });
@@ -695,7 +747,7 @@ return true;
         response.statusCode == params.servletResponseScForbidden) {
       // Error al guardar
       print(response.body.toString());
-      Fluttertoast.showToast(msg: 'Error al guardar garantía');
+      Fluttertoast.showToast(msg: 'Error al guardar garantía: ${response.body.toString()}');
       return false;
     } else {return false;
       // Aun no se recibe respuesta del servidor

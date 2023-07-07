@@ -47,6 +47,7 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
   late String _initialRuta = '';
   late String _idGuarantee ='';
   late Function _callback;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -68,110 +69,72 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
   Widget build(BuildContext context) {
     String urlDoc = params.getAppUrl(params.instance)+
         params.uploadFiles+'/'+_initialRuta;
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.end,
+    return Column(
       children: [
-        Expanded(
-          child: Text(
-            _label,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-        ),
         Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            /*SizedBox(
-              width: 200,
-              child: TextField(
-                readOnly: true,
-                decoration: InputDecorations.authInputDecoration(
-                    labelText: _label,
-                    prefixIcon: Icons.file_copy_outlined),
-                onTap: ()async {
-                  final result = await FilePicker.platform
-                      .pickFiles(allowMultiple: false);
-                  if (result == null) return;
-                  final file = result.files.first;
-                  setState(() {
-                    _ruta = file.path;
-                    if (_ruta != null) _hasUpload = true;
-                  });
-                },
+            Expanded(
+              child: Text(
+                _label,
+                style: const TextStyle(fontWeight: FontWeight.w500),
               ),
-            ),*/
-           /* Padding(
-              padding: const EdgeInsets.fromLTRB(
-                10,
-                10,
-                0,
-                5,
-              ),
-              child: ElevatedButton(
-                onPressed: () async {
-                  final result = await FilePicker.platform
-                      .pickFiles(allowMultiple: false);
-                  if (result == null) return;
-                  final file = result.files.first;
-                  setState(() {
-                    _ruta = file.path;
-                    if (_ruta != null) _hasUpload = true;
-
-                  });
-                },
-                child: const Text("Seleccionar Archivo"),
-                style: ElevatedButton.styleFrom(
-                    elevation: 6,
-                    primary: const Color.fromARGB(255, 13, 109, 189)),
-              ),
-            ),*/
-            IconButton(
-                onPressed: () async {
-                  _navigateAndDisplaySelection(context);
-                },
-                icon: const Icon(
-                  Icons.file_open, color: Colors.teal,)
             ),
-            if (_hasUpload)
-              IconButton(
-                color: Colors.blue,
-                onPressed: () {
-                  //se ejecuta callback por si hay datos que actualizar antes de enviar
-                  setState(() {
-                    _callback(true);
-                  });
-                  sendFile(_ruta!, _programCode, _fielName, _id);
-                },
-                icon: const Icon(
-                  Icons.upload,
-                  color: Colors.red,
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                    onPressed: () async {
+                      _navigateAndDisplaySelection(context);
+                    },
+                    icon: const Icon(
+                      Icons.file_open, color: Colors.teal,)
                 ),
-              ),
-            if(_initialRuta != '')
-            IconButton(
-                onPressed: () async {
-                  String file = _initialRuta;
-                  final dot = file.indexOf('.');
-                  String type = file.substring(dot, file.length);
-                  if(type == '.pdf' || type == '.PDF'){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PdfView(url: urlDoc,),
-                      ),
-                    );
-                    // _showModalPdf(context,urlDoc);
-                  }else{
-                    ShowImageAlert(context, urlDoc);
-                  }
-                },
-                icon: const Icon(
-                  Icons.remove_red_eye, color: Colors.teal,)
-            ),
+                if (_hasUpload)
+                  IconButton(
+                    color: Colors.blue,
+                    onPressed: () {
+                      //se ejecuta callback por si hay datos que actualizar antes de enviar
+                      setState(() {
+                        _callback(true);
+                      });
+                      sendFile(_ruta!, _programCode, _fielName, _id);
+                    },
+                    icon: const Icon(
+                      Icons.upload,
+                      color: Colors.red,
+                    ),
+                  ),
+                if(_initialRuta != '')
+                IconButton(
+                    onPressed: () async {
+                      String file = _initialRuta;
+                      final dot = file.indexOf('.');
+                      String type = file.substring(dot, file.length);
+                      if(type == '.pdf' || type == '.PDF'){
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PdfView(url: urlDoc,),
+                          ),
+                        );
+                        // _showModalPdf(context,urlDoc);
+                      }else{
+                        ShowImageAlert(context, urlDoc);
+                      }
+                    },
+                    icon: const Icon(
+                      Icons.remove_red_eye, color: Colors.teal,)
+                ),
 
+              ],
+            ),
           ],
         ),
+        if(isLoading)
+          const LinearProgressIndicator(),
       ],
     );
   }
@@ -203,6 +166,7 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
   }
 
   sendFile(String ruta, String programCode, String fieldName, String id) async {
+    setState((){isLoading = true;});
     _callback(true);
     final request = http.MultipartRequest('POST',
         Uri.parse(params.getAppUrl(params.instance) + 'uploadfileservelet'));
@@ -232,6 +196,7 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
       resultMessage('Subido con éxito' , context);
       _callback(false);
       setState(() {
+        isLoading = false;
         _hasUpload = false;
       });
     // }
@@ -250,6 +215,7 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
 
     }else{
     resultMessage(response.toString(), context);
+    setState((){isLoading = false;});
     }
   }
 }

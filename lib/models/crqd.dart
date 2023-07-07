@@ -1,3 +1,5 @@
+import 'package:flexwm/models/crqs.dart';
+
 class SoCreditRequestDetail {
   static const String programCode = 'CRQD';
   int id = -1;
@@ -20,8 +22,13 @@ class SoCreditRequestDetail {
   String dateEndInstitution = "";
   String institution= "";
   String location = "";
-  String period = "";
+  int period = 0;
   String degreeObtained = "";
+  int monthStay = 0;
+  String studentName = '';
+  int whoProcesses = 0;
+  String periodType = SoCreditRequest.PERIODTYPE_ANNUAL;
+  int whoStudies = 0;
 
   static String AGENCY_UNO = 'U';
   static String AGENCY_DOS = 'D';
@@ -48,7 +55,8 @@ class SoCreditRequestDetail {
       this.creditRequestId,this.verifiableIncome, this.countryId, this.city,
       this.educationalInstitution, this.educationalInstitutionType,
       this.dateStartInstitution, this.dateEndInstitution,this.institution,
-      this.location,this.period,this.degreeObtained,
+      this.location,this.period,this.degreeObtained, this.monthStay, this.studentName,
+      this.whoProcesses, this.periodType, this.whoStudies
       );
 
   factory SoCreditRequestDetail.fromJson(Map<String, dynamic> json){
@@ -73,8 +81,13 @@ class SoCreditRequestDetail {
       json['dateEndInstitution'] as String,
       json['institution'] as String,
       json['location'] as String,
-      json['period'] as String,
+      json['period'] as int,
       json['degreeObtained'] as String,
+      json['monthStay'] as int,
+      json['studentName'] as String,
+      json['whoProcesses'] as int,
+      json['periodType'] as String,
+      json['whoStudies'] as int,
     );
   }
 
@@ -102,6 +115,11 @@ class SoCreditRequestDetail {
       'location' : location,
       'period' : period,
       'degreeObtained' : degreeObtained,
+      'monthStay' : monthStay,
+      'studentName' : studentName,
+      'whoProcesses' : whoProcesses,
+      'periodType' : periodType,
+      'whoStudies' : whoStudies,
     };
   }
 }

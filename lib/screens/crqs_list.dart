@@ -290,12 +290,12 @@ class _CreditRequestList extends State<CreditRequestList> {
                       begin: AlignmentDirectional.topEnd,
                       end: AlignmentDirectional.bottomEnd,
                       colors: [
-                        Color.fromRGBO(0, 130, 146, 1),
-                        // Color.fromRGBO(225, 158, 110, 1),
-                        // Color.fromRGBO(243, 129, 48, 1),
+                        // Color.fromRGBO(0, 130, 146, 1),
+                        Color.fromRGBO(225, 158, 110, 1),
+                        Color.fromRGBO(243, 129, 48, 1),
                         // Color.fromRGBO(21, 67, 96, 1),
                         // Color.fromRGBO(171, 178, 185, 1)
-                        Color.fromRGBO(112, 169, 179, 1.0)
+                        // Color.fromRGBO(112, 169, 179, 1.0)
                       ])),
               child: SizedBox(
                 height: 140,
@@ -303,7 +303,7 @@ class _CreditRequestList extends State<CreditRequestList> {
                   children: [
                     Positioned.fill(
                         child: Image.asset(
-                      'images/logo.png',
+                      'images/logoEduPass.png',
                       fit: BoxFit.fitWidth,
                       color: Colors.white,
                     )),
@@ -394,12 +394,12 @@ class _CreditRequestList extends State<CreditRequestList> {
                           begin: AlignmentDirectional.topEnd,
                           end: AlignmentDirectional.bottomEnd,
                           colors: [
-                            Color.fromRGBO(0, 130, 146, 1),
-                            // Color.fromRGBO(225, 158, 110, 1),
-                            // Color.fromRGBO(243, 129, 48, 1),
+                            // Color.fromRGBO(0, 130, 146, 1),
+                            Color.fromRGBO(225, 158, 110, 1),
+                            Color.fromRGBO(243, 129, 48, 1),
                             // Color.fromRGBO(21, 67, 96, 1),
                             // Color.fromRGBO(171, 178, 185, 1)
-                            Color.fromRGBO(112, 169, 179, 1.0)
+                            // Color.fromRGBO(112, 169, 179, 1.0)
                           ])),
                   child: SizedBox(
                     height: 140,
@@ -407,7 +407,7 @@ class _CreditRequestList extends State<CreditRequestList> {
                       children: [
                         Positioned.fill(
                             child: Image.asset(
-                          'images/logo.png',
+                          'images/logoEduPass.png',
                           fit: BoxFit.fitWidth,
                           color: Colors.white,
                         )),
@@ -447,7 +447,7 @@ class _CreditRequestList extends State<CreditRequestList> {
                       } else {
                         Fluttertoast.showToast(
                             msg:
-                                'Error al obrtener información, intentelo más tarde');
+                                'Error al obtener información, intentelo más tarde');
                       }
                     });
                   },

@@ -199,7 +199,6 @@ class _CustDataFormState extends State<CustDataForm>{
               if(soCreditRequest.creditBureau > 0){
                 if( soCreditRequestDetail.institution != '' &&
                     soCreditRequestDetail.location != '' &&
-                    soCreditRequestDetail.period != '' &&
                     soCreditRequestDetail.degreeObtained != '' &&
                     stepRealized >=1){
                   setState(() {
@@ -232,7 +231,7 @@ class _CustDataFormState extends State<CustDataForm>{
 
               textInstitutionCntrll.text = soCreditRequestDetail.institution;
               textLocationCntrll.text = soCreditRequestDetail.location;
-              textPeriodCntrll.text = soCreditRequestDetail.period;
+              textPeriodCntrll.text = soCreditRequestDetail.period.toString();
               textDegreeCntrll.text = soCreditRequestDetail.degreeObtained;
             }
             if(soCreditRequestDetail.educationalInstitution != '' ) textEducationalInstitutionCntrll.text = soCreditRequestDetail.educationalInstitution;
@@ -280,14 +279,14 @@ class _CustDataFormState extends State<CustDataForm>{
       AuthListBackground(child: formCrqd()),
       AuthListBackground(child: Padding(
         padding: const EdgeInsets.only(top: 50),
-        child: CreditRequestGuarantee(forceFilter: soCreditRequest.id),
+        child: CreditRequestGuarantee(forceFilter: soCreditRequest.id, requiredAsset: false,),
       )),
       AuthListBackground(child: Padding(
         padding: const EdgeInsets.only(top: 50),
         child: ChatPrueba(forceFilter: wflowId),
       ),),
       AuthListBackground(child: CreditRequestInfoScreen(soCreditRequest: soCreditRequest,
-        step: stepRealized)
+        step: stepRealized, requiredAsset: true, requiredGuarantees: 0,)
       ),
     ];
 
@@ -1317,7 +1316,7 @@ class _CustDataFormState extends State<CustDataForm>{
             SubCatalogContainerWidget(
                 title: 'Sponsors',
                 child: CreditRequestGuarantee(
-                    forceFilter: soCreditRequest.id
+                    forceFilter: soCreditRequest.id, requiredAsset: false,
                 )
             ),
           ],
@@ -1572,7 +1571,7 @@ class _CustDataFormState extends State<CustDataForm>{
     }
     soCreditRequestDetail.institution = textInstitutionCntrll.text;
     soCreditRequestDetail.location = textLocationCntrll.text;
-    soCreditRequestDetail.period = textPeriodCntrll.text;
+    soCreditRequestDetail.period = int.parse(textPeriodCntrll.text);
     soCreditRequestDetail.degreeObtained = textDegreeCntrll.text;
 
     // Envia la sesion como Cookie, con el nombre en UpperCase

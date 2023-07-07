@@ -42,7 +42,7 @@ class _HeaderIcon extends StatelessWidget {
             const SizedBox(width: 10,),
 
             Flexible(
-              child:Image.asset('images/logo.png'),
+              child:Image.asset('images/logo1.png'),
             ),
           ],
         ),
