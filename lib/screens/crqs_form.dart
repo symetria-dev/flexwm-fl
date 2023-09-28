@@ -1,5 +1,5 @@
-
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flexwm/main.dart';
 import 'package:flexwm/models/crqd.dart';
@@ -13,6 +13,7 @@ import 'package:flexwm/screens/crqg_screen.dart';
 import 'package:flexwm/screens/crqs_list.dart';
 import 'package:flexwm/ui/appbar_flexwm.dart';
 import 'package:flexwm/widgets/auth_listbackground.dart';
+import 'package:flexwm/widgets/dropdown_widget_crmt.dart';
 import 'package:flexwm/widgets/sub_catalog_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 import '../models/crqa.dart';
+import '../models/orci.dart';
 import '../routes/app_routes.dart';
 import '../widgets/card_stepcontainer.dart';
 import '../widgets/dropdown_widget.dart';
@@ -35,19 +37,20 @@ import 'crqg_form2.dart';
 import 'cust_crqs_form.dart';
 import 'info_cqrs_screen.dart';
 
-
 class CrqsForm extends StatefulWidget {
   final SoCreditRequest creditRequest;
   final SoCreditRequestDetail creditRequestDetail;
-  const CrqsForm({Key? key, required this.creditRequest,
-    required this.creditRequestDetail,}) : super(key: key);
+  const CrqsForm({
+    Key? key,
+    required this.creditRequest,
+    required this.creditRequestDetail,
+  }) : super(key: key);
 
   @override
   _CrqsFormState createState() => _CrqsFormState();
-
 }
 
-class _CrqsFormState extends State<CrqsForm>{
+class _CrqsFormState extends State<CrqsForm> {
   //Lista de avales
   final List<SoCreditRequestGuarantee> _creditRequestGuarantee = [];
   //Lista de garantias por solicitud de crédito
@@ -59,18 +62,24 @@ class _CrqsFormState extends State<CrqsForm>{
   //objeto para los datos de detalle solicitud de crédito
   SoCreditRequestDetail soCreditRequestDetail = SoCreditRequestDetail.empty();
   //objeto para los datis de perfil de crédito
-  SoCreditRequestGuarantee soCreditRequestGuarantee = SoCreditRequestGuarantee.empty();
+  SoCreditRequestGuarantee soCreditRequestGuarantee =
+      SoCreditRequestGuarantee.empty();
   //Indice indicador de paso activo
   int _activeStepIndex = 0;
+  // Lista para tabla de amortización
+  List<SoOderCreditItem> _soOrderCreditItem = [];
 
   //controllers campos step2
-  final textMontoCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
-  final textCantPeriodoCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
+  final textMontoCntrll =
+      MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
+  final textCantPeriodoCntrll =
+      MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
 
   late int creditDestiny = 0;
   int monthSelected = 0;
   int deadLine = 0;
-  final textPagoMonthCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
+  final textPagoMonthCntrll =
+      MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
   int creditTypeId = 0;
   //controllers campos step 3
   final textEducationalInstitutionCntrll = TextEditingController();
@@ -91,10 +100,12 @@ class _CrqsFormState extends State<CrqsForm>{
   late String relation = '';
 
   //controllers financiamiento en el extranjero
-   bool visaFees = false;
-   bool planeTickets = false;
-  final textProgramCostCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
-  final textMaintenanceCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
+  bool visaFees = false;
+  bool planeTickets = false;
+  final textProgramCostCntrll =
+      MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
+  final textMaintenanceCntrll =
+      MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
   final textStudiesPlaceCntrll = TextEditingController();
   final textMonthStayCntrll = TextEditingController();
   late int engagementAgencyId = 0;
@@ -103,8 +114,10 @@ class _CrqsFormState extends State<CrqsForm>{
   final textEngagementSchollCntrll = TextEditingController();
   final textDateProbablyTravelCntrll = TextEditingController();
   final textEducationalProgramCntrll = TextEditingController();
-  final textVerifiableIncomeCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
-  final textDisbursementAmountCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
+  final textVerifiableIncomeCntrll =
+      MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
+  final textDisbursementAmountCntrll =
+      MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
 
   //keys para validaciones de formularios en cada paso
   final _formKeyCrqs = GlobalKey<FormState>();
@@ -135,6 +148,8 @@ class _CrqsFormState extends State<CrqsForm>{
   String titleCrqd = 'Detalles Solicitud de Crédito';
   //Progresindicator envio de datos
   bool sendingData = false;
+  //existe agenncia selecionada
+  bool angencyValue = false;
   //errores de solicitud
   String errorMsg = '';
   //id de flujo
@@ -172,55 +187,62 @@ class _CrqsFormState extends State<CrqsForm>{
   bool requiredAsset = false;
   //debe crear acreditado titular diferente
   bool requiredAcredited = false;
+  // total interes anual y cat
+  double rate = 0.0;
+  double cat = 0.0;
+  //identificador para ejecutar y actualizar data de creditmotive
+  final GlobalKey<dropdownWidgetStateCrmt> _keyGetDataDropdownCrmt =
+      GlobalKey();
 
   @override
-  void initState(){
+  void initState() {
     //Se obtiene el cliente que se encuentra loggeado
     idCustomer = params.idLoggedUser;
     fetchCustomer(idCustomer.toString());
     institutionType = SoCreditRequestDetail.INSTITUTION_TYPE_NATIONAL;
     //Si existe el crédito minimo va en el paso 3
-    if(widget.creditRequest.id > 0){
+    if (widget.creditRequest.id > 0) {
+      rate = widget.creditRequest.rate;
+      fetchSoOrderCreditItem(widget.creditRequest.id);
+      fetchFinanceUtil(widget.creditRequest.id);
       fetchCrqg(widget.creditRequest.id).then((value) {
-        if(soCreditRequestGuarantee.verifiableIncome > 0){
-          textVerifiableIncomeCntrll.updateValue(soCreditRequestGuarantee.verifiableIncome);
-          checkWhoProcesses =true;
+        if (soCreditRequestGuarantee.verifiableIncome > 0) {
+          textVerifiableIncomeCntrll
+              .updateValue(soCreditRequestGuarantee.verifiableIncome);
+          checkWhoProcesses = true;
           checkIncome = true;
         }
       });
-      setState((){
+      setState(() {
         stepRealized = 2;
         _activeStepIndex = 2;
       });
-
-
-
 
       //obtener datos de dropdownlist (funcionaba para los planes de crédito)
       getData();
 
       soCreditRequest = widget.creditRequest;
-      if(soCreditRequest.soWFlow.userMsgs){
+      if (soCreditRequest.soWFlow.userMsgs) {
         setState(() {
           messages = true;
         });
       }
 
-      if(soCreditRequest.status != SoCreditRequest.STATUS_EDITION){
+      if (soCreditRequest.status != SoCreditRequest.STATUS_EDITION) {
         setState(() {
           stepRealized = 3;
           _activeStepIndex = 3;
-          _currentTabIndex = 3;
+          _currentTabIndex = 4;
         });
       }
 
       codeCrqs = soCreditRequest.code;
       fiscalRegime = soCreditRequest.fiscalRegime;
-      if(soCreditRequest.creditMotiveId > 0){
+      if (soCreditRequest.creditMotiveId > 0) {
         creditDestiny = soCreditRequest.creditMotiveId;
       }
 
-      if(soCreditRequest.disbursements > 0){
+      if (soCreditRequest.disbursements > 0) {
         multiDisposicion = 1;
         textDisbursementsCntrll.text = soCreditRequest.disbursements.toString();
         textCantPeriodoCntrll.updateValue(soCreditRequest.disbursementAmount);
@@ -231,50 +253,65 @@ class _CrqsFormState extends State<CrqsForm>{
       deadLine = soCreditRequest.deadlineRequired;
       textPagoMonthCntrll.updateValue(soCreditRequest.monthlyPayment);
 
-      if(soCreditRequest.creditBureau == 1) isSwitched = true;
+      if (soCreditRequest.creditBureau == 1) isSwitched = true;
       // textDateStartCntrll.text = soCreditRequest.starDate;
 
-     soCreditRequestDetail = widget.creditRequestDetail;
+      soCreditRequestDetail = widget.creditRequestDetail;
 
-     periodType = soCreditRequestDetail.periodType;
+      periodType = soCreditRequestDetail.periodType;
       textPeriodCntrll.text = soCreditRequestDetail.period.toString();
-              textInstitutionCntrll.text = soCreditRequestDetail.institution;
-              textLocationCntrll.text = soCreditRequestDetail.location;
-              textDegreeCntrll.text = soCreditRequestDetail.degreeObtained;
-            if(soCreditRequestDetail.educationalInstitution != '' ) textEducationalInstitutionCntrll.text = soCreditRequestDetail.educationalInstitution;
-            if(soCreditRequestDetail.educationalInstitutionType != '' ) institutionType = soCreditRequestDetail.educationalInstitutionType;
-            if(soCreditRequestDetail.dateStartInstitution != '' ) textDateStartCntrll.text = soCreditRequestDetail.dateStartInstitution.replaceAll(' 00:00', '');
-            if(soCreditRequestDetail.dateEndInstitution != '' ) textDateEndCntrll.text = soCreditRequestDetail.dateEndInstitution.replaceAll(' 00:00', '');
-            setState((){creditRequestDetailId = soCreditRequestDetail.id;});
-            // updateDataCrqs();
-            if(soCreditRequestDetail.visaFees > 0 ) visaFees = true;
-            if(soCreditRequestDetail.planeTickets > 0 ) planeTickets = true;
-            if(soCreditRequestDetail.programCost > 0.0 ) textProgramCostCntrll.updateValue(soCreditRequestDetail.programCost);
-            if(soCreditRequestDetail.maintenance > 0.0 ) textMaintenanceCntrll.updateValue(soCreditRequestDetail.maintenance);
-            textStudiesPlaceCntrll.text = soCreditRequestDetail.studiesPlace;
-            if(soCreditRequestDetail.engagementAgencyId > 0) {
-              setState((){engagementAgencyId = soCreditRequestDetail.engagementAgencyId;});
-            }
-            if(soCreditRequestDetail.whoProcesses > 0) checkWhoProcesses = true;
-            if(soCreditRequestDetail.whoStudies > 0){
-              checkWhoStudies = true;
-              _activeStepIndex = 3;
-              stepRealized = 3;
-              _currentTabIndex = 3;
-            }else{
-              checkWhoStudies = false;
-            }
-            if(soCreditRequestDetail.studentName != ''){
-              textStudentNameCntrll.text = soCreditRequestDetail.studentName;
-              _activeStepIndex = 3;
-              stepRealized = 3;
-              _currentTabIndex = 3;
-            }
-            textEngagementSchollCntrll.text = soCreditRequestDetail.engagementSchool;
-            textDateProbablyTravelCntrll.text = soCreditRequestDetail.dateProbablyTravel;
-            textEducationalProgramCntrll.text = soCreditRequestDetail.educationalProgram;
-            countryId = soCreditRequestDetail.countryId;
-            textCityCntrll.text = soCreditRequestDetail.city;
+      textInstitutionCntrll.text = soCreditRequestDetail.institution;
+      textLocationCntrll.text = soCreditRequestDetail.location;
+      textDegreeCntrll.text = soCreditRequestDetail.degreeObtained;
+      if (soCreditRequestDetail.educationalInstitution != '')
+        textEducationalInstitutionCntrll.text =
+            soCreditRequestDetail.educationalInstitution;
+      if (soCreditRequestDetail.educationalInstitutionType != '')
+        institutionType = soCreditRequestDetail.educationalInstitutionType;
+      if (soCreditRequestDetail.dateStartInstitution != '')
+        textDateStartCntrll.text =
+            soCreditRequestDetail.dateStartInstitution.replaceAll(' 00:00', '');
+      if (soCreditRequestDetail.dateEndInstitution != '')
+        textDateEndCntrll.text =
+            soCreditRequestDetail.dateEndInstitution.replaceAll(' 00:00', '');
+      setState(() {
+        creditRequestDetailId = soCreditRequestDetail.id;
+      });
+      // updateDataCrqs();
+      if (soCreditRequestDetail.visaFees > 0) visaFees = true;
+      if (soCreditRequestDetail.planeTickets > 0) planeTickets = true;
+      if (soCreditRequestDetail.programCost > 0.0)
+        textProgramCostCntrll.updateValue(soCreditRequestDetail.programCost);
+      if (soCreditRequestDetail.maintenance > 0.0)
+        textMaintenanceCntrll.updateValue(soCreditRequestDetail.maintenance);
+      textStudiesPlaceCntrll.text = soCreditRequestDetail.studiesPlace;
+      if (soCreditRequestDetail.engagementAgencyId > 0) {
+        setState(() {
+          engagementAgencyId = soCreditRequestDetail.engagementAgencyId;
+        });
+      }
+      if (soCreditRequestDetail.whoProcesses > 0) checkWhoProcesses = true;
+      if (soCreditRequestDetail.whoStudies > 0) {
+        checkWhoStudies = true;
+        _activeStepIndex = 3;
+        stepRealized = 3;
+        _currentTabIndex = 4;
+      } else {
+        checkWhoStudies = false;
+      }
+      if (soCreditRequestDetail.studentName != '') {
+        textStudentNameCntrll.text = soCreditRequestDetail.studentName;
+        _activeStepIndex = 3;
+        stepRealized = 3;
+        _currentTabIndex = 4;
+      }
+      textEngagementSchollCntrll.text = soCreditRequestDetail.engagementSchool;
+      textDateProbablyTravelCntrll.text =
+          soCreditRequestDetail.dateProbablyTravel;
+      textEducationalProgramCntrll.text =
+          soCreditRequestDetail.educationalProgram;
+      countryId = soCreditRequestDetail.countryId;
+      textCityCntrll.text = soCreditRequestDetail.city;
       textMonthStayCntrll.text = soCreditRequestDetail.monthStay.toString();
 
       //step 3
@@ -287,82 +324,142 @@ class _CrqsFormState extends State<CrqsForm>{
         fetchSoCreditRequestAssets(soCreditRequest.id).then((value) {
           fetchCrty(soCreditRequest.creditMotiveId.toString()).then((value) {
             //se válida si se requiere garantía
-            if(_creditRequestAssetListData.isEmpty &&
-                soCreditRequest.amountRequired > soCreditType.amountAsset){
+            if (_creditRequestAssetListData.isEmpty &&
+                soCreditRequest.amountRequired > soCreditType.amountAsset) {
               setState(() {
                 requiredAsset = true;
               });
             }
             //Si no se han registrado el numero de avales requeridos redirecciona a forma de aval
-            if(requiredGuarantees() && stepRealized > 2){
-              showAlertDialog(context, 'Por los parámetros de tu solicitud se '
+            if (requiredGuarantees() && stepRealized > 2) {
+              showAlertDialog(
+                  context,
+                  'Por los parámetros de tu solicitud se '
                   'requiere agregar acreditados extra, favor de agregarlos en la siguiente pantalla.');
             }
           });
         });
       });
-    }else{
+    } else {
       creditDestiny = 0;
       rolePreliminar = SoCreditRequestGuarantee.ROLE_ACREDITED;
       relation = SoCreditRequestGuarantee.RELATION_SELF;
     }
     super.initState();
   }
+
+
+  bool sort = true;
+
+  // List<int> sno = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+  // List<String> itemList = [
+  //   'Item- 1',
+  //   'Item- 2',
+  //   'Item- 3',
+  //   'Item- 4',
+  //   'Item- 5',
+  //   'Item- 6',
+  //   'Item- 7',
+  //   'Item- 8',
+  //   'Item- 9',
+  //   'Item- 10',
+  //   'Item- 11',
+  //   'Item- 12',
+  //   'Item- 13',
+  //   'Item- 14',
+  //   'Item- 15'
+  // ];
+  //
+  // onSort(int columnIndex, bool ascending) {
+  //   if (columnIndex == 0) {
+  //     if (ascending) {
+  //       sno.sort((a, b) => a.compareTo(b));
+  //       itemList = itemList.reversed.toList();
+  //     } else {
+  //       sno.sort((b, a) => a.compareTo(b));
+  //       itemList = itemList.reversed.toList();
+  //     }
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
     //lista de pasos para formularios
-    List<Step> stepList()=> [
-      stepCreditRequest(),
-      stepCreditRequestDetail(),
-      stepMoreDataCust(),
-      // stepEmploymentSituation(),
-      finalStep(),
-    ];
+    List<Step> stepList() => [
+          stepCreditRequest(),
+          stepCreditRequestDetail(),
+          stepMoreDataCust(),
+          // stepEmploymentSituation(),
+          finalStep(),
+        ];
     //lista de widgets para selección de body dependiendo tab seleccionado
     final _crqsTabPages = <Widget>[
       formCreditRequest(stepList()),
-      // if(institutionType == SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL)
-      // AuthListBackground(child: formCrqd()),
-      AuthListBackground(child: Padding(
-        padding: const EdgeInsets.only(top: 50),
-        child: CreditRequestGuarantee(forceFilter: soCreditRequest.id, requiredAsset: requiredAsset,),
-      )),
-      AuthListBackground(child: Padding(
-        padding: const EdgeInsets.only(top: 50),
-        child: ChatPrueba(forceFilter: wflowId),
-      ),),
-      AuthListBackground(child: CreditRequestInfoScreen(soCreditRequest: soCreditRequest,
-        step: stepRealized, requiredAsset: requiredAsset, requiredGuarantees: allGuarantees,)
+      if(soCreditRequest.id > 0)
+      AuthListBackground(child:
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: CardStepContainer(child:
+            dataTable()
+          ),
+        )
       ),
+      AuthListBackground(
+          child: Padding(
+        padding: const EdgeInsets.only(top: 50),
+        child: CreditRequestGuarantee(
+          forceFilter: soCreditRequest.id,
+          requiredAsset: requiredAsset,
+          whoProccess: soCreditRequestDetail.whoProcesses,
+        ),
+      )),
+      AuthListBackground(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 50),
+          child: ChatPrueba(forceFilter: wflowId),
+        ),
+      ),
+      AuthListBackground(
+          child: CreditRequestInfoScreen(
+        soCreditRequest: soCreditRequest,
+        step: stepRealized,
+        requiredAsset: requiredAsset,
+        requiredGuarantees: allGuarantees,
+      )),
     ];
 
     //Iconos para barra de navegación inferior
     final _crqsBottmonNavBarItems = <BottomNavigationBarItem>[
-      const BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_sharp), label: 'Cotiza'),
+      const BottomNavigationBarItem(
+          icon: Icon(Icons.account_balance_wallet_sharp), label: 'Cotiza'),
       // if(institutionType == SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL)
       //   const BottomNavigationBarItem(icon: Icon(Icons.airplanemode_active), label: 'Acréditado'),
-      const BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Acréditado'),
+      if(soCreditRequest.id > 0)
+      const BottomNavigationBarItem(
+          icon: Icon(Icons.data_exploration_rounded), label: 'Tabla Amortización'),
+      const BottomNavigationBarItem(
+          icon: Icon(Icons.account_circle), label: 'Acréditado'),
       BottomNavigationBarItem(
           icon: Stack(
             children: [
               const Icon(Icons.chat),
-              if(messages)
-              const Positioned(  // draw a red marble
-                top: 0.0,
-                right: 0.0,
-                child: Icon(Icons.brightness_1, size: 12.0,
-                    color: Colors.redAccent),
-              ),
+              if (messages)
+                const Positioned(
+                  // draw a red marble
+                  top: 0.0,
+                  right: 0.0,
+                  child: Icon(Icons.brightness_1,
+                      size: 12.0, color: Colors.redAccent),
+                ),
             ],
           ),
           // Icon(Icons.chat),
           label: 'Chat'),
-      const BottomNavigationBarItem(icon: Icon(Icons.assignment), label: 'Estatus'),
+      const BottomNavigationBarItem(
+          icon: Icon(Icons.assignment), label: 'Estatus'),
     ];
 
-    updateCrqsInfo(){
-
-    }
+    updateCrqsInfo() {}
 
     final bottomNavBar = BottomNavigationBar(
       items: _crqsBottmonNavBarItems,
@@ -373,135 +470,151 @@ class _CrqsFormState extends State<CrqsForm>{
         // setState(() {
         //   _currentTabIndex = index;
         // });
-        if(soCreditRequest.id > 0){
-          if(soCreditRequest.status == SoCreditRequest.STATUS_EDITION){
+        if (soCreditRequest.id > 0) {
+          if (soCreditRequest.status == SoCreditRequest.STATUS_EDITION) {
             setState(() {
               creditRequestDetailId = soCreditRequestDetail.id;
               wflowId = soCreditRequest.wFlowId;
               _currentTabIndex = index;
             });
-          }else{
-            if(index == _crqsBottmonNavBarItems.length-2 ||
-                index == _crqsBottmonNavBarItems.length-1){
+          } else {
+            if (index == _crqsBottmonNavBarItems.length - 2 ||
+                index == _crqsBottmonNavBarItems.length - 1) {
               setState(() {
                 creditRequestDetailId = soCreditRequestDetail.id;
                 wflowId = soCreditRequest.wFlowId;
                 _currentTabIndex = index;
               });
-              if(index == _crqsBottmonNavBarItems.length-2){
+              if (index == _crqsBottmonNavBarItems.length - 2) {
                 setState(() {
                   messages = false;
                 });
               }
-            }else{
+            } else {
               setState(() {
                 creditRequestDetailId = soCreditRequestDetail.id;
                 wflowId = soCreditRequest.wFlowId;
-                _currentTabIndex = _crqsBottmonNavBarItems.length-1;
+                _currentTabIndex = _crqsBottmonNavBarItems.length - 1;
               });
-              Fluttertoast.showToast(msg: 'Su solicitud se encuentra en revisión, ya no puede editar su información.');
+              Fluttertoast.showToast(
+                  msg:
+                      'Su solicitud se encuentra en revisión, ya no puede editar su información.');
             }
           }
-        }else{
-          Fluttertoast.showToast(msg: 'Complete hasta el paso 2 para poder continuar con su registro.');
+        } else {
+          Fluttertoast.showToast(
+              msg:
+                  'Complete hasta el paso 2 para poder continuar con su registro.');
         }
-      },);
+      },
+    );
 
-
-   return Scaffold(
-     appBar: AppBarStyle.authAppBarFlex(title: 'Solicitud de Crédito $codeCrqs'),
-     body: AuthFormBackground(
-       child: _crqsTabPages[_currentTabIndex]
-     ),
-     bottomNavigationBar: bottomNavBar,
-   );
+    return Scaffold(
+      appBar:
+          AppBarStyle.authAppBarFlex(title: 'Solicitud de Crédito $codeCrqs'),
+      body: AuthFormBackground(child: _crqsTabPages[_currentTabIndex]),
+      bottomNavigationBar: bottomNavBar,
+    );
   }
 
   //Validaciones para avanzar step
-  bool validStep (int step) {
-    switch (step){
+  bool validStep(int step) {
+    switch (step) {
       case 0:
-        if(_formKeyCrqs.currentState!.validate() && creditDestiny > 0 &&
-            (engagementAgencyId > 0 || textInstitutionCntrll.text != '')
-        && institutionType != '' && periodType != '-') {
+        if (_formKeyCrqs.currentState!.validate() &&
+            creditDestiny > 0 &&
+            (engagementAgencyId > 0 || textInstitutionCntrll.text != '') &&
+            institutionType != '' &&
+            periodType != '-') {
           //Se valida el tipo lugar de estudios
-          if(institutionType == SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL){
-            if(_formKeyCrqd.currentState!.validate()){
+          if (institutionType ==
+              SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL) {
+            if (_formKeyCrqd.currentState!.validate()) {
               setState(() {
                 _activeStepIndex += 1;
                 stepRealized = 1;
               });
               return true;
-            }else{
+            } else {
               Fluttertoast.showToast(msg: 'Favor de llenar todos los campos');
               return false;
             }
-          }else{
+          } else {
             setState(() {
               _activeStepIndex += 1;
               stepRealized = 1;
             });
             return true;
           }
-
-        }else{
+        } else {
           Fluttertoast.showToast(msg: 'Favor de llenar todos los campos');
           return false;
         }
         break;
       case 1:
-        if(_formKeyCrqs2.currentState!.validate()){
-          setState(() { sendingData = true;});
-          if(_validPeriods){
+        if (_formKeyCrqs2.currentState!.validate()) {
+          setState(() {
+            sendingData = true;
+          });
+          if (_validPeriods) {
             //Se guardan datos de solicitud de crédito
             addCreditRequest().then((value) {
-              if(value){
+              if (value) {
                 //buscamos el acreditado titular
                 fetchCrqg(soCreditRequest.id);
                 addCreditRequestDetail().then((value) {
-                  if(value){
+                  if (value) {
                     setState(() {
                       _activeStepIndex += 1;
                       stepRealized = 2;
                     });
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Datos actualizados correctamente')),
+                      const SnackBar(
+                          content: Text('Datos actualizados correctamente')),
                     );
                     return true;
-                  }else{
+                  } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('$errorMsg')),
                     );
                     return false;
                   }
                 });
-              }else{
+              } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('$errorMsg')),
                 );
                 return false;
               }
             });
-          }else{
+          } else {
             setState(() {
               sendingData = false;
             });
-            Fluttertoast.showToast(msg: 'Lo sentimos, el plan de crédito seleccionado \n '
-                'no permite este plazo, intente con un plazo diferente.');
+            showAlertDialogTasa(context,
+                'Lo sentimos, el plan de crédito seleccionado no permite este plazo, intente con un plazo diferente.');
+          /*  Fluttertoast.showToast(
+                msg: 'Lo sentimos, el plan de crédito seleccionado \n '
+                    'no permite este plazo, intente con un plazo diferente.');*/
             return false;
           }
           break;
-        }else{;return false;
+        } else {
+          ;
+          return false;
         }
       case 2:
-        if(_formKeyCude.currentState!.validate()){
-          setState(() { sendingData = true;});
+        if (_formKeyCude.currentState!.validate()) {
+          setState(() {
+            sendingData = true;
+          });
           addCreditRequestGuarantee().then((value) {
             //se agrega detalle de la solicitud
             addCreditRequestDetail().then((value) {
-              if(value){
+              if (value) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Datos actualizados correctamente')),
+                  const SnackBar(
+                      content: Text('Datos actualizados correctamente')),
                 );
                 setState(() {
                   _activeStepIndex += 1;
@@ -509,60 +622,66 @@ class _CrqsFormState extends State<CrqsForm>{
                 });
                 //Se consulta si requiere garantias
                 fetchSoCreditRequestAssets(soCreditRequest.id).then((value) {
-                  if(_creditRequestAssetListData.isEmpty &&
-                      soCreditRequest.amountRequired > soCreditType.amountAsset){
+                  if (_creditRequestAssetListData.isEmpty &&
+                      soCreditRequest.amountRequired >
+                          soCreditType.amountAsset) {
                     setState(() {
                       requiredAsset = true;
                     });
-                  }else{
+                  } else {
                     setState(() {
                       requiredAsset = false;
                     });
                   }
                   //se consulta solicitud para actualizar datos
-                  fetchCreditRequest(soCreditRequestDetail.creditRequestId.toString()).then((value) {
+                  fetchCreditRequest(
+                          soCreditRequestDetail.creditRequestId.toString())
+                      .then((value) {
                     print('after fetchcrqs - ${soCreditRequest.guarantees}');
                     //se consultan los acreditados registrados en esa solicitud
-                    fetchSoCreditRequestGuarantee(soCreditRequest.id).then((value) {
+                    fetchSoCreditRequestGuarantee(soCreditRequest.id)
+                        .then((value) {
                       allGuarantees = _creditRequestGuarantee.length;
                       //si requiere acreditados se redirige a la forma
                       if (requiredGuarantees()) {
                         showAlertDialog(
-                            context, 'Por los parámetros de tu solicitud se '
+                            context,
+                            'Por los parámetros de tu solicitud se '
                             'requiere agregar acreditados extra, favor de agregarlos en la siguiente pantalla.');
-                      }else{
-                        showAlertDialog(context, 'Favor de completar sus datos financieros en la siguiente pantalla.');
+                      } else {
+                        showAlertDialog(context,
+                            'Favor de completar sus datos financieros en la siguiente pantalla.');
                       }
                     });
                   });
                 });
-
-              }else{
-                return false;}
+              } else {
+                return false;
+              }
             });
           });
-              break;
-        }else{
+          break;
+        } else {
           return false;
         }
     }
     return false;
   }
-  
-  Widget formCreditRequest(List<Step> stepList){
+
+  Widget formCreditRequest(List<Step> stepList) {
     return Stepper(
       steps: stepList,
       type: StepperType.horizontal,
       currentStep: _activeStepIndex,
       onStepContinue: () {
-        if(!sendingData) {
+        if (!sendingData) {
           if (validStep(_activeStepIndex)) {
             /*setState(() {
             sendingData = false;
             _activeStepIndex += 1;
           });*/
           }
-        }else{
+        } else {
           Fluttertoast.showToast(msg: 'Solictud en proceso, espere un momento');
         }
         // else{setState((){sendingData = false;});}
@@ -576,7 +695,7 @@ class _CrqsFormState extends State<CrqsForm>{
           return;
         }
 
-       /* if(isLastStep){
+        /* if(isLastStep){
           Navigator.push(
               context,
               MaterialPageRoute(builder: (context) =>
@@ -588,9 +707,9 @@ class _CrqsFormState extends State<CrqsForm>{
             //TODO: Acción al cerrar formulario avales desde formulario solicitud
           }));
         }else{*/
-          setState(() {
-            _activeStepIndex -= 1;
-          });
+        setState(() {
+          _activeStepIndex -= 1;
+        });
         // }
       },
       onStepTapped: (int index) {
@@ -605,7 +724,9 @@ class _CrqsFormState extends State<CrqsForm>{
         final isLastStep = _activeStepIndex == stepList.length - 1;
         return Row(
           children: [
-            const SizedBox(height: 100,),
+            const SizedBox(
+              height: 100,
+            ),
             //Si es el último paso muestra Guardar en el texto del botón
             if (_activeStepIndex > 0)
               Expanded(
@@ -617,7 +738,7 @@ class _CrqsFormState extends State<CrqsForm>{
             const SizedBox(
               width: 10,
             ),
-            if(!isLastStep)
+            if (!isLastStep)
               Expanded(
                 child: ElevatedButton(
                   onPressed: details.onStepContinue,
@@ -632,257 +753,423 @@ class _CrqsFormState extends State<CrqsForm>{
     );
   }
 
-  Widget stepOne(){
-     return Form(
-       key: _formKeyCrqs,
-       autovalidateMode: AutovalidateMode.onUserInteraction,
-       child: Column(children: [
-         // const SizedBox(height: 10,),
-         Row(
-           children: const [
-             Text("Contratación con:",
-               style: TextStyle(color: Colors.grey,fontSize: 15),
-             ),
-           ],
-         ),
-         const SizedBox(height: 10,),
-         DropdownWidget(
-           callback: (String id) {
-             setState(() {
-               engagementAgencyId = int.parse(id);
-             });
-           },
-           programCode: 'SUPL',
-           label: 'Agencia',
-           dropdownValue: soCreditRequestDetail.engagementAgencyId.toString(),
-         ),
-         const SizedBox(height: 10,),
-         if(engagementAgencyId < 1)
-         TextFormField(
-           autocorrect: false,
-           keyboardType: TextInputType.name,
-           controller: textInstitutionCntrll,
-           decoration: InputDecorations.authInputDecoration(
-               hintText: "Otra institución",
-               labelText: "*Otra institución",
-               prefixIcon: Icons.school
-           ),
-           validator: ( value ) {
-             return ( value != null && value.isNotEmpty )
-                 ? null
-                 : 'Por favor ingrese una institución válida';
-           },
-         ),
+  Widget stepOne() {
+    return Form(
+      key: _formKeyCrqs,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      child: Column(children: [
+        // const SizedBox(height: 10,),
+        const Row(
+          children: [
+            Text(
+              "Contratación con:",
+              style: TextStyle(color: Colors.grey, fontSize: 15),
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        DropdownWidget(
+          callback: (String id) {
+            setState(() {
+              engagementAgencyId = int.parse(id);
+              if (engagementAgencyId > 0) {
+                _keyGetDataDropdownCrmt.currentState
+                    ?.getDataAfterTapAgency(engagementAgencyId.toString());
+                angencyValue = true;
+              } else {
+                angencyValue = false;
+                _keyGetDataDropdownCrmt.currentState
+                    ?.getAllDataAfterTapAgency();
+              }
+            });
+          },
+          programCode: 'SUPL',
+          label: 'Agencia',
+          dropdownValue: soCreditRequestDetail.engagementAgencyId.toString(),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        if (engagementAgencyId < 1)
+          TextFormField(
+            autocorrect: false,
+            keyboardType: TextInputType.name,
+            controller: textInstitutionCntrll,
+            decoration: InputDecorations.authInputDecoration(
+                hintText: "Otra institución",
+                labelText: "*Otra institución",
+                prefixIcon: Icons.school),
+            validator: (value) {
+              return (value != null && value.isNotEmpty)
+                  ? null
+                  : 'Por favor ingrese una institución válida';
+            },
+          ),
 
-         const SizedBox( height: 10 ),
-         Row(
-           children: [
-             const Expanded(
-                 child: Text("Tipo de Institución Educativa*",
-                   style: TextStyle(color: Colors.grey,fontSize: 15),
-                 )
-             ),
-             DropdownButtonHideUnderline(
-               child: ButtonTheme(
-                 child: DropdownButton(
-                   value: institutionType,
-                   items: SoCreditRequestDetail.getInstitutionType.map((e) {
-                     return DropdownMenuItem(
-                       child: Text(e['label']),
-                       value: e['value'],
-                     );
-                   }).toList(),
-                   onChanged: (Object? value) {
-                     setState(() {
-                       institutionType = '$value';
-                     });
-                   },
-                 ),
-               ),
-             ),
-           ],
-         ),
-         const SizedBox( height: 10 ),
-         Row(
-           children: const [
-             Text("Seleccionar programa de estudios",
-               style: TextStyle(color: Colors.grey,fontSize: 15),
-             ),
-           ],
-         ),
-         DropdownWidget(
-           callback: (String id) {
-             setState(() {
-               creditDestiny = int.parse(id);
-             });
-             if(creditDestiny > 0){
-               fetchCrty(creditDestiny.toString());
-             }
-           },
-           programCode: 'CRMT',
-           label: 'Programa de estudios*',
-           dropdownValue: soCreditRequest.creditMotiveId.toString(),
-         ),
-         const SizedBox(height: 10),
-         Row(
-           children: [
-             const Expanded(
-                 child: Text("Tipo periodo de estudios*",
-                   style: TextStyle(color: Colors.grey,fontSize: 15),
-                 )
-             ),
-             DropdownButtonHideUnderline(
-               child: ButtonTheme(
-                 child: DropdownButton(
-                   value: periodType,
-                   items: SoCreditRequest.getPeriodType.map((e) {
-                     return DropdownMenuItem(
-                       child: Text(e['label']),
-                       value: e['value'],
-                     );
-                   }).toList(),
-                   onChanged: (Object? value) {
-                     setState(() {
-                       periodType = '$value';
-                     });
-                   },
-                 ),
-               ),
-             ),
-           ],
-         ),
-           const SizedBox(height: 10),
-           TextFormField(
-             autocorrect: false,
-             controller: textPeriodCntrll,
-             keyboardType: TextInputType.number,
-             decoration: InputDecorations.authInputDecoration(
-                 hintText: "Periodos del Programa de Estudios",
-                 labelText: "*Periodos del Programa de Estudios",
-                 prefixIcon: Icons.numbers
-             ),
-             validator: ( value ) {
-               final intNumber = int.tryParse(value!);
-               return (intNumber != null && intNumber > 0)
-                   ? null
-                   : 'Favor de ingresar un número válido (solo números)';
-             },
-           ),
-         if(multiDisposicion > 0)
-         const SizedBox(height: 10),
-         if(multiDisposicion > 0)
-         TextFormField(
-           autocorrect: false,
-           controller: textDisbursementsCntrll,
-           keyboardType: TextInputType.number,
-           decoration: InputDecorations.authInputDecoration(
-               hintText: "Num. Disposiciones",
-               labelText: "*Num. Disposiciones",
-               prefixIcon: Icons.numbers
-           ),
-           validator: ( value ) {
-             final intNumber = int.tryParse(value!);
-             return (intNumber != null && intNumber > 0)
-                 ? null
-                 : 'Favor de ingresar un número válido (solo números)';
-           },
-           onChanged: (value) {
-             final intNumber = int.tryParse(value!);
-             textMontoCntrll.updateValue(intNumber!*textCantPeriodoCntrll.numberValue);
-           },
-         ),
-         if(multiDisposicion > 0)
-           const SizedBox(height: 10),
-         if(multiDisposicion > 0)
-           TextFormField(
-             autocorrect: false,
-             controller: textCantPeriodoCntrll,
-             keyboardType: TextInputType.number,
-             decoration: InputDecorations.authInputDecoration(
-                 hintText: "Monto por periodo",
-                 labelText: "*Monto por periodo",
-                 prefixIcon: Icons.monetization_on_outlined
-             ),
-             validator: ( value ) {
-               final intNumber = double.tryParse(value!.replaceAll(',', ''));
-               /*return (intNumber != null && intNumber >= _minAmount &&
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            const Expanded(
+                child: Text(
+              "Tipo de Institución Educativa*",
+              style: TextStyle(color: Colors.grey, fontSize: 15),
+            )),
+            DropdownButtonHideUnderline(
+              child: ButtonTheme(
+                child: DropdownButton(
+                  value: institutionType,
+                  items: SoCreditRequestDetail.getInstitutionType.map((e) {
+                    return DropdownMenuItem(
+                      child: Text(e['label']),
+                      value: e['value'],
+                    );
+                  }).toList(),
+                  onChanged: (Object? value) {
+                    setState(() {
+                      institutionType = '$value';
+                    });
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        const Row(
+          children: [
+            Text(
+              "Seleccionar programa de estudios*",
+              style: TextStyle(color: Colors.grey, fontSize: 15),
+            ),
+          ],
+        ),
+
+        DropdownWidgetCrmt(
+          key: _keyGetDataDropdownCrmt,
+          callback: (String id) {
+            setState(() {
+              creditDestiny = int.parse(id);
+            });
+            if (creditDestiny > 0) {
+              fetchCrty(creditDestiny.toString());
+            }
+          },
+          programCode: 'CRMT',
+          label: 'Programa de estudios*',
+          dropdownValue: soCreditRequest.creditMotiveId.toString(),
+          supplierId: (angencyValue) ? engagementAgencyId.toString() : '',
+        ),
+
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            const Expanded(
+                child: Text(
+              "Tipo periodo de estudios*",
+              style: TextStyle(color: Colors.grey, fontSize: 15),
+            )),
+            DropdownButtonHideUnderline(
+              child: ButtonTheme(
+                child: DropdownButton(
+                  value: periodType,
+                  items: SoCreditRequest.getPeriodType.map((e) {
+                    return DropdownMenuItem(
+                      child: Text(e['label']),
+                      value: e['value'],
+                    );
+                  }).toList(),
+                  onChanged: (Object? value) {
+                    setState(() {
+                      periodType = '$value';
+                    });
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          autocorrect: false,
+          controller: textPeriodCntrll,
+          keyboardType: TextInputType.number,
+          decoration: InputDecorations.authInputDecoration(
+              hintText: "Periodos del Programa de Estudios",
+              labelText: "*Periodos del Programa de Estudios",
+              prefixIcon: Icons.numbers),
+          validator: (value) {
+            final intNumber = int.tryParse(value!);
+            return (intNumber != null && intNumber > 0)
+                ? null
+                : 'Favor de ingresar un número válido (solo números)';
+          },
+        ),
+        if (multiDisposicion > 0) const SizedBox(height: 10),
+        if (multiDisposicion > 0)
+          TextFormField(
+            autocorrect: false,
+            controller: textDisbursementsCntrll,
+            keyboardType: TextInputType.number,
+            decoration: InputDecorations.authInputDecoration(
+                hintText: "Num. Disposiciones",
+                labelText: "*Num. Disposiciones",
+                prefixIcon: Icons.numbers),
+            validator: (value) {
+              final intNumber = int.tryParse(value!);
+              return (intNumber != null && intNumber > 0)
+                  ? null
+                  : 'Favor de ingresar un número válido (solo números)';
+            },
+            onChanged: (value) {
+              final intNumber = int.tryParse(value!);
+              textMontoCntrll
+                  .updateValue(intNumber! * textCantPeriodoCntrll.numberValue);
+            },
+          ),
+        if (multiDisposicion > 0) const SizedBox(height: 10),
+        if (multiDisposicion > 0)
+          TextFormField(
+            autocorrect: false,
+            controller: textCantPeriodoCntrll,
+            keyboardType: TextInputType.number,
+            decoration: InputDecorations.authInputDecoration(
+                hintText: "Monto por periodo",
+                labelText: "*Monto por periodo",
+                prefixIcon: Icons.monetization_on_outlined),
+            validator: (value) {
+              final intNumber = double.tryParse(value!.replaceAll(',', ''));
+              /*return (intNumber != null && intNumber >= _minAmount &&
                  intNumber <= _maxAmount)
                  ? null
                  : 'Lo sentimos, el plan de crédito seleccionado requiere\n'
                  'un monto mínimo de $_minAmount y máximo $_maxAmount';*/
-               return (intNumber != null && intNumber > 0)
-                   ? null
-                   : 'Favor de ingresar un monto mayor a 0';
-             },
-             onChanged: (value) {
-               final intNumber = double.tryParse(value!.replaceAll(',', ''));
-               textMontoCntrll.updateValue(intNumber!*int.parse(textDisbursementsCntrll.text));
-             },
-           ),
-         const SizedBox(height: 10,),
-         TextFormField(
-           keyboardType: TextInputType.number,
-           readOnly: (multiDisposicion>0),
-           decoration: InputDecorations.authInputDecoration(
-               labelText: 'Monto total solicitado*',
-               prefixIcon: Icons.monetization_on_outlined),
-           controller: textMontoCntrll,
-           validator: ( value ) {
-             final intNumber = double.tryParse(value!.replaceAll(',', ''));
-             return (intNumber != null && intNumber >= soCreditType.minAmount &&
-                 intNumber <= soCreditType.maxAmount)
-                 ? null
-                 : 'Lo sentimos, el plan de crédito seleccionado requiere\n'
-                 'un monto mínimo de ${soCreditType.minAmount} y máximo ${soCreditType.maxAmount}';
-         /*    return (intNumber != null && intNumber >= soCreditType.minAmou)
+              return (intNumber != null && intNumber > 0)
+                  ? null
+                  : 'Favor de ingresar un monto mayor a 0';
+            },
+            onChanged: (value) {
+              final intNumber = double.tryParse(value!.replaceAll(',', ''));
+              textMontoCntrll.updateValue(
+                  intNumber! * int.parse(textDisbursementsCntrll.text));
+            },
+          ),
+        const SizedBox(
+          height: 10,
+        ),
+        TextFormField(
+          keyboardType: TextInputType.number,
+          readOnly: (multiDisposicion > 0),
+          decoration: InputDecorations.authInputDecoration(
+              labelText: 'Monto total solicitado*',
+              prefixIcon: Icons.monetization_on_outlined),
+          controller: textMontoCntrll,
+          validator: (value) {
+            final intNumber = double.tryParse(value!.replaceAll(',', ''));
+            return (intNumber != null &&
+                    intNumber >= soCreditType.minAmount &&
+                    intNumber <= soCreditType.maxAmount)
+                ? null
+                : 'Lo sentimos, el plan de crédito seleccionado requiere\n'
+                    'un monto mínimo de ${soCreditType.minAmount} y máximo ${soCreditType.maxAmount}';
+            /*    return (intNumber != null && intNumber >= soCreditType.minAmou)
                  ? null
                  : 'Favor de ingresar un monto mayor a 0';*/
-           },
-         ),
-         const SizedBox(height: 30,)
-       ]),
-     );
-  }
-
-
-  Step stepCreditRequest() {
-    return Step(
-      state: _activeStepIndex <=0 ? StepState.indexed : StepState.complete,
-      isActive: _activeStepIndex >= 0,
-        title: const Text(""),
-        content: CardStepContainer(
-          child: Column(
-            children: [
-              /*if(!isForeign)
-                stepOne()
-              else
-                formCrqd()*/
-              stepOne(),
-              if(institutionType == SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL)
-                formCrqd(),
-
-              if(sendingData)
-                const LinearProgressIndicator(),
-            ],
-          )
-          ),
-        );
-  }
-
-  Widget formPeriods(){
-    return Form(
-      key: _formKeyPeriods,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-
-        ],
-      )
+          },
+        ),
+        const SizedBox(
+          height: 30,
+        )
+      ]),
     );
   }
 
-  Widget formCrqd(){
+  Step stepCreditRequest() {
+    return Step(
+      state: _activeStepIndex <= 0 ? StepState.indexed : StepState.complete,
+      isActive: _activeStepIndex >= 0,
+      title: const Text(""),
+      content: CardStepContainer(
+          child: Column(
+        children: [
+          /*if(!isForeign)
+                stepOne()
+              else
+                formCrqd()*/
+          stepOne(),
+          if (institutionType ==
+              SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL)
+            formCrqd(),
+          if (sendingData) const LinearProgressIndicator(),
+        ],
+      )),
+    );
+  }
+
+  Widget dataTable() {
+    DateTime date = DateTime.now();
+    print(date.year); //Año
+    print(date.month); //Mes
+    print(date.day); //Dia
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 10,),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  const Text('Total Interés Anual'),
+                  const SizedBox(width: 50,),
+                  Text('$rate %'),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  const Text('CAT'),
+                  const SizedBox(width: 50,),
+                  Text('$cat %'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10,),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DataTable(
+                sortColumnIndex: 0,
+                sortAscending: sort,
+                columns: const [
+                  DataColumn(label: Text('#')),
+                  DataColumn(label: Text('Saldo Inicial')),
+                  DataColumn(label: Text('Capital')),
+                  DataColumn(label: Text('Interes')),
+                  DataColumn(label: Text('IVA Interes')),
+                  DataColumn(label: Text('Gastos N.G.')),
+                  DataColumn(label: Text('Gastos G.')),
+                  DataColumn(label: Text('Seguros N.G.')),
+                  DataColumn(label: Text('Seguros G.')),
+                  DataColumn(label: Text('IVA Extras')),
+                  DataColumn(label: Text('Total')),
+                  DataColumn(label: Text('Saldo Final')),
+                ],
+                rows: [
+                  for(int i = 0;i<_soOrderCreditItem.length;i++)
+                    DataRow(
+                      cells: [
+                        DataCell(Text('${i+1}')),
+                        DataCell(Text('${_soOrderCreditItem[i].startBalance}')),
+                        DataCell(Text('${_soOrderCreditItem[i].principal}')),
+                        DataCell(Text('${_soOrderCreditItem[i].interest}')),
+                        DataCell(Text('${_soOrderCreditItem[i].taxInterest}')),
+                        DataCell(Text('${_soOrderCreditItem[i].expenseNotTaxableAmount}')),
+                        DataCell(Text('${_soOrderCreditItem[i].expenseTaxableAmount}')),
+                        DataCell(Text('${_soOrderCreditItem[i].insuranceNotTaxableAmount}')),
+                        DataCell(Text('${_soOrderCreditItem[i].insuranceTaxableAmount}')),
+                        DataCell(Text('${_soOrderCreditItem[i].taxAmount}')),
+                        DataCell(Text('${_soOrderCreditItem[i].total}')),
+                        DataCell(Text('${_soOrderCreditItem[i].endBalance}')),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10,),
+            const Row(
+              children: [
+                Text("Importante.", style: TextStyle(fontSize: 17),),
+              ],
+            ),
+            const SizedBox(height: 10,),
+            const Row(
+              children: [
+                Text(
+                'Las condiciones* y su respectivo CAT (Costo Anual Total) sin IVA de la presente tabla'
+                ' de amortización se calculan conforme a las políticas vigentes de Edupass y '
+                'puede variar dependiendo de la calificación crediticia del solicitante.',
+                    style: TextStyle(color: Colors.grey, fontSize: 15)),
+              ],
+            ),
+            Row(
+              children: [
+                Text(
+                    'Cotización realizada el día ${date.day} de ${dateString(date.month)} de ${date.year}, vigente 10 días.',
+                    style: const TextStyle(color: Colors.grey, fontSize: 15)),
+              ],
+            ),
+            const Row(
+              children: [
+                Text(
+                    "Consulta requisitos y condiciones del financiamiento al teléfono 55 5989 6338 o en el sitio web https://www.edupass.mx/.",
+                    style: TextStyle(color: Colors.grey, fontSize: 15)),
+              ],
+            ),
+            const Row(
+              children: [
+                Text(
+                    '*Las comisiones, mensualidades, plazos y tasas.',
+                    style: TextStyle(color: Colors.grey, fontSize: 10)),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String dateString(int month){
+    String monthString = '';
+    switch (month) {
+      case 1:
+        monthString = "enero";
+        break;
+      case 2:
+        monthString = "febrero";
+        break;
+      case 3:
+        monthString = "marzo";
+        break;
+      case 4:
+        monthString = "abril";
+        break;
+      case 5:
+        monthString = "mayo";
+        break;
+      case 6:
+        monthString = "junio";
+        break;
+      case 7:
+        monthString = "julio";
+        break;
+      case 8:
+        monthString = "agosto";
+        break;
+      case 9:
+        monthString = "septiembre";
+        break;
+      case 10:
+        monthString = "octubre";
+        break;
+      case 11:
+        monthString = "noviembre";
+        break;
+      case 12:
+        monthString = "diciembre";
+        break;
+    }
+    return monthString;
+  }
+
+
+  Widget formCrqd() {
     return Form(
       key: _formKeyCrqd,
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -895,22 +1182,25 @@ class _CrqsFormState extends State<CrqsForm>{
               child: Text('Financiamiento en el Extranjero'),
             ),
           ),
-          const Divider(thickness: 2,color: Colors.blueGrey,),
-
-          const Text("Uso de recursos",
-            style: TextStyle(color: Colors.grey,fontSize: 15),
+          const Divider(
+            thickness: 2,
+            color: Colors.blueGrey,
+          ),
+          const Text(
+            "Uso de recursos",
+            style: TextStyle(color: Colors.grey, fontSize: 15),
           ),
           Row(
             children: [
               Switch(
                 value: visaFees,
                 onChanged: (value) {
-                  if(!visaFees){
-                    setState((){
+                  if (!visaFees) {
+                    setState(() {
                       visaFees = value;
                       soCreditRequestDetail.visaFees = 1;
                     });
-                  }else {
+                  } else {
                     setState(() {
                       visaFees = value;
                       soCreditRequestDetail.visaFees = 0;
@@ -919,24 +1209,26 @@ class _CrqsFormState extends State<CrqsForm>{
                 },
               ),
               const Expanded(
-                  child: Text("Gastos de Visado",
-                    style: TextStyle(color: Colors.grey),
-                  )
-              ),
+                  child: Text(
+                "Gastos de Visado",
+                style: TextStyle(color: Colors.grey),
+              )),
             ],
           ),
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           Row(
             children: [
               Switch(
                 value: planeTickets,
                 onChanged: (value) {
-                  if(!planeTickets){
-                    setState((){
+                  if (!planeTickets) {
+                    setState(() {
                       planeTickets = value;
                       soCreditRequestDetail.planeTickets = 1;
                     });
-                  }else {
+                  } else {
                     setState(() {
                       planeTickets = value;
                       soCreditRequestDetail.planeTickets = 0;
@@ -945,39 +1237,42 @@ class _CrqsFormState extends State<CrqsForm>{
                 },
               ),
               const Expanded(
-                  child: Text("Boletos de avión",
-                    style: TextStyle(color: Colors.grey),
-                  )
-              ),
+                  child: Text(
+                "Boletos de avión",
+                style: TextStyle(color: Colors.grey),
+              )),
             ],
           ),
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           TextFormField(
             keyboardType: TextInputType.number,
             decoration: InputDecorations.authInputDecoration(
                 labelText: 'Costo del programa',
                 prefixIcon: Icons.money_off_outlined),
             controller: textProgramCostCntrll,
-            validator: ( value ) {
-              return ( value != null && value.isNotEmpty )
+            validator: (value) {
+              return (value != null && value.isNotEmpty)
                   ? null
                   : 'Por favor indique el costo del programa.';
             },
           ),
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           TextFormField(
             keyboardType: TextInputType.number,
             decoration: InputDecorations.authInputDecoration(
-                labelText: 'Manutención',
-                prefixIcon: Icons.money_off_outlined),
+                labelText: 'Manutención', prefixIcon: Icons.money_off_outlined),
             controller: textMaintenanceCntrll,
-            validator: ( value ) {
-              return ( value != null && value.isNotEmpty )
+            validator: (value) {
+              return (value != null && value.isNotEmpty)
                   ? null
                   : 'Por favor indique los gastos de manuntención.';
             },
           ),
-         /* const SizedBox(height: 10,),
+          /* const SizedBox(height: 10,),
           TextFormField(
             keyboardType: TextInputType.number,
             decoration: InputDecorations.authInputDecoration(
@@ -990,44 +1285,48 @@ class _CrqsFormState extends State<CrqsForm>{
                   : 'Por favor indique sus ingresos comprobables.';
             },
           ),*/
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           TextFormField(
             decoration: InputDecorations.authInputDecoration(
                 labelText: 'Lugar de Estudios*',
                 prefixIcon: Icons.school_outlined),
             controller: textStudiesPlaceCntrll,
-            validator: ( value ) {
-              return ( value != null && value.isNotEmpty )
+            validator: (value) {
+              return (value != null && value.isNotEmpty)
                   ? null
                   : 'Por favor ingrese lugar de estudios';
             },
           ),
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           TextFormField(
             keyboardType: TextInputType.number,
             decoration: InputDecorations.authInputDecoration(
                 labelText: 'Estancia en el Extranjero (meses)',
                 prefixIcon: Icons.calendar_month),
             controller: textMonthStayCntrll,
-            validator: ( value ) {
+            validator: (value) {
               final intNumber = int.tryParse(value!);
               return (intNumber != null && intNumber > 0)
                   ? null
                   : 'Por favor indique los meses que estará en el extranjero. (solo números)';
             },
           ),
-         /* const SizedBox(height: 10,),
+          /* const SizedBox(height: 10,),
           if(engagementAgencyId <= 0)
             TextFormField(
               decoration: InputDecorations.authInputDecoration(
                   labelText: 'Directo con la escuela',
                   prefixIcon: Icons.school_outlined),
               controller: textEngagementSchollCntrll,
-*//*                          validator: ( value ) {
+*/ /*                          validator: ( value ) {
                             return ( value != null && value.isNotEmpty )
                                 ? null
                                 : 'Por favor ingrese lugar de estudios';
-                          },*//*
+                          },*/ /*
             ),
           const SizedBox(height: 10,),
           TextFormField(
@@ -1096,7 +1395,7 @@ class _CrqsFormState extends State<CrqsForm>{
                   : 'Por favor indique la ciudad';
             },
           ),*/
-        /*  ElevatedButton(
+          /*  ElevatedButton(
             onPressed: () {
               if(_formKeyCrqd.currentState!.validate()){
                 setState(() {
@@ -1142,7 +1441,7 @@ class _CrqsFormState extends State<CrqsForm>{
   }
 
   //Funcion para validad contraseña
-  Future<void> _confirmPassword() async{
+  Future<void> _confirmPassword() async {
     final textPassCntrll = TextEditingController();
     return showDialog(
         context: context,
@@ -1151,15 +1450,14 @@ class _CrqsFormState extends State<CrqsForm>{
             title: const Text('Confirme su Contraseña'),
             content: TextField(
               obscureText: true,
-              decoration: InputDecorations.authInputDecoration(
-                  labelText: 'Contraseña'
-              ),
+              decoration:
+                  InputDecorations.authInputDecoration(labelText: 'Contraseña'),
               controller: textPassCntrll,
             ),
             actions: <Widget>[
               TextButton(
-                onPressed: (){
-                  if(textPassCntrll.text == soCustomer.passw){
+                onPressed: () {
+                  if (textPassCntrll.text == soCustomer.passw) {
                     setState(() {
                       isSwitched = true;
                       // Muestra mensaje
@@ -1168,7 +1466,7 @@ class _CrqsFormState extends State<CrqsForm>{
                       );
                       Navigator.pop(context);
                     });
-                  }else{
+                  } else {
                     // Muestra mensaje
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Contraseña Incorrecta')),
@@ -1180,30 +1478,32 @@ class _CrqsFormState extends State<CrqsForm>{
               )
             ],
           );
-        }
-    );
+        });
   }
 
-
-  List<Widget> plazosChips(){
-    List<int> _chipsList = [6,9,12,18,24,30,36,48];
+  List<Widget> plazosChips() {
+    List<int> _chipsList = [6, 9, 12, 18, 24, 30, 36, 48];
     List<Widget> chips = [];
-    for(int i=0;i<_chipsList.length;i++){
+    for (int i = 0; i < _chipsList.length; i++) {
       Widget item = Padding(
-        padding: const EdgeInsets.only(left: 10,right: 5),
+        padding: const EdgeInsets.only(left: 10, right: 5),
         child: ChoiceChip(
-            label: Text(_chipsList[i].toString()),
-            labelStyle: const TextStyle(color: Colors.white),
-            backgroundColor: Colors.blueGrey,
-            selected: deadLine == _chipsList[i],
-          onSelected: (bool value){
-                if(_chipsList[i] >= soCreditType.periodsMin &&
-                    _chipsList[i] <= soCreditType.periodsMax){
-                  setState(() { _validPeriods = true; });
-                }else{
-                  setState(() { _validPeriods = false; });
-                }
-            setState((){
+          label: Text(_chipsList[i].toString()),
+          labelStyle: const TextStyle(color: Colors.white),
+          backgroundColor: Colors.blueGrey,
+          selected: deadLine == _chipsList[i],
+          onSelected: (bool value) {
+            if (_chipsList[i] >= soCreditType.periodsMin &&
+                _chipsList[i] <= soCreditType.periodsMax) {
+              setState(() {
+                _validPeriods = true;
+              });
+            } else {
+              setState(() {
+                _validPeriods = false;
+              });
+            }
+            setState(() {
               deadLine = _chipsList[i];
               getAmountPayment(textMontoCntrll.numberValue, deadLine);
             });
@@ -1215,7 +1515,7 @@ class _CrqsFormState extends State<CrqsForm>{
     return chips;
   }
 
-  Step stepCreditRequestDetail(){
+  Step stepCreditRequestDetail() {
     return Step(
       state: _activeStepIndex <= 1 ? StepState.indexed : StepState.complete,
       isActive: _activeStepIndex >= 1,
@@ -1226,23 +1526,29 @@ class _CrqsFormState extends State<CrqsForm>{
           autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             children: [
-              const SizedBox(height: 10, ),
-              const Text('Plazo solicitado (meses)', style: TextStyle(color: Colors.grey, fontSize: 15)),
-              const SizedBox( height: 10,),
+              const SizedBox(
+                height: 10,
+              ),
+              const Text('Plazo solicitado (meses)',
+                  style: TextStyle(color: Colors.grey, fontSize: 15)),
+              const SizedBox(
+                height: 10,
+              ),
               Wrap(
                 spacing: 6,
                 direction: Axis.horizontal,
                 children: plazosChips(),
               ),
-              const SizedBox(height: 10,),
+              const SizedBox(
+                height: 10,
+              ),
               TextFormField(
                 autocorrect: false,
                 keyboardType: TextInputType.name,
                 decoration: InputDecorations.authInputDecoration(
                     hintText: "Seleccione una Fecha",
                     labelText: "Fecha Inicio Estudios",
-                    prefixIcon: Icons.calendar_today_outlined
-                ),
+                    prefixIcon: Icons.calendar_today_outlined),
                 controller: textDateStartCntrll,
                 readOnly: true,
                 validator: (value) {
@@ -1250,23 +1556,26 @@ class _CrqsFormState extends State<CrqsForm>{
                       ? null
                       : 'Por favor ingrese una fecha válida';
                 },
-                onTap: (){
+                onTap: () {
                   showDatePicker(
                     context: context,
                     initialDate: DateTime.now(),
                     firstDate: DateTime(1910),
                     lastDate: DateTime(2025),
-                  ).then((DateTime? value){
-                    if(value != null){
+                  ).then((DateTime? value) {
+                    if (value != null) {
                       DateTime _formDate = DateTime.now();
                       _formDate = value;
-                      final String date = DateFormat('yyyy-MM-dd').format(_formDate);
+                      final String date =
+                          DateFormat('yyyy-MM-dd').format(_formDate);
                       textDateStartCntrll.text = date;
                     }
                   });
                 },
               ),
-              const SizedBox(height: 10,),
+              const SizedBox(
+                height: 10,
+              ),
               TextFormField(
                 readOnly: true,
                 keyboardType: TextInputType.number,
@@ -1274,15 +1583,14 @@ class _CrqsFormState extends State<CrqsForm>{
                     labelText: 'Pago mensual aproximado*',
                     prefixIcon: Icons.payments_outlined),
                 controller: textPagoMonthCntrll,
-                validator: ( value ) {
+                validator: (value) {
                   final intNumber = double.tryParse(value!.replaceAll(',', ''));
                   return (intNumber != null && intNumber > 0)
                       ? null
                       : 'Por favor indique su pago mensual';
                 },
               ),
-              if(sendingData)
-                const LinearProgressIndicator(),
+              if (sendingData) const LinearProgressIndicator(),
             ],
           ),
         ),
@@ -1297,10 +1605,12 @@ class _CrqsFormState extends State<CrqsForm>{
         title: const Text(""),
         content: CardStepContainer(
           child: Form(
-            key: _formKeyCude,
+              key: _formKeyCude,
               autovalidateMode: AutovalidateMode.onUserInteraction,
               child: Column(children: [
-                const SizedBox(height: 10,),
+                const SizedBox(
+                  height: 10,
+                ),
                 Row(
                   children: [
                     Switch(
@@ -1316,27 +1626,29 @@ class _CrqsFormState extends State<CrqsForm>{
                       },
                     ),
                     const Expanded(
-                        child: Text("¿Tu eres quien cursará el programa? ",
-                          style: TextStyle(color: Colors.grey),
-                        )
-                    ),
+                        child: Text(
+                      "¿Tu eres quien cursará el programa? ",
+                      style: TextStyle(color: Colors.grey),
+                    )),
                   ],
                 ),
-                const SizedBox( height: 10 ),
-                if(!checkWhoStudies)
+                const SizedBox(height: 10),
+                if (!checkWhoStudies)
                   TextFormField(
                     decoration: InputDecorations.authInputDecoration(
                         labelText: '*Nombre del estudiante',
                         hintText: 'Nombre',
                         prefixIcon: Icons.account_circle_outlined),
                     controller: textStudentNameCntrll,
-                    validator: ( value ) {
-                      return ( value != null && value.isNotEmpty )
+                    validator: (value) {
+                      return (value != null && value.isNotEmpty)
                           ? null
                           : 'Por favor ingrese un nombre válido';
                     },
                   ),
-                const SizedBox(height: 10,),
+                const SizedBox(
+                  height: 10,
+                ),
                 Row(
                   children: [
                     Switch(
@@ -1345,7 +1657,7 @@ class _CrqsFormState extends State<CrqsForm>{
                         /*  if(!whoStudies){
                         _confirmPassword();
                       }else {*/
-                        if(!value){
+                        if (!value) {
                           setState(() {
                             checkIncome = false;
                           });
@@ -1357,57 +1669,60 @@ class _CrqsFormState extends State<CrqsForm>{
                       },
                     ),
                     const Expanded(
-                        child: Text("¿Tu eres quien formalizará el crédito? ",
-                          style: TextStyle(color: Colors.grey),
-                        )
-                    ),
+                        child: Text(
+                      "¿Tu eres quien formalizará el crédito? ",
+                      style: TextStyle(color: Colors.grey),
+                    )),
                   ],
                 ),
-                const SizedBox(height: 10,),
+                const SizedBox(
+                  height: 10,
+                ),
                 //TODO: cambiar boolean del swiched
-                if(checkWhoProcesses)
-                Row(
-                  children: [
-                    Switch(
-                      value: checkIncome,
-                      onChanged: (value) {
-                        /*  if(!whoStudies){
+                if (checkWhoProcesses)
+                  Row(
+                    children: [
+                      Switch(
+                        value: checkIncome,
+                        onChanged: (value) {
+                          /*  if(!whoStudies){
                         _confirmPassword();
                       }else {*/
-                        setState(() {
-                          checkIncome = value;
-                        });
-                        // }
-                      },
-                    ),
-                    const Expanded(
-                        child: Text("¿Tienes ingresos comprobables? ",
-                          style: TextStyle(color: Colors.grey),
-                        )
-                    ),
-                  ],
+                          setState(() {
+                            checkIncome = value;
+                          });
+                          // }
+                        },
+                      ),
+                      const Expanded(
+                          child: Text(
+                        "¿Tienes ingresos comprobables? ",
+                        style: TextStyle(color: Colors.grey),
+                      )),
+                    ],
+                  ),
+                const SizedBox(
+                  height: 10,
                 ),
-                 const SizedBox(height: 10,),
-                if(checkIncome)
-                TextFormField(
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecorations.authInputDecoration(
-                      labelText: 'Ingresos Comprobables?',
-                      prefixIcon: Icons.money_off_outlined),
-                  controller: textVerifiableIncomeCntrll,
-                  validator: ( value ) {
-                    return ( value != null && value.isNotEmpty )
-                        ? null
-                        : 'Por favor indique sus ingresos comprobables.';
-                  },
-                ),
-                if(sendingData)
-                  const LinearProgressIndicator(),
-                const SizedBox(height: 30,)
-              ])
-          ),
-        )
-    );
+                if (checkIncome)
+                  TextFormField(
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecorations.authInputDecoration(
+                        labelText: 'Ingresos Comprobables?',
+                        prefixIcon: Icons.money_off_outlined),
+                    controller: textVerifiableIncomeCntrll,
+                    validator: (value) {
+                      return (value != null && value.isNotEmpty)
+                          ? null
+                          : 'Por favor indique sus ingresos comprobables.';
+                    },
+                  ),
+                if (sendingData) const LinearProgressIndicator(),
+                const SizedBox(
+                  height: 30,
+                )
+              ])),
+        ));
   }
 
 /*  updateDataCrqs(){
@@ -1424,7 +1739,7 @@ class _CrqsFormState extends State<CrqsForm>{
      });
   }*/
 
- /* Step stepCreditProfile(){
+  /* Step stepCreditProfile(){
     return Step(
         state: _activeStepIndex <= 2 ? StepState.indexed : StepState.complete,
         isActive: _activeStepIndex >= 2,
@@ -1453,18 +1768,17 @@ class _CrqsFormState extends State<CrqsForm>{
 
   Step finalStep() {
     return Step(
-        state: _activeStepIndex <=3 ? StepState.indexed : StepState.complete,
+        state: _activeStepIndex <= 3 ? StepState.indexed : StepState.complete,
         isActive: _activeStepIndex >= 3,
         title: const Text(""),
         content: const CardStepContainer(
           child: Text('Se ha guardado su solicitud correctamente'),
-        )
-    );
+        ));
   }
 
-  bool requiredGuarantees(){
+  bool requiredGuarantees() {
     bool request = false;
-    if(allGuarantees < soCreditRequest.guarantees){
+    if (allGuarantees < soCreditRequest.guarantees) {
       request = true;
     }
 
@@ -1488,8 +1802,9 @@ class _CrqsFormState extends State<CrqsForm>{
       return false;
     }
     //Si no hay errores se guarda el obejto devuelto
-    setState((){
-      soCreditRequestDetail = SoCreditRequestDetail.fromJson(jsonDecode(response.body));
+    setState(() {
+      soCreditRequestDetail =
+          SoCreditRequestDetail.fromJson(jsonDecode(response.body));
       creditRequestDetailId = soCreditRequestDetail.id;
       engagementAgencyId = soCreditRequestDetail.engagementAgencyId;
     });
@@ -1533,13 +1848,13 @@ class _CrqsFormState extends State<CrqsForm>{
 
     soCreditRequest.creditTypeId = creditTypeId;
     // soCreditRequest.fiscalRegime = fiscalRegime;
-    if(soCreditRequest.status == ''){
+    if (soCreditRequest.status == '') {
       soCreditRequest.status = SoCreditRequest.STATUS_EDITION;
     }
-    if(multiDisposicion > 0){
+    if (multiDisposicion > 0) {
       soCreditRequest.disbursements = int.parse(textDisbursementsCntrll.text);
       soCreditRequest.disbursementAmount = textCantPeriodoCntrll.numberValue;
-    }else{
+    } else {
       soCreditRequest.disbursements = 1;
     }
     //TODO: Analizar eliminar este campo en crqs
@@ -1556,21 +1871,22 @@ class _CrqsFormState extends State<CrqsForm>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Access-Control-Allow-Origin': '*',
         'Cookie':
-        params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
+            params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
       },
       body: jsonEncode(soCreditRequest),
     );
 
     if (response.statusCode == params.servletResponseScOk) {
-      setState((){
-      // Si fue exitoso obtiene la respuesta
+      setState(() {
+        // Si fue exitoso obtiene la respuesta
         soCreditRequest = SoCreditRequest.fromJson(jsonDecode(response.body));
         fetchCreditRequest(soCreditRequest.id.toString());
         codeCrqs = soCreditRequest.code;
+        fetchSoOrderCreditItem(soCreditRequest.id);
         // fetchCreditRequestDetail(soCreditRequest.id.toString());
-    });
+      });
       // Muestra mensaje
-     /* ScaffoldMessenger.of(context).showSnackBar(
+      /* ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Datos actualizados correctamente')),
       );*/
       return true;
@@ -1578,11 +1894,62 @@ class _CrqsFormState extends State<CrqsForm>{
       print(response.body.toString());
       errorMsg = response.body.toString();
       // Error al guardar
-     /* ScaffoldMessenger.of(context).showSnackBar(
+      /* ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error al guardar solicitud')),
       );*/
       return false;
     }
+  }
+
+  // Metodo de consulta de tabla de amportización
+  // Genera la peticion de datos al servidor
+  Future<List<SoOderCreditItem>> fetchSoOrderCreditItem(int id) async {
+    final response = await http.Client().get(Uri.parse(
+        params.getAppUrl(params.instance) +
+            'restorci;' +
+            params.jSessionIdQuery +
+            '=' +
+            params.jSessionId +
+            '?id=' +
+            id.toString()));
+
+    // Si no es exitoso envia a login
+    if (response.statusCode != params.servletResponseScOk) {
+      Navigator.pushNamed(context, AppRoutes.initialRoute);
+    }
+    setState(() {
+      final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
+
+      _soOrderCreditItem = parsed.map<SoOderCreditItem>((json) => SoOderCreditItem.fromJson(json)).toList();
+    });
+
+    final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
+    return parsed
+        .map<SoOderCreditItem>((json) => SoOderCreditItem.fromJson(json))
+        .toList();
+  }
+
+  // Metodo de consulta del valor cat
+  Future<double> fetchFinanceUtil(int id) async {
+    final response = await http.Client().get(Uri.parse(
+        params.getAppUrl(params.instance) +
+            'restfinance;' +
+            params.jSessionIdQuery +
+            '=' +
+            params.jSessionId +
+            '?crqs_id=' +
+            id.toString()));
+
+    // Si no es exitoso envia a login
+    if (response.statusCode != params.servletResponseScOk) {
+      Navigator.pushNamed(context, AppRoutes.initialRoute);
+    }
+    setState(() {
+      print('response de cat ${response.body}');
+      cat = double.parse(response.body);
+    });
+
+    return cat;
   }
 
   //petición de creditrequestguarantees para definir rol preliminar del crédito
@@ -1603,8 +1970,8 @@ class _CrqsFormState extends State<CrqsForm>{
     }
     //Si no hay errores se guarda el obejto devuelto
 
-    setState((){
-    soCreditRequest= SoCreditRequest.fromJson(jsonDecode(response.body));
+    setState(() {
+      soCreditRequest = SoCreditRequest.fromJson(jsonDecode(response.body));
       wflowId = soCreditRequest.wFlowId;
     });
     return true;
@@ -1613,40 +1980,43 @@ class _CrqsFormState extends State<CrqsForm>{
   // Actualiza la solicitud de credito detalle en el servidor
   Future<bool> addCreditRequestDetail() async {
     soCreditRequestDetail.creditRequestId = soCreditRequest.id;
-    soCreditRequestDetail.educationalInstitution = textEducationalInstitutionCntrll.text;
+    soCreditRequestDetail.educationalInstitution =
+        textEducationalInstitutionCntrll.text;
     soCreditRequestDetail.educationalInstitutionType = institutionType;
-    if(institutionType == SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL){
+    if (institutionType ==
+        SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL) {
       soCreditRequestDetail.monthStay = int.parse(textMonthStayCntrll.text);
-    }else{
+    } else {
       soCreditRequestDetail.monthStay = 0;
     }
 
-    if(engagementAgencyId > 0){
+    if (engagementAgencyId > 0) {
       soCreditRequestDetail.engagementAgencyId = engagementAgencyId;
       soCreditRequestDetail.institution = '';
-    }else{
+    } else {
       soCreditRequestDetail.engagementAgencyId = -1;
       soCreditRequestDetail.institution = textInstitutionCntrll.text;
     }
 
-    if(checkWhoStudies){
+    if (checkWhoStudies) {
       soCreditRequestDetail.whoStudies = 1;
       soCreditRequestDetail.studentName = '';
-    }else{
+    } else {
       soCreditRequestDetail.whoStudies = 0;
       soCreditRequestDetail.studentName = textStudentNameCntrll.text;
     }
 
-    if(checkWhoProcesses){
+    if (checkWhoProcesses) {
       soCreditRequestDetail.whoProcesses = 1;
-    }else{
+    } else {
       soCreditRequestDetail.whoProcesses = 0;
     }
     soCreditRequestDetail.dateStartInstitution = textDateStartCntrll.text;
     // soCreditRequestDetail.dateEndInstitution = textDateEndCntrll.text;
     // soCreditRequestDetail.verifiableIncome = verifiableIncome;
     //si es institución internacional
-    if(institutionType != SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL){
+    if (institutionType !=
+        SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL) {
       soCreditRequestDetail.visaFees = 0;
       soCreditRequestDetail.planeTickets = 0;
       soCreditRequestDetail.programCost = 0;
@@ -1657,12 +2027,14 @@ class _CrqsFormState extends State<CrqsForm>{
       soCreditRequestDetail.countryId = 0;
       soCreditRequestDetail.city = '';
       soCreditRequestDetail.engagementSchool = '';
-    }else{
+    } else {
       soCreditRequestDetail.studiesPlace = textStudiesPlaceCntrll.text;
       soCreditRequestDetail.programCost = textProgramCostCntrll.numberValue;
       soCreditRequestDetail.maintenance = textMaintenanceCntrll.numberValue;
-      soCreditRequestDetail.dateProbablyTravel = textDateProbablyTravelCntrll.text;
-      soCreditRequestDetail.educationalProgram = textEducationalProgramCntrll.text;
+      soCreditRequestDetail.dateProbablyTravel =
+          textDateProbablyTravelCntrll.text;
+      soCreditRequestDetail.educationalProgram =
+          textEducationalProgramCntrll.text;
       soCreditRequestDetail.countryId = countryId;
       soCreditRequestDetail.city = textCityCntrll.text;
     }
@@ -1680,17 +2052,17 @@ class _CrqsFormState extends State<CrqsForm>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Access-Control-Allow-Origin': '*',
         'Cookie':
-        params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
+            params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
       },
       body: jsonEncode(soCreditRequestDetail),
     );
 
     if (response.statusCode == params.servletResponseScOk) {
-
       setState(() {
         sendingData = false;
-      // Si fue exitoso obtiene la respuesta
-      soCreditRequestDetail = SoCreditRequestDetail.fromJson(jsonDecode(response.body));
+        // Si fue exitoso obtiene la respuesta
+        soCreditRequestDetail =
+            SoCreditRequestDetail.fromJson(jsonDecode(response.body));
         creditRequestDetailId = soCreditRequestDetail.id;
       });
       // Muestra mensaje
@@ -1714,25 +2086,26 @@ class _CrqsFormState extends State<CrqsForm>{
             '=' +
             params.jSessionId +
             '?idSolicitud=' +
-            id.toString()
-    ));
+            id.toString()));
 
     // Si no es exitoso envia a login
     if (response.statusCode != params.servletResponseScOk) {
       Navigator.pushNamed(context, AppRoutes.initialRoute);
     }
 
-    setState((){
-      soCreditRequestGuarantee = SoCreditRequestGuarantee.fromJson(jsonDecode(response.body));
+    setState(() {
+      soCreditRequestGuarantee =
+          SoCreditRequestGuarantee.fromJson(jsonDecode(response.body));
     });
     return true;
   }
 
   // Actualiza la solicitud de credito sponsor preliminar en el servidor
   Future<bool> addCreditRequestGuarantee() async {
-    if(checkIncome){
-      soCreditRequestGuarantee.verifiableIncome = textVerifiableIncomeCntrll.numberValue;
-    }else{
+    if (checkIncome) {
+      soCreditRequestGuarantee.verifiableIncome =
+          textVerifiableIncomeCntrll.numberValue;
+    } else {
       soCreditRequestGuarantee.verifiableIncome = 0;
     }
 
@@ -1745,15 +2118,15 @@ class _CrqsFormState extends State<CrqsForm>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Access-Control-Allow-Origin': '*',
         'Cookie':
-        params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
+            params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
       },
       body: jsonEncode(soCreditRequestGuarantee),
     );
 
     if (response.statusCode == params.servletResponseScOk) {
-
       // Si fue exitoso obtiene la respuesta
-      soCreditRequestGuarantee = SoCreditRequestGuarantee.fromJson(jsonDecode(response.body));
+      soCreditRequestGuarantee =
+          SoCreditRequestGuarantee.fromJson(jsonDecode(response.body));
 
       // Muestra mensaje
       // ScaffoldMessenger.of(context).showSnackBar(
@@ -1788,7 +2161,7 @@ class _CrqsFormState extends State<CrqsForm>{
       return false;
     }
     //Si no hay errores se guarda el obejto devuelto
-    setState((){
+    setState(() {
       soCustomer = SoCustomer.fromJson(jsonDecode(response.body));
     });
 
@@ -1813,7 +2186,7 @@ class _CrqsFormState extends State<CrqsForm>{
       return false;
     }
     //Si no hay errores se guarda el obejto devuelto
-    setState((){
+    setState(() {
       soCreditType = SoCreditType.fromJson(jsonDecode(response.body));
       creditTypeId = soCreditType.id;
       multiDisposicion = soCreditType.multiDisbursement;
@@ -1832,17 +2205,17 @@ class _CrqsFormState extends State<CrqsForm>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Access-Control-Allow-Origin': '*',
           'Cookie':
-          params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
+              params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
         },
         body: json.encode(''));
-
 
     setState(() {
       dataList = json.decode(response.body);
     });
     for (int i = 0; i < dataList.length; i++) {
-      if (int.parse(dataList[i]['id'].toString()) == widget.creditRequest.creditTypeId) {
-        setState((){
+      if (int.parse(dataList[i]['id'].toString()) ==
+          widget.creditRequest.creditTypeId) {
+        setState(() {
           _periods = dataList[i]['periods'];
           _minAmount = dataList[i]['minAmount'];
           _maxAmount = dataList[i]['maxAmount'];
@@ -1881,15 +2254,14 @@ class _CrqsFormState extends State<CrqsForm>{
 
     final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
     setState(() {
-      if(soCreditRequestDetail.whoProcesses == 0 ||
-          soCreditRequestDetail.educationalInstitutionType == SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL){
-
-      }
+      if (soCreditRequestDetail.whoProcesses == 0 ||
+          soCreditRequestDetail.educationalInstitutionType ==
+              SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL) {}
       _creditRequestGuarantee.clear();
-    _creditRequestGuarantee.addAll(parsed
-        .map<SoCreditRequestGuarantee>(
-            (json) => SoCreditRequestGuarantee.fromJson(json))
-        .toList());
+      _creditRequestGuarantee.addAll(parsed
+          .map<SoCreditRequestGuarantee>(
+              (json) => SoCreditRequestGuarantee.fromJson(json))
+          .toList());
     });
     isAcredited();
     return parsed
@@ -1898,28 +2270,29 @@ class _CrqsFormState extends State<CrqsForm>{
         .toList();
   }
 
-  void isAcredited (){
-    for (SoCreditRequestGuarantee soGuarantee in _creditRequestGuarantee){
-      if(soGuarantee.role == SoCreditRequestGuarantee.ROLE_ACREDITED
-      && soGuarantee.relation == SoCreditRequestGuarantee.RELATION_SELF &&
-          (soCreditRequestDetail.educationalInstitutionType == SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL
-          && soCreditRequestDetail.monthStay > soCreditType.maxMonthStay)){
+  void isAcredited() {
+    for (SoCreditRequestGuarantee soGuarantee in _creditRequestGuarantee) {
+      if (soGuarantee.role == SoCreditRequestGuarantee.ROLE_ACREDITED &&
+          soGuarantee.relation == SoCreditRequestGuarantee.RELATION_SELF &&
+          (soCreditRequestDetail.educationalInstitutionType ==
+                  SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL &&
+              soCreditRequestDetail.monthStay > soCreditType.maxMonthStay)) {
         setState(() {
           requiredAcredited = true;
         });
       }
 
-      if(!checkWhoProcesses){
+      if (!checkWhoProcesses) {
         setState(() {
           requiredAcredited = true;
         });
       }
-
     }
   }
 
   //Consulta las garantias por solicitud
-  Future<List<SoCreditRequestAsset>> fetchSoCreditRequestAssets(int forceFilter) async {
+  Future<List<SoCreditRequestAsset>> fetchSoCreditRequestAssets(
+      int forceFilter) async {
     String url = params.getAppUrl(params.instance) +
         'restcrqa;' +
         params.jSessionIdQuery +
@@ -1940,11 +2313,14 @@ class _CrqsFormState extends State<CrqsForm>{
 
     final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
 
-    _creditRequestAssetListData.addAll(
-        parsed.map<SoCreditRequestAsset>((json) => SoCreditRequestAsset.fromJson(json)).toList());
-    setState((){});
+    _creditRequestAssetListData.addAll(parsed
+        .map<SoCreditRequestAsset>(
+            (json) => SoCreditRequestAsset.fromJson(json))
+        .toList());
+    setState(() {});
     return parsed
-        .map<SoCreditRequestAsset>((json) => SoCreditRequestAsset.fromJson(json))
+        .map<SoCreditRequestAsset>(
+            (json) => SoCreditRequestAsset.fromJson(json))
         .toList();
   }
 
@@ -1979,6 +2355,21 @@ class _CrqsFormState extends State<CrqsForm>{
     });
     return true;
   }
+
+  showAlertDialogTasa(BuildContext context, String text) {
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      content: Text(text),
+    );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   showAlertDialog(BuildContext context, String text) {
     // set up the buttons
     /* Widget cancelButton = TextButton(
@@ -1989,7 +2380,7 @@ class _CrqsFormState extends State<CrqsForm>{
     );*/
     Widget continueButton = TextButton(
       child: const Text("Continuar"),
-      onPressed:  () {
+      onPressed: () {
         Navigator.pop(context);
       },
     );
@@ -2008,26 +2399,23 @@ class _CrqsFormState extends State<CrqsForm>{
         return alert;
       },
     ).then((value) {
-      if(requiredGuarantees()){
+      if (requiredGuarantees()) {
         Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) =>
-                CreditRequestGuarateeForm2(
-                  soCreditRequestGuarantee: SoCreditRequestGuarantee
-                      .empty(),
-                  creditRequestId: soCreditRequest.id,
-                  requiredAsset: requiredAsset,
-                  requiredAcredited: requiredAcredited,),
-            )
-        ).then((value) =>
-            setState(() {
+            MaterialPageRoute(
+              builder: (context) => CreditRequestGuarateeForm2(
+                soCreditRequestGuarantee: SoCreditRequestGuarantee.empty(),
+                creditRequestId: soCreditRequest.id,
+                requiredAsset: requiredAsset,
+                requiredAcredited: requiredAcredited,
+                whoProccess: soCreditRequestDetail.whoProcesses,
+              ),
+            )).then((value) => setState(() {
               //al volver se verifica que si se cumpla, si no redirecciona a home
               _creditRequestGuarantee.clear();
-              fetchSoCreditRequestAssets(soCreditRequest.id)
-                  .then((value) {
+              fetchSoCreditRequestAssets(soCreditRequest.id).then((value) {
                 if (_creditRequestAssetListData.isEmpty &&
-                    soCreditRequest.amountRequired >
-                        soCreditType.amountAsset) {
+                    soCreditRequest.amountRequired > soCreditType.amountAsset) {
                   setState(() {
                     requiredAsset = true;
                   });
@@ -2039,29 +2427,26 @@ class _CrqsFormState extends State<CrqsForm>{
               });
               //al cerrar forma se verifica si si se agrego y si no
               //se redirije a la pantalla de inicio
-              fetchSoCreditRequestGuarantee(
-                  soCreditRequest.id).then((value) {
-                allGuarantees =
-                    _creditRequestGuarantee.length;
+              fetchSoCreditRequestGuarantee(soCreditRequest.id).then((value) {
+                allGuarantees = _creditRequestGuarantee.length;
                 if (requiredGuarantees()) {
                   Navigator.pushNamed(context, '/crqs_list');
                 }
               });
             }));
-      }else{
+      } else {
         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) =>
-            CreditRequestGuarateeForm2(
-            soCreditRequestGuarantee: soCreditRequestGuarantee,
-            creditRequestId: soCreditRequest.id, requiredAsset: requiredAsset,
-            requiredAcredited: false,),
-          )
-        );
+            context,
+            MaterialPageRoute(
+              builder: (context) => CreditRequestGuarateeForm2(
+                soCreditRequestGuarantee: soCreditRequestGuarantee,
+                creditRequestId: soCreditRequest.id,
+                requiredAsset: requiredAsset,
+                requiredAcredited: false,
+                whoProccess: soCreditRequestDetail.whoProcesses,
+              ),
+            ));
       }
     });
   }
-
 }
-
-

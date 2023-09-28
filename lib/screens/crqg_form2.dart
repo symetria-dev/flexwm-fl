@@ -37,10 +37,11 @@ class CreditRequestGuarateeForm2 extends StatefulWidget{
   final int creditRequestId;
   final bool requiredAsset;
   final bool requiredAcredited;
+  final int whoProccess;
   const CreditRequestGuarateeForm2({Key? key,
     required this.soCreditRequestGuarantee,
     required this.creditRequestId, required this.requiredAsset,
-    required this.requiredAcredited}) : super(key: key);
+    required this.requiredAcredited, required this.whoProccess}) : super(key: key);
 
   @override
   State<CreditRequestGuarateeForm2> createState() => _CreditRequestGuarateeForm2State();
@@ -146,6 +147,8 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
   bool avalCreated = false;
   //id aval
   int creditRequestGuaranteeId = 0;
+  // id cliente
+  int customerId = 0;
   //bandera para editar campos de aval
   bool isSameGuarantee = false;
   //indicador de progress modal overlay
@@ -158,6 +161,9 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
 
   String title = '';
 
+  // El solicitante es el acreditado
+  bool whoProccess = false;
+
   @override
   void initState(){
     if(widget.requiredAcredited){
@@ -167,77 +173,89 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
     }
 
     if(widget.soCreditRequestGuarantee.id > 0 ){
+      customerId = widget.soCreditRequestGuarantee.soCustomer.id;
 
-      creditRequestGuaranteeId = widget.soCreditRequestGuarantee.id;
-      avalCreated = true;
-      soCreditRequestGuarantee = widget.soCreditRequestGuarantee;
-      if(soCreditRequestGuarantee.relation == SoCreditRequestGuarantee.RELATION_SELF){
-        isSameGuarantee = true;
-      }
+        fetchCrqg(widget.soCreditRequestGuarantee.id.toString()).then((value) {
+          avalCreated = true;
+          soCreditRequestGuarantee = widget.soCreditRequestGuarantee;
+          if(soCreditRequestGuarantee.creditBureau > 0){
+            isSwitched = true;
+          }else{
+            isSwitched = false;
+          }
 
-      fetchSoCreditRequestAssets(soCreditRequestGuarantee.id);
+          if(widget.whoProccess > 0 || soCreditRequestGuarantee.creditBureau > 0){
+            whoProccess = true;
+          }
 
-      title = SoCreditRequestGuarantee.getLabelRol(soCreditRequestGuarantee.role);
+          if(soCreditRequestGuarantee.relation == SoCreditRequestGuarantee.RELATION_SELF){
+            isSameGuarantee = true;
+          }
 
-      if(soCreditRequestGuarantee.relation != '') relation = soCreditRequestGuarantee.relation;
-      textEconomicDepCntrll.text = soCreditRequestGuarantee.economicDependents.toString();
-      textTypeHousingCntrll.text = soCreditRequestGuarantee.typeHousing;
-      textYearsResidenceCntrll.text = soCreditRequestGuarantee.yearsResidence.toString();
-      if(soCreditRequestGuarantee.role != '') role = soCreditRequestGuarantee.role;
-      soCustomer = soCreditRequestGuarantee.soCustomer;
-      fetchSoCustomerAddress(soCustomer.id).then((value) {
+          fetchSoCreditRequestAssets(soCreditRequestGuarantee.id);
 
-        if(soCustomer.curp != '' && _customerAddressListData.isNotEmpty){
-          _activeStepIndex = 2;
-        }else if(soCustomer.mobile != '' && soCustomer.email != '' ){
-          _activeStepIndex=1;
-        }else{
-          _activeStepIndex = 0;
-        }
-        textFisrtNameCntrll.text = soCreditRequestGuarantee.soCustomer.firstName;
-        textFatherLastNameCntrll.text = soCreditRequestGuarantee.soCustomer.fatherLastName;
-        textMotherLastNameCntrll.text = soCreditRequestGuarantee.soCustomer.motherlastname;
-        textBirthdateCntrll.text = soCreditRequestGuarantee.soCustomer.birthdate;
-        textCellphoneCntrll.text = soCreditRequestGuarantee.soCustomer.mobile;
-        textEmailCntrll.text = soCreditRequestGuarantee.soCustomer.email;
-        textRfcCntrll.text = soCreditRequestGuarantee.soCustomer.rfc;
-        textCurpCntrll.text = soCreditRequestGuarantee.soCustomer.curp;
-        if(soCreditRequestGuarantee.soCustomer.maritalStatus != '') {
-          setState((){
-            maritalStatus = soCreditRequestGuarantee.soCustomer.maritalStatus;
-          });
-        }
-        if(soCreditRequestGuarantee.soCustomer.maritalRegimen != '') regimenMarital = soCreditRequestGuarantee.soCustomer.maritalRegimen;
-        if(soCreditRequestGuarantee.soCustomer.spouseName != '') textSpouseNameCntrll.text = soCreditRequestGuarantee.soCustomer.spouseName;
-        if(soCreditRequestGuarantee.accountStatement > 0.0) textAccountStatementCntrll.updateValue(soCreditRequestGuarantee.accountStatement);
-        if(soCreditRequestGuarantee.payrollReceipts > 0.0) textPayrollReceiptsCntrll.updateValue(soCreditRequestGuarantee.payrollReceipts);
-        if(soCreditRequestGuarantee.typeHousing != '') textTypeHousingCntrll.text = soCreditRequestGuarantee.typeHousing;
-        if(soCreditRequestGuarantee.heritage != '') textHeritageCntrll.text = soCreditRequestGuarantee.heritage;
-        if(soCreditRequestGuarantee.economicDependents > 0) {
+          title = SoCreditRequestGuarantee.getLabelRol(soCreditRequestGuarantee.role);
+
+          if(soCreditRequestGuarantee.relation != '') relation = soCreditRequestGuarantee.relation;
           textEconomicDepCntrll.text = soCreditRequestGuarantee.economicDependents.toString();
-        } else{
-          textEconomicDepCntrll.text = '';
-        }
-        if(soCreditRequestGuarantee.employmentStatus != '') employmentStatus = soCreditRequestGuarantee.employmentStatus;
-        if(soCreditRequestGuarantee.company != '') textCompanyCntrll.text = soCreditRequestGuarantee.company;
-        if(soCreditRequestGuarantee.economicActivity != '' && soCreditRequestGuarantee.typeHousing != ''
-        && soCreditRequestGuarantee.economicDependents >= 0){
-          textEconomicActCntrll.text = soCreditRequestGuarantee.economicActivity;
-          //si este dato existe es que ya va en el paso 3 de la forma
-          _activeStepIndex = 3;
-        }
+          textTypeHousingCntrll.text = soCreditRequestGuarantee.typeHousing;
+          textYearsResidenceCntrll.text = soCreditRequestGuarantee.yearsResidence.toString();
+          if(soCreditRequestGuarantee.role != '') role = soCreditRequestGuarantee.role;
+          soCustomer = soCreditRequestGuarantee.soCustomer;
+          fetchSoCustomerAddress(soCustomer.id).then((value) {
 
-        if(soCreditRequestGuarantee.yearsEmployment > 0)textYearsEmploymentCntrll.text = soCreditRequestGuarantee.yearsEmployment.toString();
-        if(soCreditRequestGuarantee.creditCards > 0.0)textCreditCardsCntrll.updateValue(soCreditRequestGuarantee.creditCards);
-        if(soCreditRequestGuarantee.rent > 0.0)textRentCntrll.updateValue(soCreditRequestGuarantee.rent);
-        if(soCreditRequestGuarantee.creditAutomotive > 0.0)textCreditAutomotiveCntrll.updateValue(soCreditRequestGuarantee.creditAutomotive);
-        if(soCreditRequestGuarantee.creditFurniture > 0.0)textCreditFurniturCntrll.updateValue(soCreditRequestGuarantee.creditFurniture);
-        if(soCreditRequestGuarantee.personalLoans > 0.0)textPersonalLoansCntrll.updateValue(soCreditRequestGuarantee.personalLoans);
-        if(soCreditRequestGuarantee.verifiableIncome > 0.0)textVerifiableIncomeCntrll.updateValue(soCreditRequestGuarantee.verifiableIncome);
-        if(soCreditRequestGuarantee.ciec != '') textCiecCntrll.text = soCreditRequestGuarantee.ciec;
+            if(soCustomer.curp != '' && _customerAddressListData.isNotEmpty){
+              _activeStepIndex = 2;
+            }else if(soCustomer.mobile != '' && soCustomer.email != '' ){
+              _activeStepIndex=1;
+            }else{
+              _activeStepIndex = 0;
+            }
+            textFisrtNameCntrll.text = soCreditRequestGuarantee.soCustomer.firstName;
+            textFatherLastNameCntrll.text = soCreditRequestGuarantee.soCustomer.fatherLastName;
+            textMotherLastNameCntrll.text = soCreditRequestGuarantee.soCustomer.motherlastname;
+            textBirthdateCntrll.text = soCreditRequestGuarantee.soCustomer.birthdate;
+            textCellphoneCntrll.text = soCreditRequestGuarantee.soCustomer.mobile;
+            textEmailCntrll.text = soCreditRequestGuarantee.soCustomer.email;
+            textRfcCntrll.text = soCreditRequestGuarantee.soCustomer.rfc;
+            textCurpCntrll.text = soCreditRequestGuarantee.soCustomer.curp;
+            if(soCreditRequestGuarantee.soCustomer.maritalStatus != '') {
+              setState((){
+                maritalStatus = soCreditRequestGuarantee.soCustomer.maritalStatus;
+              });
+            }
+            if(soCreditRequestGuarantee.soCustomer.maritalRegimen != '') regimenMarital = soCreditRequestGuarantee.soCustomer.maritalRegimen;
+            if(soCreditRequestGuarantee.soCustomer.spouseName != '') textSpouseNameCntrll.text = soCreditRequestGuarantee.soCustomer.spouseName;
+            if(soCreditRequestGuarantee.accountStatement > 0.0) textAccountStatementCntrll.updateValue(soCreditRequestGuarantee.accountStatement);
+            if(soCreditRequestGuarantee.payrollReceipts > 0.0) textPayrollReceiptsCntrll.updateValue(soCreditRequestGuarantee.payrollReceipts);
+            if(soCreditRequestGuarantee.typeHousing != '') textTypeHousingCntrll.text = soCreditRequestGuarantee.typeHousing;
+            if(soCreditRequestGuarantee.heritage != '') textHeritageCntrll.text = soCreditRequestGuarantee.heritage;
+            if(soCreditRequestGuarantee.economicDependents > 0) {
+              textEconomicDepCntrll.text = soCreditRequestGuarantee.economicDependents.toString();
+            } else{
+              textEconomicDepCntrll.text = '';
+            }
+            if(soCreditRequestGuarantee.employmentStatus != '') employmentStatus = soCreditRequestGuarantee.employmentStatus;
+            if(soCreditRequestGuarantee.company != '') textCompanyCntrll.text = soCreditRequestGuarantee.company;
+            if(soCreditRequestGuarantee.economicActivity != '' && soCreditRequestGuarantee.typeHousing != ''
+                && soCreditRequestGuarantee.economicDependents >= 0){
+              textEconomicActCntrll.text = soCreditRequestGuarantee.economicActivity;
+              //si este dato existe es que ya va en el paso 3 de la forma
+              _activeStepIndex = 3;
+            }
 
-      });
+            if(soCreditRequestGuarantee.yearsEmployment > 0)textYearsEmploymentCntrll.text = soCreditRequestGuarantee.yearsEmployment.toString();
+            if(soCreditRequestGuarantee.creditCards > 0.0)textCreditCardsCntrll.updateValue(soCreditRequestGuarantee.creditCards);
+            if(soCreditRequestGuarantee.rent > 0.0)textRentCntrll.updateValue(soCreditRequestGuarantee.rent);
+            if(soCreditRequestGuarantee.creditAutomotive > 0.0)textCreditAutomotiveCntrll.updateValue(soCreditRequestGuarantee.creditAutomotive);
+            if(soCreditRequestGuarantee.creditFurniture > 0.0)textCreditFurniturCntrll.updateValue(soCreditRequestGuarantee.creditFurniture);
+            if(soCreditRequestGuarantee.personalLoans > 0.0)textPersonalLoansCntrll.updateValue(soCreditRequestGuarantee.personalLoans);
+            if(soCreditRequestGuarantee.verifiableIncome > 0.0)textVerifiableIncomeCntrll.updateValue(soCreditRequestGuarantee.verifiableIncome);
+            if(soCreditRequestGuarantee.ciec != '') textCiecCntrll.text = soCreditRequestGuarantee.ciec;
 
+          });
+
+        });
       }else{
       maritalStatus = SoCreditRequestGuarantee.STATUS_SINGLE;
       regimenMarital = SoCreditRequestGuarantee.REGIMEN_CONJUGAL_SOCIETY;
@@ -627,7 +645,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
               SubCatalogContainerWidget(
                   title: 'Domicilio(s)*',
                   child: CustomerAddress(
-                    forceFilter: soCustomer.id,
+                    forceFilter: customerId,
                     callback: (int addresses){
                       setState(() {
                         custAddresses = addresses;
@@ -794,21 +812,22 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
               child: Column(
                 children: [
                   const SizedBox(height: 10,),
+                  if(whoProccess || soCreditRequestGuarantee.creditBureau > 0
+                      || soCreditRequestGuarantee.customerId == params.idLoggedUser)
                   Row(
                     children: [
                       Switch(
                         value: isSwitched,
                         onChanged: (value) {
-                          /*if(!isSwitched){
-                            _confirmPassword();
-                          }else {
-                            setState(() {
-                              isSwitched = value;
-                            });
-                          }*/
-                          setState(() {
-                            isSwitched = value;
-                          });
+                          print('quien procesa --- $whoProccess');
+                          if(whoProccess || soCreditRequestGuarantee.customerId == params.idLoggedUser) {
+                            if (!isSwitched ) {
+                              _confirmPassword();
+                            }
+                            // setState(() {
+                            //   isSwitched = value;
+                            // });
+                          }
                         },
                       ),
                       const Expanded(
@@ -819,6 +838,17 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                       ),
                     ],
                   ),
+                  if(!whoProccess && soCreditRequestGuarantee.role == SoCreditRequestGuarantee.ROLE_ACREDITED
+                      && soCreditRequestGuarantee.customerId != params.idLoggedUser)
+                    const Row(
+                      children: [
+                        Expanded(
+                            child: Text("Favor de revisar su correo, se envió una solicitud para su autorización de revisión en buro de crédito",
+                              style: TextStyle(color: Colors.grey),
+                            )
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: 10,),
                   TextFormField(
                     keyboardType: TextInputType.number,
@@ -1096,7 +1126,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Confirme su Contraseña'),
+            title: const Text('Confirme su Contraseña \n*contraseña con la que ingresó a la aplicación'),
             content: TextField(
               obscureText: true,
               decoration: InputDecorations.authInputDecoration(
@@ -1123,6 +1153,46 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                     );
                     Navigator.pop(context);
                   }
+                },
+                child: const Text('Confirmar'),
+              )
+            ],
+          );
+        }
+    );
+  }
+
+  //Funcion para validad contraseña
+  Future<void> _emailMsg() async{
+    final textPassCntrll = TextEditingController();
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Se enviará un correo electrónico a ${soCustomer.email} para validar la autorización'),
+            /*content: TextField(
+              obscureText: true,
+              decoration: InputDecorations.authInputDecoration(
+                  labelText: 'Contraseña'
+              ),
+              controller: textPassCntrll,
+            ),*/
+            actions: <Widget>[
+              TextButton(
+                onPressed: (){
+                  setState(() {
+                    isSwitched = false;
+                    Navigator.pop(context);
+                  });
+                },
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: (){
+                    setState(() {
+                      isSwitched = true;
+                      Navigator.pop(context);
+                    });
                 },
                 child: const Text('Confirmar'),
               )
@@ -1684,6 +1754,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
       }
       setState(() {
         soCustomer = SoCustomer.fromJson(jsonDecode(response.body));
+        customerId = soCustomer.id;
       });
       // Muestra mensaje
 
@@ -1741,8 +1812,19 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
     soCreditRequestGuarantee.creditAutomotive = textCreditAutomotiveCntrll.numberValue;
     soCreditRequestGuarantee.creditFurniture = textCreditFurniturCntrll.numberValue;
     soCreditRequestGuarantee.personalLoans = textPersonalLoansCntrll.numberValue;
-    if(textEconomicDepCntrll.text != '')soCreditRequestGuarantee.economicDependents = int.parse(textEconomicDepCntrll.text);
     soCreditRequestGuarantee.typeHousing = textTypeHousingCntrll.text;
+    if(isSwitched){
+      soCreditRequestGuarantee.creditBureau = 1;
+    }else{
+      soCreditRequestGuarantee.creditBureau = 0;
+    }
+
+    if(role == SoCreditRequestGuarantee.ROLE_ACREDITED && !whoProccess
+        && !isSwitched && soCreditRequestGuarantee.customerId != params.idLoggedUser){
+      soCreditRequestGuarantee.sendMailBureau = 1;
+    }else{
+      soCreditRequestGuarantee.sendMailBureau = 0;
+    }
 
     final response = await http.post(
       Uri.parse(params.getAppUrl(params.instance) +
@@ -1766,8 +1848,14 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
       setState((){
         avalCreated = true;
         soCreditRequestGuarantee = SoCreditRequestGuarantee.fromJson(jsonDecode(response.body));
+        if(soCreditRequestGuarantee.creditBureau > 0){
+          isSwitched = true;
+        }
         creditRequestGuaranteeId = soCreditRequestGuarantee.id;
       });
+      if(soCreditRequestGuarantee.creditBureau < 1 && !whoProccess && soCreditRequestGuarantee.customerId != params.idLoggedUser){
+        showAlertDialogSendMail(context, "Favor de revisar su correo, se envió una solicitud para su autorización de revisión en buro de crédito");
+      }
       // Muestra mensaje
 /*      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registro actualizado')),
@@ -1784,6 +1872,19 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
     }
   }
 
+  showAlertDialogSendMail(BuildContext context, String text) {
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      content: Text(text),
+    );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    ).then((value) => Navigator.pop(context));
+  }
 
   //Peticon de datos de un cliente especifico
   Future<bool> fetchCrqg(String id) async {

@@ -8,72 +8,70 @@ import 'package:flexwm/common/params.dart' as params;
 import 'package:image_cropper/image_cropper.dart';
 
 class CameraPhotoId extends StatefulWidget {
-
-  const CameraPhotoId(
-      {Key? key,})
-      : super(key: key);
+  const CameraPhotoId({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<CameraPhotoId> createState() => _CameraPhotoIdState();
 }
 
 class _CameraPhotoIdState extends State<CameraPhotoId> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-          backgroundColor: Colors.white,
-          body: FutureBuilder<List<CameraDescription>?>(
-            future: availableCameras(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                if (snapshot.data == null) {
-                  return const Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        'No se encontró ninguna cámara',
-                        style: TextStyle(color: Colors.black),
-                      ));
-                }
-                return CameraOverlay(
-                    snapshot.data!.first,
-                    CardOverlay.byFormat(OverlayFormat.cardID3),
-                        (XFile file) async {
-                          CroppedFile? cropper = await ImageCropper().cropImage(
-                              sourcePath: file.path,
-                              aspectRatio: const CropAspectRatio(ratioX: 3, ratioY: 2),
-                              aspectRatioPresets: [
-                                CropAspectRatioPreset.ratio3x2,
-                              ],
-                              compressQuality: 40,
-                              maxHeight: 600,
-                              maxWidth: 600,
-                              // compressFormat: ImageCompressFormat.jpg,
-  /*                            androidUiSettings: AndroidUiSettings(
+      backgroundColor: Colors.white,
+      body: FutureBuilder<List<CameraDescription>?>(
+        future: availableCameras(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            if (snapshot.data == null) {
+              return const Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'No se encontró ninguna cámara',
+                    style: TextStyle(color: Colors.black),
+                  ));
+            }
+            return CameraOverlay(
+                snapshot.data!.first,
+                CardOverlay.byFormat(
+                    OverlayFormat.cardID3), (XFile file) async {
+              CroppedFile? cropper = await ImageCropper().cropImage(
+                sourcePath: file.path,
+                aspectRatio: const CropAspectRatio(ratioX: 3, ratioY: 2),
+                aspectRatioPresets: [
+                  CropAspectRatioPreset.ratio3x2,
+                ],
+                compressQuality: 40,
+                maxHeight: 600,
+                maxWidth: 600,
+                // compressFormat: ImageCompressFormat.jpg,
+                /*                            androidUiSettings: AndroidUiSettings(
                                   toolbarColor: Colors.blue,
                                   toolbarTitle: "Recorta la imagen",
                                   toolbarWidgetColor: Colors.white,
                                   backgroundColor: Colors.white)*/
-                          );
-                          afterTakePhoto(cropper!);
-                        },
-                    info:
-                    'Coloque su tarjeta de identificación dentro del rectángulo y asegúrese de que la imagen sea perfectamente legible.',
-                    label: 'Escaneando');
-              } else {
-                return const Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Obteniendo cámaras',
-                      style: TextStyle(color: Colors.black),
-                    ));
-              }
+              );
+              afterTakePhoto(cropper!);
             },
-          ),
-        );
+                info:
+                    'Coloque su tarjeta de identificación dentro del rectángulo y asegúrese de que la imagen sea perfectamente legible.',
+                label: 'Escaneando');
+          } else {
+            return const Align(
+                alignment: Alignment.center,
+                child: Text(
+                  'Obteniendo cámaras',
+                  style: TextStyle(color: Colors.black),
+                ));
+          }
+        },
+      ),
+    );
   }
 
-  afterTakePhoto(CroppedFile file){
+  afterTakePhoto(CroppedFile file) {
     showDialog(
       context: context,
       barrierColor: Colors.black,
@@ -91,7 +89,8 @@ class _CameraPhotoIdState extends State<CameraPhotoId> {
                   child: const Icon(Icons.close)),
               OutlinedButton(
                   onPressed: () {
-                    sendFile().then((value) => Navigator.pop(context, file.path));
+                    sendFile()
+                        .then((value) => Navigator.pop(context, file.path));
                   },
                   child: const Icon(Icons.check)),
             ],
@@ -102,22 +101,20 @@ class _CameraPhotoIdState extends State<CameraPhotoId> {
                   child: Container(
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                          fit: BoxFit.fitWidth,
-                          alignment: FractionalOffset.center,
-                          image: FileImage(
-                            File(file.path),
-                          ),
-                        )),
+                      fit: BoxFit.fitWidth,
+                      alignment: FractionalOffset.center,
+                      image: FileImage(
+                        File(file.path),
+                      ),
+                    )),
                   ),
                 )));
       },
     );
   }
 
-  Future<bool> sendFile() async{
-
+  Future<bool> sendFile() async {
     Navigator.pop(context);
     return true;
   }
-
 }

@@ -279,7 +279,7 @@ class _CustDataFormState extends State<CustDataForm>{
       AuthListBackground(child: formCrqd()),
       AuthListBackground(child: Padding(
         padding: const EdgeInsets.only(top: 50),
-        child: CreditRequestGuarantee(forceFilter: soCreditRequest.id, requiredAsset: false,),
+        child: CreditRequestGuarantee(forceFilter: soCreditRequest.id, requiredAsset: false,whoProccess: 0,),
       )),
       AuthListBackground(child: Padding(
         padding: const EdgeInsets.only(top: 50),
@@ -1316,7 +1316,7 @@ class _CustDataFormState extends State<CustDataForm>{
             SubCatalogContainerWidget(
                 title: 'Sponsors',
                 child: CreditRequestGuarantee(
-                    forceFilter: soCreditRequest.id, requiredAsset: false,
+                    forceFilter: soCreditRequest.id, requiredAsset: false,whoProccess: 0,
                 )
             ),
           ],

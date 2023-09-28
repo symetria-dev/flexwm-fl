@@ -35,6 +35,8 @@ class SoCreditRequestGuarantee {
   String identificationBack = "";
   String identityVideo = "";
   String proofAddress = "";
+  int creditBureau = 0;
+  int sendMailBureau = 0;
 
   static String RELATION_SELF = 'Z';
   static String RELATION_PARENT = 'P';
@@ -123,7 +125,7 @@ class SoCreditRequestGuarantee {
       this.creditCards,this.rent,this.creditAutomotive,this.creditFurniture,this.personalLoans,
       this.verifiableIncome, this.soCustomer,this.identification,this.proofIncome,
       this.fiscalSituation,this.verifiableIncomeFile,this.declaratory, this.identificationBack,
-      this.identityVideo, this.proofAddress);
+      this.identityVideo, this.proofAddress, this.creditBureau);
 
   factory SoCreditRequestGuarantee.fromJson(Map<String, dynamic> json){
     return SoCreditRequestGuarantee(
@@ -186,6 +188,7 @@ class SoCreditRequestGuarantee {
       json['identificationBack'] as String,
       json['identityVideo'] as String,
       json['proofAddress'] as String,
+      json['creditBureau'] as int,
     );
   }
 
@@ -222,6 +225,8 @@ class SoCreditRequestGuarantee {
       'identificationBack' : identificationBack,
       'identityVideo' : identityVideo,
       'proofAddress' : proofAddress,
+      'creditBureau' : creditBureau,
+      'sendMailBureau' : sendMailBureau,
     };
   }
 }

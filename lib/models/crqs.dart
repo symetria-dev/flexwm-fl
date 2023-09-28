@@ -24,6 +24,7 @@ class SoCreditRequest {
   int disbursements = 0;
   int guarantees = 0;
   double disbursementAmount = 0.0;
+  double rate = 0.0;
 
   static String STATUS_EDITION = 'E';
   static String STATUS_REVISION = 'R';
@@ -114,7 +115,8 @@ class SoCreditRequest {
       this.deadlineRequired,this.monthlyPayment,this.currencyId,this.creditTypeId,
       this.creditProfileId, this.code, this.status,
       this.wFlowId, this.fiscalRegime, this.creditBureau, this.soWFlow, this.starDate,
-      this.periodType, this.periods, this.disbursements, this.guarantees, this.disbursementAmount);
+      this.periodType, this.periods, this.disbursements, this.guarantees, this.disbursementAmount,
+      this.rate);
 
   factory SoCreditRequest.fromJson(Map<String, dynamic> json) {
     return SoCreditRequest(
@@ -146,6 +148,7 @@ class SoCreditRequest {
       json['disbursements'] as int,
       json['guarantees'] as int,
       json['disbursementAmount'] as double,
+      json['rate'] as double,
     );
   }
 
@@ -172,6 +175,7 @@ class SoCreditRequest {
       'disbursements' : disbursements,
       'guarantees' : guarantees,
       'disbursementAmount' : disbursementAmount,
+      'rate' : rate,
     };
   }
 

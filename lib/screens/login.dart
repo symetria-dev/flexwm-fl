@@ -35,7 +35,7 @@ class LoginFormState extends State<LoginForm> {
   bool sendingData = false;
 
   @override
-  void initState(){
+  void initState() {
     // Primero libera la sesion existente
     doLogout();
     // Asigna datos previos de persistencia
@@ -58,16 +58,17 @@ class LoginFormState extends State<LoginForm> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 250,),
-
+              const SizedBox(
+                height: 250,
+              ),
               CardContainer(
                 child: Column(
-
                   // mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox( height: 10 ),
-                    const Text('Inicio de Sesión', style: TextStyle(color: Colors.grey, fontSize: 20)),
-                    const SizedBox( height: 20 ),
+                    const SizedBox(height: 10),
+                    const Text('Inicio de Sesión',
+                        style: TextStyle(color: Colors.grey, fontSize: 20)),
+                    const SizedBox(height: 20),
 /*                Flexible(
                       child:Image.asset('images/logo.png'),
                     ),*/
@@ -92,7 +93,7 @@ class LoginFormState extends State<LoginForm> {
       key: _formKey,
       child: Column(
         children: <Widget>[
-         /* TextFormField(
+          /* TextFormField(
             //initialValue: soWFlowStep.name,
             // The validator receives the text that the user has entered.
             validator: (value) {
@@ -138,8 +139,7 @@ class LoginFormState extends State<LoginForm> {
             obscureText: true,
             controller: passwordController,
           ),
-          if(sendingData)
-            const LinearProgressIndicator(),
+          if (sendingData) const LinearProgressIndicator(),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: ElevatedButton(
@@ -154,7 +154,8 @@ class LoginFormState extends State<LoginForm> {
                   doLogin();
                 }
               },
-              child: const Text('Ingresar',
+              child: const Text(
+                'Ingresar',
                 style: TextStyle(
                   fontSize: 18,
                   color: Colors.white,
@@ -162,37 +163,37 @@ class LoginFormState extends State<LoginForm> {
               ),
             ),
           ),
-           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                      text: 'Nuevo Registro | ',
-                      style: const TextStyle(color: Colors.blue,fontSize: 16),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const NewCustForm())
-                          );
-                        }
-                  ),
-                  TextSpan(
-                      text: 'Olvide mi Password',
-                      style: const TextStyle(color: Colors.blue,fontSize: 16),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const ResetPassword())
-                          );
-                        }
-                  )
-                ],
-              ),
-            )
-          )
+          Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                        text: 'Nuevo Registro | ',
+                        style:
+                            const TextStyle(color: Colors.blue, fontSize: 16),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const NewCustForm()));
+                          }),
+                    TextSpan(
+                        text: 'Olvide mi Password',
+                        style:
+                            const TextStyle(color: Colors.blue, fontSize: 16),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ResetPassword()));
+                          })
+                  ],
+                ),
+              ))
         ],
       ),
     );
@@ -202,9 +203,11 @@ class LoginFormState extends State<LoginForm> {
   void doLogout() async {
     // Si hay sesion abierta
     if (params.instance != '') {
-      await http.Client().get(Uri.parse(
-          params.getAppUrl(params.instance) + 'restlogout;' +
-              params.jSessionIdQuery + '=' + params.jSessionId));
+      await http.Client().get(Uri.parse(params.getAppUrl(params.instance) +
+          'restlogout;' +
+          params.jSessionIdQuery +
+          '=' +
+          params.jSessionId));
     }
   }
 
@@ -230,7 +233,6 @@ class LoginFormState extends State<LoginForm> {
       Navigator.pushReplacementNamed(context, '/crqs_list');
       //setState(() {sendingData = false;});
     } else {
-
       print(response.body.toString());
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -238,7 +240,9 @@ class LoginFormState extends State<LoginForm> {
       );
 
       passwordController.text = '';
-      setState(() {sendingData = false;});
+      setState(() {
+        sendingData = false;
+      });
       // If the server did not return a 201 CREATED response,
       // then throw an exception.
       throw Exception('Error de Login: ' + response.statusCode.toString());
@@ -252,7 +256,7 @@ class LoginFormState extends State<LoginForm> {
     String instance = prefs.getString('instance') ?? '';
     String email = prefs.getString('email') ?? '';
 
-   /* if (instance != '') {
+    /* if (instance != '') {
       instanceController.text = instance;
     } else {
       instanceController.text = '_flexwm-js';

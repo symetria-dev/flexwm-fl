@@ -3,6 +3,7 @@
 // No puede ser utilizado, distribuido, copiado sin autorizacion expresa por escrito.
 
 library flexwm.params;
+
 import 'package:flutter/material.dart';
 
 // Constantes
@@ -28,9 +29,9 @@ const Color bgColor = Colors.white;
 const Color appBarBgColor = Colors.white;
 
 // Variables de login
-// String instance = '-edupass';
-String instance = '_flexwm-js';
-// String instance = '-demo';
+String instance = '-edupass';
+// String instance = '_flexwm-js';
+//String instance = '-demo';
 bool isLoggedIn = false;
 String email = '';
 String firstname = '';
@@ -41,7 +42,7 @@ bool loggedCust = false;
 int idLoggedUser = -1;
 
 // Obtiene el id del usuario loggeado
-int getIdLoggedUser(){
+int getIdLoggedUser() {
   return idLoggedUser;
 }
 
@@ -56,24 +57,23 @@ List<Color> theme = [
 // Obtiene el servidor a utilizar
 String getAppUrl(String instance) {
   //Revisa que el parametro de instancia no este vacio
-  if(instance != ""){
+  if (instance != "") {
     // Revisa si tiene prefijo para ambiente desarrollo
     if (instance[0] == '_') {
       String cleanInstance = instance.substring(1, instance.length);
       // return 'http://localhost:8080/' + cleanInstance + '/';
-      return 'http://192.168.100.6:8080/' + cleanInstance + '/';
+      return 'http://192.168.100.22:8080/' + cleanInstance + '/';
     } else if (instance[0] == "-") {
       String cleanInstance = instance.substring(1, instance.length);
       return 'https://sb.flexwm.com/' + cleanInstance + '/';
     } else {
       return 'https://apps.flexwm.com/' + instance + '/';
     }
-  }else{
+  } else {
     //TODO configurar de maneria dinamica instancia default
     //Si se encuentra vacio le seteamos la de local para pruebas
     return 'http://192.168.100.22:8080/flexwm-js/';
   }
-
 }
 
 // Icono segun app
@@ -88,7 +88,7 @@ Icon getProperIcon(String wFlowCallerCode) {
     return const Icon(Icons.request_page_outlined, color: Colors.green);
   } else if (wFlowCallerCode == 'CUST') {
     return const Icon(Icons.group, color: Colors.green);
-  }else {
+  } else {
     return const Icon(Icons.task, color: Colors.blueAccent);
   }
 }

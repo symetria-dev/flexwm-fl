@@ -14,7 +14,9 @@ import '../models/cust.dart';
 class CreditRequestGuarantee extends StatefulWidget {
   final int forceFilter;
   final bool requiredAsset;
-  const CreditRequestGuarantee({Key? key, required this.forceFilter, required this.requiredAsset})
+  final int whoProccess;
+  const CreditRequestGuarantee({Key? key, required this.forceFilter,
+    required this.requiredAsset, required this.whoProccess})
       : super(key: key);
 
   @override
@@ -105,6 +107,7 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
             _creditRequestGuarantee[index].identificationBack,
             _creditRequestGuarantee[index].identityVideo,
             _creditRequestGuarantee[index].proofAddress,
+            _creditRequestGuarantee[index].creditBureau,
           );
           return Slidable(
             endActionPane:
@@ -139,7 +142,8 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
                           builder: (_) => CreditRequestGuarateeForm2(
                               soCreditRequestGuarantee: nextSoCreditRequest,
                               creditRequestId: idCreditRequest, requiredAsset: requiredAsset,
-                            requiredAcredited: false,),
+                            requiredAcredited: false,
+                            whoProccess: widget.whoProccess,),
                         )).then((value) => setState((){
                           if(widget.requiredAsset){
                             fetchSoCreditRequestAssets(idCreditRequest).then((value) {
@@ -189,7 +193,8 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
                                     CreditRequestGuarateeForm2(
                                         soCreditRequestGuarantee: SoCreditRequestGuarantee.empty(),
                                         creditRequestId: idCreditRequest, requiredAsset: requiredAsset,
-                                      requiredAcredited: false,),
+                                      requiredAcredited: false,
+                                      whoProccess: widget.whoProccess,),
                                   )
                                 ).then((value) => setState((){
                                   if(widget.requiredAsset){
@@ -234,7 +239,8 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
               builder: (_) => CreditRequestGuarateeForm2(
                   soCreditRequestGuarantee: SoCreditRequestGuarantee.empty(),
                   creditRequestId: idCreditRequest, requiredAsset: requiredAsset,
-                requiredAcredited: false,),
+                requiredAcredited: false,
+                whoProccess: widget.whoProccess,),
             )).then((value) {
               _creditRequestGuarantee.clear();
               _soCustomerList.clear();

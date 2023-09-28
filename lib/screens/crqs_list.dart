@@ -10,6 +10,7 @@ import 'package:flexwm/screens/cust_crqs_form.dart';
 import 'package:flexwm/ui/appbar_flexwm.dart';
 import 'package:flexwm/widgets/auth_formbackground.dart';
 import 'package:flexwm/widgets/auth_listbackground.dart';
+import 'package:flexwm/widgets/card_stepcontainer.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -145,18 +146,18 @@ class _CreditRequestList extends State<CreditRequestList> {
                 if (snapshot.hasData) {
                   _soCreditRequest = snapshot.data!;
                   return (_soCreditRequest.isEmpty)
-                      ? noListWidget()
-                      : (list)
-                          ? getList(_soCreditRequest)
-                          : getListWidget(_soCreditRequest);
+                  ? noListWidget()
+                  : (list)
+                  ? getList(_soCreditRequest)
+                  : getListWidget(_soCreditRequest);
                 } else if (snapshot.hasError) {
-                  // Hay errores los muestra
-                  return Text('${snapshot.error}');
+                // Hay errores los muestra
+                return Text('${snapshot.error}');
                 } else {
-                  // Muestra icono avance
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                // Muestra icono avance
+                return const Center(
+                child: CircularProgressIndicator(),
+                );
                 }
               },
             ),
@@ -225,11 +226,11 @@ class _CreditRequestList extends State<CreditRequestList> {
     AlertDialog alert = AlertDialog(
       title:
           const Text("Si tienes dudas del proceso, por favor contáctanos al:"),
-      content: Column(
+      content: const Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
-            children: const [
+            children: [
               Icon(
                 Icons.mail,
                 color: Colors.blueGrey,
@@ -244,7 +245,7 @@ class _CreditRequestList extends State<CreditRequestList> {
             ],
           ),
           Row(
-            children: const [
+            children: [
               Icon(
                 Icons.phone,
                 color: Colors.blueGrey,
@@ -274,96 +275,106 @@ class _CreditRequestList extends State<CreditRequestList> {
   }
 
   Widget noListWidget() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 70, bottom: 0.8, left: 5, right: 5),
-      child: Card(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        elevation: 10,
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 70, bottom: 0.8, left: 5, right: 5),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-                  gradient: LinearGradient(
-                      begin: AlignmentDirectional.topEnd,
-                      end: AlignmentDirectional.bottomEnd,
-                      colors: [
-                        // Color.fromRGBO(0, 130, 146, 1),
-                        Color.fromRGBO(225, 158, 110, 1),
-                        Color.fromRGBO(243, 129, 48, 1),
-                        // Color.fromRGBO(21, 67, 96, 1),
-                        // Color.fromRGBO(171, 178, 185, 1)
-                        // Color.fromRGBO(112, 169, 179, 1.0)
-                      ])),
-              child: SizedBox(
-                height: 140,
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                        child: Image.asset(
-                      'images/logoEduPass.png',
-                      fit: BoxFit.fitWidth,
-                      color: Colors.white,
-                    )),
-                    const Positioned(
-                        bottom: 6,
-                        left: 16,
-                        right: 16,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'La mejor garantía para pedir un crédito educativo.',
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ))
-                  ],
-                ),
-              ),
-            ),
-            ListTile(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => CrqsForm(
-                          creditRequest: SoCreditRequest.empty(),
-                          creditRequestDetail: SoCreditRequestDetail.empty(),
-                        )),
-              ).then((value) => setState(() {
-                    _futureSoCreditRequests = fetchSoCreditRequests();
-                  })),
-              leading: IconButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => CrqsForm(
-                            creditRequest: SoCreditRequest.empty(),
-                            creditRequestDetail: SoCreditRequestDetail.empty(),
+            Card(
+              color: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              elevation: 10,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+                        gradient: LinearGradient(
+                            begin: AlignmentDirectional.topEnd,
+                            end: AlignmentDirectional.bottomEnd,
+                            colors: [
+                              // Color.fromRGBO(0, 130, 146, 1),
+                              Color.fromRGBO(225, 158, 110, 1),
+                              Color.fromRGBO(243, 129, 48, 1),
+                              // Color.fromRGBO(21, 67, 96, 1),
+                              // Color.fromRGBO(171, 178, 185, 1)
+                              // Color.fromRGBO(112, 169, 179, 1.0)
+                            ])),
+                    child: SizedBox(
+                      height: 140,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                              child: Image.asset(
+                            'images/logoEduPass.png',
+                            fit: BoxFit.fitWidth,
+                            color: Colors.white,
                           )),
-                ).then((value) => setState(() {
-                      _futureSoCreditRequests = fetchSoCreditRequests();
-                    })),
-                icon: const Icon(
-                  Icons.monetization_on_outlined,
-                  color: Colors.teal,
-                ),
-              ),
-              title: const Text('Solicitar nuevo crédito'),
-              subtitle: const Text(
-                  'Haz clic aquí para solicitar un crédito con la garantía de Edupass'),
-              trailing: const Icon(
-                Icons.add_circle_outline,
-                color: Colors.green,
+                          const Positioned(
+                              bottom: 6,
+                              left: 16,
+                              right: 16,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'La mejor garantía para pedir un crédito educativo.',
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ))
+                        ],
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => CrqsForm(
+                                creditRequest: SoCreditRequest.empty(),
+                                creditRequestDetail: SoCreditRequestDetail.empty(),
+                              )),
+                    ).then((value) => setState(() {
+                          _futureSoCreditRequests = fetchSoCreditRequests();
+                        })),
+                    leading: IconButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => CrqsForm(
+                                  creditRequest: SoCreditRequest.empty(),
+                                  creditRequestDetail: SoCreditRequestDetail.empty(),
+                                )),
+                      ).then((value) => setState(() {
+                            _futureSoCreditRequests = fetchSoCreditRequests();
+                          })),
+                      icon: const Icon(
+                        Icons.monetization_on_outlined,
+                        color: Colors.teal,
+                      ),
+                    ),
+                    title: const Text('Solicitar nuevo crédito'),
+                    subtitle: const Text(
+                        'Haz clic aquí para solicitar un crédito con la garantía de Edupass'),
+                    trailing: const Icon(
+                      Icons.add_circle_outline,
+                      color: Colors.green,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                ],
               ),
             ),
             const SizedBox(
-              height: 10,
-            )
+              height: 40,
+            ),
+            _renderExpanded(),
           ],
         ),
       ),
@@ -372,177 +383,184 @@ class _CreditRequestList extends State<CreditRequestList> {
 
   // Obtiene el listado con formato
   Widget getListWidget(List<SoCreditRequest> soWFlowStepList) {
+    int indexx = -1;
     return ListView.builder(
       itemCount: soWFlowStepList.length,
       itemBuilder: (context, index) {
         final item = soWFlowStepList[index];
         return Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Card(
-            color: Colors.white,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            elevation: 10,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(15)),
-                      gradient: LinearGradient(
-                          begin: AlignmentDirectional.topEnd,
-                          end: AlignmentDirectional.bottomEnd,
-                          colors: [
-                            // Color.fromRGBO(0, 130, 146, 1),
-                            Color.fromRGBO(225, 158, 110, 1),
-                            Color.fromRGBO(243, 129, 48, 1),
-                            // Color.fromRGBO(21, 67, 96, 1),
-                            // Color.fromRGBO(171, 178, 185, 1)
-                            // Color.fromRGBO(112, 169, 179, 1.0)
-                          ])),
-                  child: SizedBox(
-                    height: 140,
-                    child: Stack(
-                      children: [
-                        Positioned.fill(
-                            child: Image.asset(
-                          'images/logoEduPass.png',
-                          fit: BoxFit.fitWidth,
-                          color: Colors.white,
-                        )),
-                        Positioned(
-                            bottom: 6,
-                            left: 16,
-                            right: 16,
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Crédito Educativo - ${item.code}',
-                                style: const TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ))
-                      ],
-                    ),
-                  ),
-                ),
-                ListTile(
-                  onTap: () {
-                    fetchCreditRequestDetail(item.id.toString()).then((value) {
-                      if (value) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => CrqsForm(
-                                    creditRequest: item,
-                                    creditRequestDetail: soCreditRequestDetail,
-                                  )),
-                        ).then((value) => setState(() {
-                              _futureSoCreditRequests = fetchSoCreditRequests();
-                            }));
-                      } else {
-                        Fluttertoast.showToast(
-                            msg:
-                                'Error al obtener información, intentelo más tarde');
-                      }
-                    });
-                  },
-                  leading: IconButton(
-                    //onPressed: () {Navigator.pushNamed(context, '/wflowstep', arguments: {'id': item.id});},
-                    onPressed: () {
-                      fetchCreditRequestDetail(item.id.toString())
-                          .then((value) {
-                        if (value) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => CrqsForm(
-                                      creditRequest: item,
-                                      creditRequestDetail:
-                                          soCreditRequestDetail,
-                                    )),
-                          ).then((value) => setState(() {
-                                _futureSoCreditRequests =
-                                    fetchSoCreditRequests();
-                              }));
-                        } else {
-                          Fluttertoast.showToast(
-                              msg:
-                                  'Error al obrtener información, intentelo más tarde');
-                        }
-                      });
-                    },
-                    icon: const Icon(
-                      Icons.account_balance_wallet_outlined,
-                      color: Colors.teal,
-                    ),
-                  ),
-                  title: Text(
-                      'Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Monto financiado: ' +
-                          NumberFormat.currency(locale: 'es_MX', symbol: '\$')
-                              .format(item.amountRequired)),
-                      // Text('Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
-                    ],
-                  ),
-                  // trailing: const Icon(Icons.monetization_on_outlined, color: Colors.indigo,),
-                  trailing: CircularPercentIndicator(
-                    radius: 28.0,
-                    lineWidth: 10.0,
-                    animation: true,
-                    percent: (item.status == SoCreditRequest.STATUS_EDITION)
-                        ? 0.35
-                        : (item.status == SoCreditRequest.STATUS_REVISION)
-                            ? 0.70
-                            : (item.status == SoCreditRequest.STATUS_AUTHORIZED)
-                                ? 1.0
-                                : 0.0,
-                    center: (item.status == SoCreditRequest.STATUS_EDITION)
-                        ? const Text('35%')
-                        : (item.status == SoCreditRequest.STATUS_REVISION)
-                            ? const Text('70%')
-                            : (item.status == SoCreditRequest.STATUS_AUTHORIZED)
-                                ? const Text('100%')
-                                : const Icon(Icons.cancel_outlined),
-                    progressColor: Colors.blue,
-                    circularStrokeCap: CircularStrokeCap.round,
-                  ),
-                  /*PopupMenuButton(
-                    icon: const Icon(Icons.more_vert, color: Colors.indigo),
-                    itemBuilder: (_){
-                      return [
-                        const PopupMenuItem(
-                            value: 'sponsors',
-                            child: Text("Ver Sponsors")
-                        )
-                      ];
-                    },
-                    onSelected: (String value) => Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => CreditRequestGuaranteeList(soCreditRequest: item))
-                    ),
-                  ),*/
-                ),
-                const SizedBox(
-                  height: 10,
-                )
-                /*ButtonBar(
-                  alignment: MainAxisAlignment.end,
+          child: Column(
+            children: [
+              Card(
+                color: Colors.white,
+                shape:
+                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                elevation: 10,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextButton(
-                        onPressed: (){},
-                        child: const Text('Ver más')
+                    Container(
+                      decoration: const BoxDecoration(
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(15)),
+                          gradient: LinearGradient(
+                              begin: AlignmentDirectional.topEnd,
+                              end: AlignmentDirectional.bottomEnd,
+                              colors: [
+                                // Color.fromRGBO(0, 130, 146, 1),
+                                Color.fromRGBO(225, 158, 110, 1),
+                                Color.fromRGBO(243, 129, 48, 1),
+                                // Color.fromRGBO(21, 67, 96, 1),
+                                // Color.fromRGBO(171, 178, 185, 1)
+                                // Color.fromRGBO(112, 169, 179, 1.0)
+                              ])),
+                      child: SizedBox(
+                        height: 140,
+                        child: Stack(
+                          children: [
+                            Positioned.fill(
+                                child: Image.asset(
+                              'images/logoEduPass.png',
+                              fit: BoxFit.fitWidth,
+                              color: Colors.white,
+                            )),
+                            Positioned(
+                                bottom: 6,
+                                left: 16,
+                                right: 16,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Crédito Educativo - ${item.code}',
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ))
+                          ],
+                        ),
+                      ),
+                    ),
+                    ListTile(
+                      onTap: () {
+                        fetchCreditRequestDetail(item.id.toString()).then((value) {
+                          if (value) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => CrqsForm(
+                                        creditRequest: item,
+                                        creditRequestDetail: soCreditRequestDetail,
+                                      )),
+                            ).then((value) => setState(() {
+                                  _futureSoCreditRequests = fetchSoCreditRequests();
+                                }));
+                          } else {
+                            Fluttertoast.showToast(
+                                msg:
+                                    'Error al obtener información, intentelo más tarde');
+                          }
+                        });
+                      },
+                      leading: IconButton(
+                        //onPressed: () {Navigator.pushNamed(context, '/wflowstep', arguments: {'id': item.id});},
+                        onPressed: () {
+                          fetchCreditRequestDetail(item.id.toString())
+                              .then((value) {
+                            if (value) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => CrqsForm(
+                                          creditRequest: item,
+                                          creditRequestDetail:
+                                              soCreditRequestDetail,
+                                        )),
+                              ).then((value) => setState(() {
+                                    _futureSoCreditRequests =
+                                        fetchSoCreditRequests();
+                                  }));
+                            } else {
+                              Fluttertoast.showToast(
+                                  msg:
+                                      'Error al obrtener información, intentelo más tarde');
+                            }
+                          });
+                        },
+                        icon: const Icon(
+                          Icons.account_balance_wallet_outlined,
+                          color: Colors.teal,
+                        ),
+                      ),
+                      title: Text(
+                          'Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Monto financiado: ' +
+                              NumberFormat.currency(locale: 'es_MX', symbol: '\$')
+                                  .format(item.amountRequired)),
+                          // Text('Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
+                        ],
+                      ),
+                      // trailing: const Icon(Icons.monetization_on_outlined, color: Colors.indigo,),
+                      trailing: CircularPercentIndicator(
+                        radius: 28.0,
+                        lineWidth: 10.0,
+                        animation: true,
+                        percent: (item.status == SoCreditRequest.STATUS_EDITION)
+                            ? 0.35
+                            : (item.status == SoCreditRequest.STATUS_REVISION)
+                                ? 0.70
+                                : (item.status == SoCreditRequest.STATUS_AUTHORIZED)
+                                    ? 1.0
+                                    : 0.0,
+                        center: (item.status == SoCreditRequest.STATUS_EDITION)
+                            ? const Text('35%')
+                            : (item.status == SoCreditRequest.STATUS_REVISION)
+                                ? const Text('70%')
+                                : (item.status == SoCreditRequest.STATUS_AUTHORIZED)
+                                    ? const Text('100%')
+                                    : const Icon(Icons.cancel_outlined),
+                        progressColor: Colors.blue,
+                        circularStrokeCap: CircularStrokeCap.round,
+                      ),
+                      /*PopupMenuButton(
+                        icon: const Icon(Icons.more_vert, color: Colors.indigo),
+                        itemBuilder: (_){
+                          return [
+                            const PopupMenuItem(
+                                value: 'sponsors',
+                                child: Text("Ver Sponsors")
+                            )
+                          ];
+                        },
+                        onSelected: (String value) => Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => CreditRequestGuaranteeList(soCreditRequest: item))
+                        ),
+                      ),*/
+                    ),
+                    const SizedBox(
+                      height: 10,
                     )
+                    /*ButtonBar(
+                      alignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                            onPressed: (){},
+                            child: const Text('Ver más')
+                        )
+                      ],
+                    )*/
                   ],
-                )*/
-              ],
-            ),
+                ),
+              ),
+              const SizedBox(height: 50,),
+              _renderExpanded(),
+            ],
           ),
         );
       },
@@ -551,135 +569,327 @@ class _CreditRequestList extends State<CreditRequestList> {
 
   // Obtiene el listado con formato
   Widget getList(List<SoCreditRequest> soWFlowStepList) {
+    int indexx = -1;
     return ListView.builder(
       itemCount: soWFlowStepList.length,
       itemBuilder: (context, index) {
         final item = soWFlowStepList[index];
         return Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Card(
-            color: Colors.white,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            elevation: 10,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  onTap: () {
-                    fetchCreditRequestDetail(item.id.toString()).then((value) {
-                      if (value) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => CrqsForm(
-                                creditRequest: item,
-                                creditRequestDetail: soCreditRequestDetail,
-                              )),
-                        ).then((value) => setState(() {
-                          _futureSoCreditRequests = fetchSoCreditRequests();
-                        }));
-                      } else {
-                        Fluttertoast.showToast(
-                            msg:
-                            'Error al obrtener información, intentelo más tarde');
-                      }
-                    });
-                  },
-                  leading: IconButton(
-                    //onPressed: () {Navigator.pushNamed(context, '/wflowstep', arguments: {'id': item.id});},
-                    onPressed: () {
-                      fetchCreditRequestDetail(item.id.toString()).then((value) {
-                        if (value) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => CrqsForm(
-                                  creditRequest: item,
-                                  creditRequestDetail: soCreditRequestDetail,
-                                )),
-                          ).then((value) => setState(() {
-                            _futureSoCreditRequests = fetchSoCreditRequests();
-                          }));
-                        } else {
-                          Fluttertoast.showToast(
-                              msg:
-                              'Error al obrtener información, intentelo más tarde');
-                        }
-                      });
-                    },
-                    icon: const Icon(
-                      Icons.account_balance_wallet_outlined,
-                      color: Colors.teal,
-                    ),
-                  ),
-                  title: Text(
-                      'Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Monto financiado: ' +
-                          NumberFormat.currency(locale: 'es_MX', symbol: '\$')
-                              .format(item.amountRequired)),
-                      // Text('Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
-                    ],
-                  ),
-                  // trailing: const Icon(Icons.monetization_on_outlined, color: Colors.indigo,),
-                  trailing: CircularPercentIndicator(
-                    radius: 28.0,
-                    lineWidth: 10.0,
-                    animation: true,
-                    percent: (item.status == SoCreditRequest.STATUS_EDITION)
-                        ? 0.35
-                        : (item.status == SoCreditRequest.STATUS_REVISION)
-                            ? 0.70
-                            : (item.status == SoCreditRequest.STATUS_AUTHORIZED)
-                                ? 1.0
-                                : 0.0,
-                    center: (item.status == SoCreditRequest.STATUS_EDITION)
-                        ? const Text('35%')
-                        : (item.status == SoCreditRequest.STATUS_REVISION)
-                            ? const Text('70%')
-                            : (item.status == SoCreditRequest.STATUS_AUTHORIZED)
-                                ? const Text('100%')
-                                : const Icon(Icons.cancel_outlined),
-                    progressColor: Colors.blue,
-                    circularStrokeCap: CircularStrokeCap.round,
-                  ),
-                  /*PopupMenuButton(
-                    icon: const Icon(Icons.more_vert, color: Colors.indigo),
-                    itemBuilder: (_){
-                      return [
-                        const PopupMenuItem(
-                            value: 'sponsors',
-                            child: Text("Ver Sponsors")
-                        )
-                      ];
-                    },
-                    onSelected: (String value) => Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => CreditRequestGuaranteeList(soCreditRequest: item))
-                    ),
-                  ),*/
-                ),
-                const SizedBox(
-                  height: 10,
-                )
-                /*ButtonBar(
-                  alignment: MainAxisAlignment.end,
+          child: Column(
+            children: [
+              Card(
+                color: Colors.white,
+                shape:
+                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                elevation: 10,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextButton(
-                        onPressed: (){},
-                        child: const Text('Ver más')
-                    )
+                    ListTile(
+                      onTap: () {
+                        fetchCreditRequestDetail(item.id.toString()).then((value) {
+                          if (value) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => CrqsForm(
+                                    creditRequest: item,
+                                    creditRequestDetail: soCreditRequestDetail,
+                                  )),
+                            ).then((value) => setState(() {
+                              _futureSoCreditRequests = fetchSoCreditRequests();
+                            }));
+                          } else {
+                            Fluttertoast.showToast(
+                                msg:
+                                'Error al obrtener información, intentelo más tarde');
+                          }
+                        });
+                      },
+                      leading: IconButton(
+                        //onPressed: () {Navigator.pushNamed(context, '/wflowstep', arguments: {'id': item.id});},
+                        onPressed: () {
+                          fetchCreditRequestDetail(item.id.toString()).then((value) {
+                            if (value) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => CrqsForm(
+                                      creditRequest: item,
+                                      creditRequestDetail: soCreditRequestDetail,
+                                    )),
+                              ).then((value) => setState(() {
+                                _futureSoCreditRequests = fetchSoCreditRequests();
+                              }));
+                            } else {
+                              Fluttertoast.showToast(
+                                  msg:
+                                  'Error al obrtener información, intentelo más tarde');
+                            }
+                          });
+                        },
+                        icon: const Icon(
+                          Icons.account_balance_wallet_outlined,
+                          color: Colors.teal,
+                        ),
+                      ),
+                      title: Text(
+                          'Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Monto financiado: ' +
+                              NumberFormat.currency(locale: 'es_MX', symbol: '\$')
+                                  .format(item.amountRequired)),
+                          // Text('Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
+                        ],
+                      ),
+                      // trailing: const Icon(Icons.monetization_on_outlined, color: Colors.indigo,),
+                      trailing: CircularPercentIndicator(
+                        radius: 28.0,
+                        lineWidth: 10.0,
+                        animation: true,
+                        percent: (item.status == SoCreditRequest.STATUS_EDITION)
+                            ? 0.35
+                            : (item.status == SoCreditRequest.STATUS_REVISION)
+                                ? 0.70
+                                : (item.status == SoCreditRequest.STATUS_AUTHORIZED)
+                                    ? 1.0
+                                    : 0.0,
+                        center: (item.status == SoCreditRequest.STATUS_EDITION)
+                            ? const Text('35%')
+                            : (item.status == SoCreditRequest.STATUS_REVISION)
+                                ? const Text('70%')
+                                : (item.status == SoCreditRequest.STATUS_AUTHORIZED)
+                                    ? const Text('100%')
+                                    : const Icon(Icons.cancel_outlined),
+                        progressColor: Colors.blue,
+                        circularStrokeCap: CircularStrokeCap.round,
+                      ),
+                      /*PopupMenuButton(
+                        icon: const Icon(Icons.more_vert, color: Colors.indigo),
+                        itemBuilder: (_){
+                          return [
+                            const PopupMenuItem(
+                                value: 'sponsors',
+                                child: Text("Ver Sponsors")
+                            )
+                          ];
+                        },
+                        onSelected: (String value) => Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => CreditRequestGuaranteeList(soCreditRequest: item))
+                        ),
+                      ),*/
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    /*ButtonBar(
+                      alignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                            onPressed: (){},
+                            child: const Text('Ver más')
+                        )
+                      ],
+                    )*/
                   ],
-                )*/
-              ],
-            ),
+                ),
+              ),
+              const SizedBox(height: 50,),
+              _renderExpanded(),
+            ],
           ),
         );
       },
     );
   }
+
+  Widget _renderExpanded() {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: CardStepContainer(
+        child: Column(
+          children: [
+            const Row(
+            children: [
+                Text(
+                  "Requisitos mínimos.",
+                  style: TextStyle(color: Colors.grey, fontSize: 15),
+                ),
+              ],
+            ),
+            ListTile(
+              onTap: () {
+                print('onTap');
+              },
+              /*leading: IconButton(
+                //onPressed: () {Navigator.pushNamed(context, '/wflowstep', arguments: {'id': item.id});},
+                onPressed: () {
+                  print('icoButtonn pressed');
+                },
+                icon: const Icon(
+                  Icons.account_balance_wallet_outlined,
+                  color: Colors.teal,
+                ),
+              ),*/
+              title: const Text(
+                  '1. Edad: 21 a 69 años'),
+             /* subtitle: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Monto financiado: jeje'),
+                  // Text('Estatus: ${SoCreditRequest.getStatusText(item.status)}'),
+                ],
+              ),*/
+              // trailing: const Icon(Icons.monetization_on_outlined, color: Colors.indigo,),
+              trailing: PopupMenuButton(
+                icon: const Icon(Icons.help_outline, color: Colors.teal),
+                itemBuilder: (_){
+                  return [
+                    const PopupMenuItem(
+                        value: 'sponsors',
+                        child: Text("Ser estudiante, tutor o familiar directo* del estudiante.\n*Abuelos, hijos, hermanos.")
+                    )
+                  ];
+                },
+                onSelected: (String value) {
+                  print('popUp');
+                },
+              ),
+            ),
+            ListTile(
+              onTap: () {
+                print('onTap');
+              },
+              title: const Text(
+                  '2. Identificación oficial'),
+              trailing: PopupMenuButton(
+                icon: const Icon(Icons.help_outline, color: Colors.teal),
+                itemBuilder: (_){
+                  return [
+                    const PopupMenuItem(
+                        value: 'sponsors',
+                        child: Text("Identificación oficial.\nVigente: INE o Pasaporte o FM2 (Extranjeros).")
+                    )
+                  ];
+                },
+                onSelected: (String value) {
+                  print('popUp');
+                },
+              ),
+            ),ListTile(
+              onTap: () {
+                print('onTap');
+              },
+              title: const Text(
+                  '3. Comprobante de domicilio'),
+              trailing: PopupMenuButton(
+                icon: const Icon(Icons.help_outline, color: Colors.teal),
+                itemBuilder: (_){
+                  return [
+                    const PopupMenuItem(
+                        value: 'sponsors',
+                        child: Text("Comprobante de domicilio.\nRecibo de teléfono, luz, agua, predial  (Antigüedad menor a tres meses).")
+                    )
+                  ];
+                },
+                onSelected: (String value) {
+                  print('popUp');
+                },
+              ),
+            ),ListTile(
+              onTap: () {
+                print('onTap');
+              },
+              title: const Text(
+                  '4. Historial crediticio positivo'),
+            ),ListTile(
+              onTap: () {
+                print('onTap');
+              },
+              title: const Text(
+                  '5. Comprobación de ingresos'),
+              trailing: PopupMenuButton(
+                icon: const Icon(Icons.help_outline, color: Colors.teal),
+                itemBuilder: (_){
+                  return [
+                     const PopupMenuItem(
+                        value: 'sponsors',
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text("Percepción de ingresos en la economía formal."),
+                                ),
+                              ],
+                            ),
+                            ListTile(
+                              title: Text(
+                                  '1. Ingresos declarados en el SAT:',
+                                    style: TextStyle(color: Colors.grey, fontSize: 15)),
+                            ),
+                            ListTile(
+                              title: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+                                child: Text(
+                                    '6 últimos meses de Estados de cuenta bancarios completos (con todas sus hojas).',
+                                    style: TextStyle(color: Colors.grey, fontSize: 15)),
+                              ),
+                            ),
+                            ListTile(
+                              title: Text(
+                                  "2. Ingresos asalariados:",
+                                  style: TextStyle(color: Colors.grey, fontSize: 15)),
+                            ),
+                            ListTile(
+                              title: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+                                child: Text(
+                                    'Estados de cuenta bancarios completos (con todas sus hojas) y/o recibos de nómina con CFDI de los 3 últimos meses.',
+                                    style: TextStyle(color: Colors.grey, fontSize: 15)),
+                              ),
+                            ),
+                            ListTile(
+                              title: Text(
+                                  "3. Constancia de Situación Fiscal y N° serie fiel. (Persona Física con Actividad Empresarial)",
+                                  style: TextStyle(color: Colors.grey, fontSize: 15)),
+                            ),
+                            ListTile(
+                              title: Text(
+                                  "4. Antigüedad laboral:",
+                                  style: TextStyle(color: Colors.grey, fontSize: 15)),
+                            ),
+                            ListTile(
+                              title: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+                                child: Text(
+                                    'Mínimo 1 año para personas asalariadas.\nMínimo 3 años para personas físicas con actividad empresarial.',
+                                    style: TextStyle(color: Colors.grey, fontSize: 15)),
+                              ),
+                            ),
+                          ],
+                        )
+                    )
+                  ];
+                },
+                onSelected: (String value) {
+                  print('popUp');
+                },
+              ),
+            ),
+            const SizedBox(height: 30,),
+            const Text("Para identificar la autenticidad de los datos en esta solicitud, Edupass podrá solicitar información "
+                "y/o documentación adicional. Esta aplicación no implica obligación a cargo de Edupass para el otorgamiento "
+                "del crédito, por lo que se reserva el derecho de cancelarla en caso de inconsistencia y/o falsedad en la información."),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   // Actualiza al arrastrar hacia abajo
   Future<void> _pullRefresh() async {

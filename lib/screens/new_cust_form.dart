@@ -1,8 +1,8 @@
-
 import 'dart:convert';
 
 import 'package:flexwm/providers/cust_provider.dart';
 import 'package:flexwm/routes/routes.dart';
+import 'package:flexwm/widgets/alert_diaog.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -17,16 +17,15 @@ import '../routes/app_routes.dart';
 import '../widgets/dropdown_widget.dart';
 
 class NewCustForm extends StatefulWidget {
-
-  const NewCustForm({Key? key,
+  const NewCustForm({
+    Key? key,
   }) : super(key: key);
 
   @override
   _NewCustForm createState() => _NewCustForm();
-
 }
 
-class _NewCustForm extends State<NewCustForm>{
+class _NewCustForm extends State<NewCustForm> {
   bool stepForm = false;
   bool stepFinalForm = false;
   //controllers para manejo de datos
@@ -58,68 +57,61 @@ class _NewCustForm extends State<NewCustForm>{
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: FloatingActionButton(
-          backgroundColor: Colors.white,
-          child: const Icon(Icons.arrow_back,color: Colors.grey,),
-          onPressed: (){
-            if(stepFinalForm){
-              setState(() {
-                stepFinalForm=false;
-              });
-            }else{
-              if(stepForm){
+        floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: FloatingActionButton(
+            backgroundColor: Colors.white,
+            child: const Icon(
+              Icons.arrow_back,
+              color: Colors.grey,
+            ),
+            onPressed: () {
+              if (stepFinalForm) {
                 setState(() {
-                  stepForm=false;
+                  stepFinalForm = false;
                 });
-              }else{
-                Navigator.pop(context);
+              } else {
+                if (stepForm) {
+                  setState(() {
+                    stepForm = false;
+                  });
+                } else {
+                  Navigator.pop(context);
+                }
               }
-            }
-          },
-          mini: true,
+            },
+            mini: true,
+          ),
         ),
-      ),
-      body: AuthBackground(
-        child: SingleChildScrollView(
+        body: AuthBackground(
+            child: SingleChildScrollView(
           child: Column(
             children: [
-
-              const SizedBox( height: 250 ),
-
+              const SizedBox(height: 250),
               CardContainer(
-                child: Column(
-                  children: [
-
-                    const SizedBox( height: 10 ),
-                    const Text('Registro Cliente Nuevo', style: TextStyle(color: Colors.grey, fontSize: 20)),
-                    const SizedBox( height: 20 ),
-
-                    if(!stepForm)
-                      stepOneForm()
-                    else
-                      if(stepFinalForm)
-                        stepThreeForm()
-                      else
-                        stepTwoForm()
-                  ],
-                )
-              ),
-
-              const SizedBox( height: 50 ),
+                  child: Column(
+                children: [
+                  const SizedBox(height: 10),
+                  const Text('Registro Cliente Nuevo',
+                      style: TextStyle(color: Colors.grey, fontSize: 20)),
+                  const SizedBox(height: 20),
+                  if (!stepForm)
+                    stepOneForm()
+                  else if (stepFinalForm)
+                    stepThreeForm()
+                  else
+                    stepTwoForm()
+                ],
+              )),
+              const SizedBox(height: 50),
             ],
           ),
-        )
-      )
-   );
+        )));
   }
 
-  Widget stepOneForm(){
-
+  Widget stepOneForm() {
     var now = DateTime.now();
     var formatterAno = DateFormat("y");
     return Container(
@@ -135,14 +127,11 @@ class _NewCustForm extends State<NewCustForm>{
               decoration: InputDecorations.authInputDecoration(
                   hintText: "Nombre",
                   labelText: "*Nombre",
-                  prefixIcon: Icons.account_circle_outlined
-              ),
-              validator: ( value ) {
-
-                return ( value != null && value.isNotEmpty )
+                  prefixIcon: Icons.account_circle_outlined),
+              validator: (value) {
+                return (value != null && value.isNotEmpty)
                     ? null
                     : 'Por favor ingrese un nombre válido';
-
               },
             ),
             const SizedBox(height: 10),
@@ -153,14 +142,11 @@ class _NewCustForm extends State<NewCustForm>{
               decoration: InputDecorations.authInputDecoration(
                   hintText: "Apellido Paterno",
                   labelText: "*Apellido Paterno",
-                  prefixIcon: Icons.account_circle_outlined
-              ),
-              validator: ( value ) {
-
-                return ( value != null && value.isNotEmpty )
+                  prefixIcon: Icons.account_circle_outlined),
+              validator: (value) {
+                return (value != null && value.isNotEmpty)
                     ? null
                     : 'Por favor ingrese un apellido válido';
-
               },
             ),
             const SizedBox(height: 10),
@@ -171,14 +157,11 @@ class _NewCustForm extends State<NewCustForm>{
               decoration: InputDecorations.authInputDecoration(
                   hintText: "Apellido Materno",
                   labelText: "*Apellido Materno",
-                  prefixIcon: Icons.account_circle_outlined
-              ),
-              validator: ( value ) {
-
-                return ( value != null && value.isNotEmpty )
+                  prefixIcon: Icons.account_circle_outlined),
+              validator: (value) {
+                return (value != null && value.isNotEmpty)
                     ? null
                     : 'Por favor ingrese un apellido válido';
-
               },
             ),
             const SizedBox(height: 10),
@@ -218,8 +201,7 @@ class _NewCustForm extends State<NewCustForm>{
                   labelText: (custTypeController.text == SoCustomer.TYPE_PERSON)
                       ? "Fecha de Nacimiento"
                       : "Fecha Constitución",
-                  prefixIcon: Icons.calendar_today_outlined
-              ),
+                  prefixIcon: Icons.calendar_today_outlined),
               controller: dateContr,
               readOnly: true,
               validator: (value) {
@@ -227,142 +209,140 @@ class _NewCustForm extends State<NewCustForm>{
                     ? null
                     : 'Por favor ingrese una fecha válida';
               },
-              onTap: (){
+              onTap: () {
                 showDatePicker(
                   context: context,
-                  initialDate: DateTime(int.parse(formatterAno.format(now))-18),
+                  initialDate:
+                      DateTime(int.parse(formatterAno.format(now)) - 18),
                   firstDate: DateTime(1910),
-                  lastDate: DateTime(int.parse(formatterAno.format(now))-18),
-                ).then((DateTime? value){
-                  if(value != null){
+                  lastDate: DateTime(int.parse(formatterAno.format(now)) - 18),
+                ).then((DateTime? value) {
+                  if (value != null) {
                     DateTime _formDate = DateTime.now();
                     _formDate = value;
-                    final String date = DateFormat('yyyy-MM-dd').format(_formDate);
+                    final String date =
+                        DateFormat('yyyy-MM-dd').format(_formDate);
                     dateContr.text = date;
                   }
                 });
               },
             ),
-            const SizedBox( height: 40 ),
-
+            const SizedBox(height: 40),
             MaterialButton(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
                 disabledColor: Colors.grey,
                 elevation: 0,
                 // color: Colors.deepOrange,
                 color: Colors.blueGrey,
                 child: Container(
-                    padding: const EdgeInsets.symmetric( horizontal: 80, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 80, vertical: 15),
                     child: const Text(
                       'Siguiente',
-                      style: TextStyle( color: Colors.white ),
-                    )
-                ),
+                      style: TextStyle(color: Colors.white),
+                    )),
                 onPressed: () async {
-                  if(_firstForm.currentState!.validate()){
-                    setState((){
+                  if (_firstForm.currentState!.validate()) {
+                    setState(() {
                       stepForm = true;
                     });
                   }
-                }
-            )
+                })
           ],
         ),
       ),
     );
   }
 
-  Widget stepThreeForm(){
+  Widget stepThreeForm() {
     return Container(
-        child: Form(
+      child: Form(
         key: _thirdForm,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         child: Column(
-        children: [
-          TextFormField(
-            validator: (value) {
-              String? passw = value;
-              return validateStructure(passw!)
-                  ? null
-                  : 'La contraseña debe contener mínimo 8 caracteres\n'
-                  'Mínimo 1 minúscula\n'
-                  'Mínimo 1 mayúscula\n'
-                  'Mínimo 1 número\n'
-                  'Mínimo 1 carácter especial (! @ # \$ & * ~)';
-            },
-            decoration: InputDecorations.authInputDecoration(
-                hintText: "Password",
-                labelText: "*Password",
-                prefixIcon: Icons.account_circle_outlined
+          children: [
+            TextFormField(
+              validator: (value) {
+                String? passw = value;
+                return validateStructure(passw!)
+                    ? null
+                    : 'La contraseña debe contener mínimo 8 caracteres\n'
+                        'Mínimo 1 minúscula\n'
+                        'Mínimo 1 mayúscula\n'
+                        'Mínimo 1 número\n'
+                        'Mínimo 1 carácter especial (! @ # \$ & * ~)';
+              },
+              decoration: InputDecorations.authInputDecoration(
+                  hintText: "Password",
+                  labelText: "*Password",
+                  prefixIcon: Icons.account_circle_outlined),
+              obscureText: true,
+              controller: textPswContrll,
             ),
-            obscureText: true,
-            controller: textPswContrll,
+            const SizedBox(
+              height: 10,
             ),
-          const SizedBox(height: 10,),
-          TextFormField(
-            validator: (value) {
-              if (value != textPswContrll.text) {
-                return 'Las contraseñas deben coincidir';
-              }
-              return null;
-            },
-            decoration: InputDecorations.authInputDecoration(
-                hintText: "Confirmar Password",
-                labelText: "*Confirmar Password",
-                prefixIcon: Icons.account_circle_outlined
-            ),
-            obscureText: true,
-            controller: textPswConfContrll,
-          ),
-          if(isLoading)
-            const LinearProgressIndicator(),
-          const SizedBox( height: 40 ),
-          MaterialButton(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              disabledColor: Colors.grey,
-              elevation: 0,
-              // color: Colors.deepOrange,
-              color: Colors.blueGrey,
-              child: Container(
-                  padding: const EdgeInsets.symmetric( horizontal: 80, vertical: 15),
-                  child: Text(
-                    isLoading
-                        ? 'Espere'
-                        : 'Agregar',
-                    style: const TextStyle( color: Colors.white ),
-                  )
-              ),
-              onPressed: () async {
-                if(_thirdForm.currentState!.validate()){
-                  setState(() {
-                    isLoading = true;
-                  });
-                  addCust(context);
+            TextFormField(
+              validator: (value) {
+                if (value != textPswContrll.text) {
+                  return 'Las contraseñas deben coincidir';
                 }
-              }
-          )
+                return null;
+              },
+              decoration: InputDecorations.authInputDecoration(
+                  hintText: "Confirmar Password",
+                  labelText: "*Confirmar Password",
+                  prefixIcon: Icons.account_circle_outlined),
+              obscureText: true,
+              controller: textPswConfContrll,
+            ),
+            if (isLoading) const LinearProgressIndicator(),
+            const SizedBox(height: 40),
+            MaterialButton(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                disabledColor: Colors.grey,
+                elevation: 0,
+                // color: Colors.deepOrange,
+                color: Colors.blueGrey,
+                child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 80, vertical: 15),
+                    child: Text(
+                      isLoading ? 'Espere' : 'Agregar',
+                      style: const TextStyle(color: Colors.white),
+                    )),
+                onPressed: () async {
+                  if (_thirdForm.currentState!.validate()) {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    addCust(context);
+                  }
+                })
           ],
         ),
       ),
     );
   }
 
-  bool validateStructure(String value){
+  bool validateStructure(String value) {
     print(value);
     // String pattern = r'^(?=.?[A-Z])(?=.?[a-z])(?=.?[0-9])(?=.?[!@#\$&*~]).{8,}$';
-    String pattern = r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
+    String pattern =
+        r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
     RegExp regExp = RegExp(pattern);
     return regExp.hasMatch(value);
   }
 
-  Widget stepTwoForm (){
+  Widget stepTwoForm() {
     return Container(
       child: Form(
         key: _secondForm,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         child: Column(
           children: [
-
             TextFormField(
               autocorrect: false,
               keyboardType: TextInputType.emailAddress,
@@ -370,17 +350,15 @@ class _NewCustForm extends State<NewCustForm>{
               decoration: InputDecorations.authInputDecoration(
                   hintText: 'tucorreo@gmail.com',
                   labelText: 'Correo electrónico',
-                  prefixIcon: Icons.alternate_email_rounded
-              ),
-              validator: ( value ) {
-
-                String pattern = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-                RegExp regExp  = RegExp(pattern);
+                  prefixIcon: Icons.alternate_email_rounded),
+              validator: (value) {
+                String pattern =
+                    r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+                RegExp regExp = RegExp(pattern);
 
                 return regExp.hasMatch(value ?? '')
                     ? null
                     : 'El valor ingresado no luce como un correo';
-
               },
             ),
             /*const SizedBox(height: 10),
@@ -409,17 +387,17 @@ class _NewCustForm extends State<NewCustForm>{
               decoration: InputDecorations.authInputDecoration(
                   hintText: 'Tel. Celular',
                   labelText: 'Tel. Celular',
-                  prefixIcon: Icons.phone_iphone_outlined
-              ),
-              validator: ( value ) {
+                  prefixIcon: Icons.phone_iphone_outlined),
+              validator: (value) {
                 final intNumber = int.tryParse(value!);
-                return ( intNumber != null && value.length > 9 )
+                return (intNumber != null && value.length > 9)
                     ? null
                     : 'Por favor ingrese un número de teléfono válido';
-
               },
             ),
-            const SizedBox(height: 10,),
+            const SizedBox(
+              height: 10,
+            ),
             DropdownWidget(
               callback: (String id) {
                 setState(() {
@@ -430,29 +408,28 @@ class _NewCustForm extends State<NewCustForm>{
               label: 'Referencia*',
               dropdownValue: referralId.toString(),
             ),
-            const SizedBox( height: 40 ),
-
+            const SizedBox(height: 40),
             MaterialButton(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
                 disabledColor: Colors.grey,
                 elevation: 0,
                 // color: Colors.deepOrange,
                 color: Colors.blueGrey,
                 child: Container(
-                    padding: const EdgeInsets.symmetric( horizontal: 80, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 80, vertical: 15),
                     child: const Text(
                       'Siguiente',
-                      style: TextStyle( color: Colors.white ),
-                    )
-                ),
+                      style: TextStyle(color: Colors.white),
+                    )),
                 onPressed: () async {
-                  if(_secondForm.currentState!.validate()){
-                    setState((){
+                  if (_secondForm.currentState!.validate()) {
+                    setState(() {
                       stepFinalForm = true;
                     });
                   }
-                }
-            )
+                })
           ],
         ),
       ),
@@ -484,13 +461,15 @@ class _NewCustForm extends State<NewCustForm>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Access-Control-Allow-Origin': '*',
         'Cookie':
-        params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
+            params.jSessionIdQuery.toUpperCase() + '=' + params.jSessionId,
       },
       body: jsonEncode(soCustomer),
     );
 
     if (response.statusCode == params.servletResponseScOk) {
-      setState((){isLoading = false;});
+      setState(() {
+        isLoading = false;
+      });
       // Si fue exitoso obtiene la respuesta
       soCustomer = SoCustomer.fromJson(jsonDecode(response.body));
 
@@ -503,19 +482,19 @@ class _NewCustForm extends State<NewCustForm>{
       //     MaterialPageRoute(builder: (context) => const LoginForm())
       // );
     } else {
-      setState((){isLoading = false;});
+      setState(() {
+        isLoading = false;
+      });
       // Error al guardar
       Navigator.pop(context);
       print('Error al Guardar ${response.body}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(response.body)),
-      );
+      resultMessage(response.body, context);
     }
   }
 
   showAlertDialog(BuildContext context) {
     // set up the buttons
-   /* Widget cancelButton = TextButton(
+    /* Widget cancelButton = TextButton(
       child: const Text("Cancelar"),
       onPressed:  () {
         Navigator.pop(context);
@@ -523,7 +502,7 @@ class _NewCustForm extends State<NewCustForm>{
     );*/
     Widget continueButton = TextButton(
       child: const Text("Continuar"),
-      onPressed:  () {
+      onPressed: () {
         Navigator.pushNamed(context, AppRoutes.initialRoute);
       },
     );
