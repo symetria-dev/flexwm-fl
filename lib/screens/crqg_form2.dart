@@ -84,7 +84,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
   //datos de aval/cliente
   SoCustomer soCustomer = SoCustomer.empty();
   //Se crean controllers para asignar valores en campos generales de aval
-  late String role = SoCreditRequestGuarantee.ROLE_COACREDITED;
+  late String role = SoCreditRequestGuarantee.ROLE_ACREDITED;
   late String relation = SoCreditRequestGuarantee.RELATION_SELF;
   final textFisrtNameCntrll = TextEditingController();
   final textFatherLastNameCntrll = TextEditingController();
@@ -178,6 +178,9 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
         fetchCrqg(widget.soCreditRequestGuarantee.id.toString()).then((value) {
           avalCreated = true;
           soCreditRequestGuarantee = widget.soCreditRequestGuarantee;
+          setState(() {
+            creditRequestGuaranteeId = soCreditRequestGuarantee.id;
+          });
           if(soCreditRequestGuarantee.creditBureau > 0){
             isSwitched = true;
           }else{
@@ -230,7 +233,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
             if(soCreditRequestGuarantee.payrollReceipts > 0.0) textPayrollReceiptsCntrll.updateValue(soCreditRequestGuarantee.payrollReceipts);
             if(soCreditRequestGuarantee.typeHousing != '') textTypeHousingCntrll.text = soCreditRequestGuarantee.typeHousing;
             if(soCreditRequestGuarantee.heritage != '') textHeritageCntrll.text = soCreditRequestGuarantee.heritage;
-            if(soCreditRequestGuarantee.economicDependents > 0) {
+            if(soCreditRequestGuarantee.economicDependents >= 0) {
               textEconomicDepCntrll.text = soCreditRequestGuarantee.economicDependents.toString();
             } else{
               textEconomicDepCntrll.text = '';
@@ -254,7 +257,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
             if(soCreditRequestGuarantee.ciec != '') textCiecCntrll.text = soCreditRequestGuarantee.ciec;
 
           });
-
+          updateDataCrqg();
         });
       }else{
       maritalStatus = SoCreditRequestGuarantee.STATUS_SINGLE;
@@ -679,7 +682,12 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                     labelText: "Nombre(s)*",
                     prefixIcon: Icons.account_circle_outlined),
                 validator: (value) {
-                  return (value != null && value.isNotEmpty)
+                  String? valnom = value;
+                  while(valnom!.endsWith(' ')){
+                    valnom = valnom!.replaceRange(valnom.length-1, null, '');
+                    value = valnom;
+                  }
+                  return (value != null && value!.isNotEmpty)
                       ? null
                       : 'Por favor ingrese un nombre válido';
                 },
@@ -1217,7 +1225,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                       programCode: SoCreditRequestGuarantee.programCode,
                       fielName: 'crqg_identification',
                       label: 'Identificación parte frontal',
-                      id: soCreditRequestGuarantee.id.toString(),
+                      id: creditRequestGuaranteeId.toString(),
                       callBack: (bool isLoading) {
                         setState(() {
                           _isInAsyncCall = isLoading;
@@ -1231,7 +1239,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                       programCode: SoCreditRequestGuarantee.programCode,
                       fielName: 'crqg_identificationback',
                       label: 'Identificación parte trasera',
-                      id: soCreditRequestGuarantee.id.toString(),
+                      id: creditRequestGuaranteeId.toString(),
                       callBack: (bool isLoading) {
                         setState(() {
                           _isInAsyncCall = isLoading;
@@ -1245,7 +1253,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                       programCode: SoCreditRequestGuarantee.programCode,
                       fielName: 'crqg_proofincome',
                       label: 'Comprobante de Ingresos',
-                      id: soCreditRequestGuarantee.id.toString(),
+                      id: creditRequestGuaranteeId.toString(),
                       callBack: (bool isLoading) {
                         setState(() {
                           _isInAsyncCall = isLoading;
@@ -1259,7 +1267,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                       programCode: SoCreditRequestGuarantee.programCode,
                       fielName: 'crqg_fiscalsituation',
                       label: 'Constancia de Situación Fiscal',
-                      id: soCreditRequestGuarantee.id.toString(),
+                      id: creditRequestGuaranteeId.toString(),
                       callBack: (bool isLoading) {
                         setState(() {
                           _isInAsyncCall = isLoading;
@@ -1273,7 +1281,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                       programCode: SoCreditRequestGuarantee.programCode,
                       fielName: 'crqg_verifiableincomefile',
                       label: 'Otros Ingresos Comprobables',
-                      id: soCreditRequestGuarantee.id.toString(),
+                      id: creditRequestGuaranteeId.toString(),
                       callBack: (bool isLoading) {
                         setState(() {
                           _isInAsyncCall = isLoading;
@@ -1288,7 +1296,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                       programCode: SoCreditRequestGuarantee.programCode,
                       fielName: 'crqg_declaratory',
                       label: 'Declaratorias',
-                      id: soCreditRequestGuarantee.id.toString(),
+                      id: creditRequestGuaranteeId.toString(),
                       callBack: (bool isLoading) {
                         setState(() {
                           _isInAsyncCall = isLoading;
@@ -1302,7 +1310,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                       programCode: SoCreditRequestGuarantee.programCode,
                       fielName: 'crqg_proofaddress',
                       label: 'Comprobante de Domicilio',
-                      id: soCreditRequestGuarantee.id.toString(),
+                      id: creditRequestGuaranteeId.toString(),
                       callBack: (bool isLoading) {
                         setState(() {
                           _isInAsyncCall = isLoading;
@@ -1316,7 +1324,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                       programCode: SoCreditRequestGuarantee.programCode,
                       fielName: 'crqg_identityvideo',
                       label: 'Video de Identidad',
-                      id: soCreditRequestGuarantee.id.toString(),
+                      id: creditRequestGuaranteeId.toString(),
                       callBack: (bool isLoading) {
                         setState(() {
                           _isInAsyncCall = isLoading;
@@ -1643,36 +1651,9 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
     );
   }
 
-  Widget formDatosFinancieros(){
-    return SingleChildScrollView(
-      child: Column(
-        children: const [
-          SizedBox(height: 40,),
-          CardContainer(
-            child: Text(''),
-          ),
-          SizedBox(height: 50,),
-        ],
-      ),
-    );
-  }
-
-  Widget formDatosAdicionales(){
-    return SingleChildScrollView(
-      child: Column(
-        children: const [
-          SizedBox(height: 40,),
-          CardContainer(
-            child: Text(''),
-          ),
-          SizedBox(height: 50,),
-        ],
-      ),
-    );
-  }
-
   //funcion para actualizar widget hijo mediante el callback (uploadfile)
   updateDataCrqg(){
+    print('updatedatacrqg -----');
     //indicamos que se esta realizando el proceso de subir archivo
     //Se ejecuta el metodo de consulta para actualizar los datos del aval.
     fetchCrqg(creditRequestGuaranteeId.toString()).then((value) {
@@ -1896,7 +1877,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
             params.jSessionId +
             '?id=' +
             id.toString()));
-
+print('fetchcrqg $id');
     // Si no es exitoso envia a login
     if (response.statusCode != params.servletResponseScOk) {
       Navigator.pushNamed(context, AppRoutes.initialRoute);

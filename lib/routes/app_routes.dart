@@ -7,6 +7,8 @@ import 'package:flexwm/screens/cust_crqs_form.dart';
 import 'package:flexwm/screens/dashboard.dart';
 import 'package:flexwm/screens/cameraPhotoId.dart';
 import 'package:flexwm/widgets/upload_image_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import '../models/crqs.dart';
 import '../screens/crqs_form.dart';
@@ -24,19 +26,22 @@ class AppRoutes {
           leadingWidget: const Icon(Icons.account_balance_wallet_sharp),
           name: 'Mis Créditos',
           screen: const CreditRequestList()),
-    MenuOption(
+    /*MenuOption(
         route: '/wfsp_list',
         name: 'Tareas Activas',
         leadingWidget: params.getProperIcon(SoWFlowStep.programCode),
         screen: CrqsForm(creditRequest: SoCreditRequest.empty(),
-          creditRequestDetail: SoCreditRequestDetail.empty(),)),
+          creditRequestDetail: SoCreditRequestDetail.empty(),)),*/
     //Se comentan para versión clientes edupass
- /*   MenuOption(
-        route: '/cust_list',
-        name: 'Clientes',
-        leadingWidget: params.getProperIcon(SoCustomer.programCode),
-        screen: const CustomerList()),
     MenuOption(
+        route: '/privacy',
+        name: 'Aviso de Privacidad',
+        leadingWidget: Icon(Icons.privacy_tip_rounded, color: Colors.orangeAccent),
+        screen: WebViewWidget(
+            controller: controller
+        )
+    ),
+   /* MenuOption(
         route: '/user',
         name: 'Usuarios',
         leadingWidget: params.getProperIcon(SoUser.programCode),
@@ -58,4 +63,29 @@ class AppRoutes {
 
     return appRoutes;
   }
+
+
+
 }
+WebViewController controller = WebViewController()
+  ..setJavaScriptMode(JavaScriptMode.unrestricted)
+  ..setBackgroundColor(const Color(0x00000000))
+  ..setNavigationDelegate(
+    NavigationDelegate(
+      onProgress: (int progress) {
+      // Update loading bar.
+      },
+      onPageStarted: (String url) {},
+      onPageFinished: (String url) {},
+      onWebResourceError: (WebResourceError error) {},
+      onNavigationRequest: (NavigationRequest request) {
+     /* if (request.url.startsWith('https://www.youtube.com/')) {
+        return NavigationDecision.prevent;
+      }*/
+        return NavigationDecision.navigate;
+      },
+    ),
+  )
+  ..loadRequest(Uri.parse('https://visualmexico.com.mx/aviso-de-privacidad/'));
+
+//https://visualmexico.com.mx/wp-content/uploads/2022/12/politica-privacidad.pdf

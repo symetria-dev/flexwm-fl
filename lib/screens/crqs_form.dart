@@ -68,6 +68,8 @@ class _CrqsFormState extends State<CrqsForm> {
   int _activeStepIndex = 0;
   // Lista para tabla de amortización
   List<SoOderCreditItem> _soOrderCreditItem = [];
+  //Bandera nuevo registro
+  bool newData = true;
 
   //controllers campos step2
   final textMontoCntrll =
@@ -214,6 +216,7 @@ class _CrqsFormState extends State<CrqsForm> {
         }
       });
       setState(() {
+        newData = false;
         stepRealized = 2;
         _activeStepIndex = 2;
       });
@@ -319,7 +322,7 @@ class _CrqsFormState extends State<CrqsForm> {
       relation = SoCreditRequestGuarantee.RELATION_SELF;
       //Se consulta cuantos avales existen para ver si se redirije a la forma
       fetchSoCreditRequestGuarantee(widget.creditRequest.id).then((value) {
-        allGuarantees = _creditRequestGuarantee.length;
+        allGuarantees = _creditRequestGuarantee.length-1;
         //Obtiene lista de garantías para validar si se requiere o no
         fetchSoCreditRequestAssets(soCreditRequest.id).then((value) {
           fetchCrty(soCreditRequest.creditMotiveId.toString()).then((value) {
@@ -519,6 +522,7 @@ class _CrqsFormState extends State<CrqsForm> {
 
   //Validaciones para avanzar step
   bool validStep(int step) {
+    DateTime date = DateTime.now();
     switch (step) {
       case 0:
         if (_formKeyCrqs.currentState!.validate() &&
@@ -564,6 +568,19 @@ class _CrqsFormState extends State<CrqsForm> {
                 fetchCrqg(soCreditRequest.id);
                 addCreditRequestDetail().then((value) {
                   if (value) {
+                    if(newData){
+                      showAlertDialogTasa(context,
+                          'Las condiciones* y su respectivo CAT (Costo Anual Total) sin IVA de la presente tabla'
+                              ' de amortización se calculan conforme a las políticas vigentes de Edupass y '
+                              'puede variar dependiendo de la calificación crediticia del solicitante. \n\n'
+                          'Cotización realizada el día ${date.day} de ${dateString(date.month)} de ${date.year}, vigente 10 días.\n\n'
+                              "Consulta requisitos y condiciones del financiamiento al teléfono 55 5989 6338 o en el sitio web https://www.edupass.mx/.",
+                          'Importante');
+                      setState(() {
+                        newData = false;
+                        _currentTabIndex =1;
+                      });
+                    }
                     setState(() {
                       _activeStepIndex += 1;
                       stepRealized = 2;
@@ -592,7 +609,7 @@ class _CrqsFormState extends State<CrqsForm> {
               sendingData = false;
             });
             showAlertDialogTasa(context,
-                'Lo sentimos, el plan de crédito seleccionado no permite este plazo, intente con un plazo diferente.');
+                'Lo sentimos, el plan de crédito seleccionado no permite este plazo, intente con un plazo diferente.','');
           /*  Fluttertoast.showToast(
                 msg: 'Lo sentimos, el plan de crédito seleccionado \n '
                     'no permite este plazo, intente con un plazo diferente.');*/
@@ -641,7 +658,7 @@ class _CrqsFormState extends State<CrqsForm> {
                     //se consultan los acreditados registrados en esa solicitud
                     fetchSoCreditRequestGuarantee(soCreditRequest.id)
                         .then((value) {
-                      allGuarantees = _creditRequestGuarantee.length;
+                      allGuarantees = _creditRequestGuarantee.length-1;
                       //si requiere acreditados se redirige a la forma
                       if (requiredGuarantees()) {
                         showAlertDialog(
@@ -1880,6 +1897,8 @@ class _CrqsFormState extends State<CrqsForm> {
       setState(() {
         // Si fue exitoso obtiene la respuesta
         soCreditRequest = SoCreditRequest.fromJson(jsonDecode(response.body));
+        rate = soCreditRequest.rate;
+        fetchFinanceUtil(soCreditRequest.id);
         fetchCreditRequest(soCreditRequest.id.toString());
         codeCrqs = soCreditRequest.code;
         fetchSoOrderCreditItem(soCreditRequest.id);
@@ -1945,7 +1964,6 @@ class _CrqsFormState extends State<CrqsForm> {
       Navigator.pushNamed(context, AppRoutes.initialRoute);
     }
     setState(() {
-      print('response de cat ${response.body}');
       cat = double.parse(response.body);
     });
 
@@ -2272,14 +2290,29 @@ class _CrqsFormState extends State<CrqsForm> {
 
   void isAcredited() {
     for (SoCreditRequestGuarantee soGuarantee in _creditRequestGuarantee) {
-      if (soGuarantee.role == SoCreditRequestGuarantee.ROLE_ACREDITED &&
-          soGuarantee.relation == SoCreditRequestGuarantee.RELATION_SELF &&
-          (soCreditRequestDetail.educationalInstitutionType ==
-                  SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL &&
-              soCreditRequestDetail.monthStay > soCreditType.maxMonthStay)) {
-        setState(() {
-          requiredAcredited = true;
-        });
+      if(checkWhoProcesses){
+        if ((soGuarantee.role == SoCreditRequestGuarantee.ROLE_ACREDITED &&
+            soGuarantee.relation == SoCreditRequestGuarantee.RELATION_SELF &&
+            (soCreditRequestDetail.educationalInstitutionType ==
+                SoCreditRequestDetail.INSTITUTION_TYPE_INTERNATIONAL &&
+                soCreditRequestDetail.monthStay > soCreditType.maxMonthStay)) ||
+            (soGuarantee.role == SoCreditRequestGuarantee.ROLE_ACREDITED &&
+                soGuarantee.relation == SoCreditRequestGuarantee.RELATION_SELF &&
+                soGuarantee.verifiableIncome < soCreditType.minIncome) ) {
+          setState(() {
+            requiredAcredited = true;
+          });
+        }
+
+        if (soGuarantee.role == SoCreditRequestGuarantee.ROLE_ACREDITED &&
+            soGuarantee.relation == SoCreditRequestGuarantee.RELATION_SELF){
+          int edad = getEdad(int.parse(soGuarantee.soCustomer.birthdate.substring(0,4)));
+          if(edad < soCreditType.minAge || edad > soCreditType.maxAge){
+            setState(() {
+              requiredAcredited = true;
+            });
+          }
+        }
       }
 
       if (!checkWhoProcesses) {
@@ -2288,6 +2321,17 @@ class _CrqsFormState extends State<CrqsForm> {
         });
       }
     }
+  }
+
+  //obtener edad a partir de año de nacimiento
+  int getEdad(int anio) {
+    int edad;
+    int anioNacimiento = anio;
+    var fechaDeHoy = DateTime.now();
+    int anioActual = fechaDeHoy.year;
+    edad = anioActual - anioNacimiento;
+    print("Tu edad es $edad");
+    return edad;
   }
 
   //Consulta las garantias por solicitud
@@ -2356,9 +2400,10 @@ class _CrqsFormState extends State<CrqsForm> {
     return true;
   }
 
-  showAlertDialogTasa(BuildContext context, String text) {
+  showAlertDialogTasa(BuildContext context, String text, String title) {
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
+      title: Text(title),
       content: Text(text),
     );
     // show the dialog
@@ -2428,7 +2473,7 @@ class _CrqsFormState extends State<CrqsForm> {
               //al cerrar forma se verifica si si se agrego y si no
               //se redirije a la pantalla de inicio
               fetchSoCreditRequestGuarantee(soCreditRequest.id).then((value) {
-                allGuarantees = _creditRequestGuarantee.length;
+                allGuarantees = _creditRequestGuarantee.length-1;
                 if (requiredGuarantees()) {
                   Navigator.pushNamed(context, '/crqs_list');
                 }

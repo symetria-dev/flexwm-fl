@@ -52,6 +52,8 @@ class _CreditRequestInfoScreen extends State<CreditRequestInfoScreen>{
     fetchSoCreditRequestGuarantee(soCreditRequest.id);
     fetchSoCreditValidations(soCreditRequest.id);
     super.initState();
+print('valores valores - ${_creditRequestGuarantee.length} - ${widget.requiredGuarantees} - step $step - ${soCreditRequest.status }');
+
   }
 
   @override
@@ -70,10 +72,10 @@ class _CreditRequestInfoScreen extends State<CreditRequestInfoScreen>{
                 ),
               ),
             ),
-            if((_creditRequestGuarantee.length != widget.requiredGuarantees || step < 4)
+            if((_creditRequestGuarantee.length-1 != widget.requiredGuarantees || step < 4)
             && soCreditRequest.status == SoCreditRequest.STATUS_EDITION)
               checkList(),
-            if(_creditRequestGuarantee.length == widget.requiredGuarantees && step !=3
+            if(_creditRequestGuarantee.length-1 == widget.requiredGuarantees && step !=3
             && soCreditRequest.status == SoCreditRequest.STATUS_EDITION)
               readySend(),
             if(soCreditRequest.status == SoCreditRequest.STATUS_REVISION)
@@ -82,26 +84,9 @@ class _CreditRequestInfoScreen extends State<CreditRequestInfoScreen>{
               statusAuthorized(),
             if(soCreditRequest.status == SoCreditRequest.STATUS_CANCELLED)
               statusCancelled(),
-            if(_creditRequestGuarantee.length == widget.requiredGuarantees && step ==3
+            if(_creditRequestGuarantee.length-1 == widget.requiredGuarantees && step ==3
                 && soCreditRequest.status == SoCreditRequest.STATUS_EDITION)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  if(step == 3){
-                    _alertSendRequest();
-                  }else{
-                    Fluttertoast.showToast(msg: 'Necesita completar los 3 pasos para enviar su solicitud');
-                  }
-                },
-                child: const Text('Enviar Solicitud',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+              _sendCrqsBotton(),
             const SizedBox(height: 30,),
           ],
         ),
@@ -129,16 +114,48 @@ class _CreditRequestInfoScreen extends State<CreditRequestInfoScreen>{
     );
   }
 
-  Widget _alertSendReque(){
-    return AlertDialog(
-      title: const Text('¿Desea enviar su solicitud?'),
-      actions: [
-        TextButton(onPressed: (){
-          Navigator.pop(context);
-        }, child: const Text('No')),
-        TextButton(onPressed: (){
-          addCreditRequest();
-        }, child: const Text('Sí')),
+  Widget _sendCrqsBotton(){
+    return Column(
+      children: [
+        if(!widget.requiredAsset)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: ElevatedButton(
+            onPressed: () {
+              if(step == 3){
+                _alertSendRequest();
+              }else{
+                Fluttertoast.showToast(msg: 'Necesita completar los 3 pasos para enviar su solicitud');
+              }
+            },
+            child: const Text('Enviar Solicitud',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+        if(widget.requiredAsset  &&
+            _creditRequestAssetListData.isNotEmpty )
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: ElevatedButton(
+            onPressed: () {
+              if(step == 3){
+                _alertSendRequest();
+              }else{
+                Fluttertoast.showToast(msg: 'Necesita completar los 3 pasos para enviar su solicitud');
+              }
+            },
+            child: const Text('Enviar Solicitud',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -182,7 +199,7 @@ class _CreditRequestInfoScreen extends State<CreditRequestInfoScreen>{
                   icon: Icon(Icons.account_circle)
               ),
               Expanded(child: Text('Avales registrados: '
-                  '${_creditRequestGuarantee.length}/${widget.requiredGuarantees}')),
+                  '${_creditRequestGuarantee.length - 1}/${widget.requiredGuarantees}')),
             ],
           ),
           if(widget.requiredAsset)
@@ -282,21 +299,21 @@ class _CreditRequestInfoScreen extends State<CreditRequestInfoScreen>{
   }
 
   Widget readySend(){
-    return CardContainer(
+    return const CardContainer(
         child:  Column(
           children: [
             Row(
-              children: const [
+              children: [
                 Text('Lista para Enviar',
                   style: TextStyle(color: Colors.black,fontSize: 17),
                 ),
               ],
             ),
-            const SizedBox(height: 15,),
+            SizedBox(height: 15,),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               mainAxisSize: MainAxisSize.max,
-              children: const [
+              children: [
                /* IconButton(
                   color: Colors.teal,
                   onPressed: (){},
@@ -323,21 +340,21 @@ class _CreditRequestInfoScreen extends State<CreditRequestInfoScreen>{
   }
 
   Widget statusRevision(){
-    return CardContainer(
+    return const CardContainer(
       child:  Column(
         children: [
           Row(
-            children: const [
+            children: [
               Text('En Revisión',
                 style: TextStyle(color: Colors.black,fontSize: 17),
               ),
             ],
           ),
-          const SizedBox(height: 15,),
+          SizedBox(height: 15,),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
-            children: const [
+            children: [
               /* IconButton(
                   color: Colors.teal,
                   onPressed: (){},
@@ -359,21 +376,21 @@ class _CreditRequestInfoScreen extends State<CreditRequestInfoScreen>{
   }
 
   Widget statusAuthorized(){
-    return CardContainer(
+    return const CardContainer(
       child:  Column(
         children: [
           Row(
-            children: const [
+            children: [
               Text('Aprobada',
                 style: TextStyle(color: Colors.black,fontSize: 17),
               ),
             ],
           ),
-          const SizedBox(height: 15,),
+          SizedBox(height: 15,),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
-            children: const [
+            children: [
               /* IconButton(
                   color: Colors.teal,
                   onPressed: (){},
@@ -396,21 +413,21 @@ class _CreditRequestInfoScreen extends State<CreditRequestInfoScreen>{
   }
 
   Widget statusCancelled(){
-    return CardContainer(
+    return const CardContainer(
       child:  Column(
         children: [
           Row(
-            children: const [
+            children: [
               Text('Rechazada',
                 style: TextStyle(color: Colors.black,fontSize: 17),
               ),
             ],
           ),
-          const SizedBox(height: 15,),
+          SizedBox(height: 15,),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
-            children: const [
+            children: [
               /* IconButton(
                   color: Colors.teal,
                   onPressed: (){},

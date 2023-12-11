@@ -125,11 +125,16 @@ class _NewCustForm extends State<NewCustForm> {
               controller: nameCtrll,
               keyboardType: TextInputType.name,
               decoration: InputDecorations.authInputDecoration(
-                  hintText: "Nombre",
-                  labelText: "*Nombre",
+                  hintText: "Nombre(s)",
+                  labelText: "*Nombre(s)",
                   prefixIcon: Icons.account_circle_outlined),
               validator: (value) {
-                return (value != null && value.isNotEmpty)
+                String? valnom = value;
+                while(valnom!.endsWith(' ')){
+                  valnom = valnom!.replaceRange(valnom.length-1, null, '');
+                  value = valnom;
+                }
+                return (value != null && value!.isNotEmpty)
                     ? null
                     : 'Por favor ingrese un nombre válido';
               },

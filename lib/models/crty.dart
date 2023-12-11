@@ -23,6 +23,8 @@ class SoCreditType {
   int periodsMin = 0;
   int periodsMax = 0;
   int maxMonthStay = 0;
+  int minAge = 0;
+  int maxAge = 0;
 
   SoCreditType.empty();
 
@@ -31,7 +33,7 @@ class SoCreditType {
       this.startDate,this.endDate,this.publicRequest,this.multiDisbursement,
       this.guarantees,this.requestWFlowTypeId,this.creditWFlowTypeId,
       this.creditCategoryId, this.minIncome, this.amountAsset, this.periodsMin,
-      this.periodsMax, this.maxMonthStay);
+      this.periodsMax, this.maxMonthStay, this.minAge, this.maxAge);
 
   factory SoCreditType.fromJson(Map<String, dynamic> json){
     return SoCreditType(
@@ -58,6 +60,8 @@ class SoCreditType {
       json['periodsMin'] as int,
       json['periodsMax'] as int,
       json['maxMonthStay'] as int,
+      json['minAge'] as int,
+      json['maxAge'] as int,
     );
   }
 
