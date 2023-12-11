@@ -51,16 +51,19 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
 
   @override
   void initState() {
+    print('Cookie: ${params.jSessionIdQuery.toUpperCase()} ${params.jSessionId}');
     _programCode = widget.programCode;
     _fielName = widget.fielName;
     _id = widget.id;
     _label = widget.label;
     _callback = widget.callBack;
+    print('id photo - $_id - $_callback');
     if(widget.initialRuta != ''){
       _initialRuta = widget.initialRuta!;
     }
     if(widget.idGuarantee != ''){
       _idGuarantee = widget.idGuarantee!;
+      print('id guaranty photo - $_idGuarantee');
     }
     super.initState();
   }
@@ -167,6 +170,7 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
 
   sendFile(String ruta, String programCode, String fieldName, String id) async {
     setState((){isLoading = true;});
+    print('object sendfile $ruta - $programCode - $fieldName - $id');
     _callback(true);
     final request = http.MultipartRequest('POST',
         Uri.parse(params.getAppUrl(params.instance) + 'uploadfileservelet'));
@@ -193,6 +197,7 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
     // _initialRuta = response.;
 
     if (response.statusCode == params.servletResponseScOk) {
+      print('segun exitoso');
       resultMessage('Subido con éxito' , context);
       _callback(false);
       setState(() {
@@ -214,8 +219,9 @@ class uploadIdPhoto extends State<UploadIdPhoto> {
     //   });
 
     }else{
-    resultMessage(response.toString(), context);
-    setState((){isLoading = false;});
+      print('no exitoso');
+      setState((){isLoading = false;});
+      resultMessage(response.toString(), context);
     }
   }
 }
