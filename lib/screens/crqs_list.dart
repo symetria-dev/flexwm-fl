@@ -226,11 +226,11 @@ class _CreditRequestList extends State<CreditRequestList> {
     AlertDialog alert = AlertDialog(
       title:
           const Text("Si tienes dudas del proceso, por favor contáctanos al:"),
-      content: const Column(
+      content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
-            children: [
+            children: const [
               Icon(
                 Icons.mail,
                 color: Colors.blueGrey,
@@ -712,8 +712,8 @@ class _CreditRequestList extends State<CreditRequestList> {
       child: CardStepContainer(
         child: Column(
           children: [
-            const Row(
-            children: [
+            Row(
+            children: const [
                 Text(
                   "Requisitos mínimos.",
                   style: TextStyle(color: Colors.grey, fontSize: 15),
@@ -815,23 +815,23 @@ class _CreditRequestList extends State<CreditRequestList> {
                 icon: const Icon(Icons.help_outline, color: Colors.teal),
                 itemBuilder: (_){
                   return [
-                     const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'sponsors',
                         child: Column(
                           children: [
                             Row(
-                              children: [
+                              children: const [
                                 Expanded(
                                   child: Text("Percepción de ingresos en la economía formal."),
                                 ),
                               ],
                             ),
-                            ListTile(
+                            const ListTile(
                               title: Text(
                                   '1. Ingresos declarados en el SAT:',
                                     style: TextStyle(color: Colors.grey, fontSize: 15)),
                             ),
-                            ListTile(
+                            const ListTile(
                               title: Padding(
                                 padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
                                 child: Text(
@@ -839,12 +839,12 @@ class _CreditRequestList extends State<CreditRequestList> {
                                     style: TextStyle(color: Colors.grey, fontSize: 15)),
                               ),
                             ),
-                            ListTile(
+                            const ListTile(
                               title: Text(
                                   "2. Ingresos asalariados:",
                                   style: TextStyle(color: Colors.grey, fontSize: 15)),
                             ),
-                            ListTile(
+                            const ListTile(
                               title: Padding(
                                 padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
                                 child: Text(
@@ -852,17 +852,17 @@ class _CreditRequestList extends State<CreditRequestList> {
                                     style: TextStyle(color: Colors.grey, fontSize: 15)),
                               ),
                             ),
-                            ListTile(
+                            const ListTile(
                               title: Text(
                                   "3. Constancia de Situación Fiscal y N° serie fiel. (Persona Física con Actividad Empresarial)",
                                   style: TextStyle(color: Colors.grey, fontSize: 15)),
                             ),
-                            ListTile(
+                            const ListTile(
                               title: Text(
                                   "4. Antigüedad laboral:",
                                   style: TextStyle(color: Colors.grey, fontSize: 15)),
                             ),
-                            ListTile(
+                            const ListTile(
                               title: Padding(
                                 padding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
                                 child: Text(

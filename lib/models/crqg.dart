@@ -25,7 +25,7 @@ class SoCreditRequestGuarantee {
   double creditAutomotive = 0.0;
   double creditFurniture = 0.0;
   double personalLoans = 0.0;
-  double verifiableIncome = 0.0;
+  double income = 0.0;
   SoCustomer soCustomer = SoCustomer.empty();
   String identification = "";
   String proofIncome = "";
@@ -37,6 +37,9 @@ class SoCreditRequestGuarantee {
   String proofAddress = "";
   int creditBureau = 0;
   int sendMailBureau = 0;
+  int occupationId = -1;
+  String occupationLabel = '';
+  double otherIncome = 0.0;
 
   static String RELATION_SELF = 'Z';
   static String RELATION_PARENT = 'P';
@@ -123,9 +126,10 @@ class SoCreditRequestGuarantee {
       this.yearsResidence,this.ciec,this.accountStatement,this.payrollReceipts,this.heritage,
       this.employmentStatus,this.company,this.economicActivity,this.yearsEmployment,
       this.creditCards,this.rent,this.creditAutomotive,this.creditFurniture,this.personalLoans,
-      this.verifiableIncome, this.soCustomer,this.identification,this.proofIncome,
+      this.income, this.soCustomer,this.identification,this.proofIncome,
       this.fiscalSituation,this.verifiableIncomeFile,this.declaratory, this.identificationBack,
-      this.identityVideo, this.proofAddress, this.creditBureau);
+      this.identityVideo, this.proofAddress, this.creditBureau, this.occupationId,
+      this.occupationLabel, this.otherIncome);
 
   factory SoCreditRequestGuarantee.fromJson(Map<String, dynamic> json){
     return SoCreditRequestGuarantee(
@@ -150,7 +154,7 @@ class SoCreditRequestGuarantee {
       json['creditAutomotive'] as double,
       json['creditFurniture'] as double,
       json['personalLoans'] as double,
-      json['verifiableIncome'] as double,
+      json['income'] as double,
       SoCustomer(json['soCustomer']['id'] as int,
         json['soCustomer']['code'] as String,
         json['soCustomer']['displayName'] as String,
@@ -179,6 +183,7 @@ class SoCreditRequestGuarantee {
         json['soCustomer']['mobile'] as String,
         json['soCustomer']['maritalRegime'] as String,
         json['soCustomer']['spouseName'] as String,
+        json['soCustomer']['gender'] as String,
           ),
       json['identification'] as String,
       json['proofIncome'] as String,
@@ -189,6 +194,9 @@ class SoCreditRequestGuarantee {
       json['identityVideo'] as String,
       json['proofAddress'] as String,
       json['creditBureau'] as int,
+      json['occupationId'] as int,
+      json['occupationLabel'] as String,
+      json['otherIncome'] as double,
     );
   }
 
@@ -215,7 +223,7 @@ class SoCreditRequestGuarantee {
       'creditAutomotive' : creditAutomotive,
       'creditFurniture' : creditFurniture,
       'personalLoans' : personalLoans,
-      'verifiableIncome' : verifiableIncome,
+      'income' : income,
       'soCustomer' : soCustomer,
       'identification' : identification,
       'proofIncome' : proofIncome,
@@ -227,6 +235,9 @@ class SoCreditRequestGuarantee {
       'proofAddress' : proofAddress,
       'creditBureau' : creditBureau,
       'sendMailBureau' : sendMailBureau,
+      'occupationId' : occupationId,
+      'occupationLabel' : occupationLabel,
+      'otherIncome' : otherIncome,
     };
   }
 }

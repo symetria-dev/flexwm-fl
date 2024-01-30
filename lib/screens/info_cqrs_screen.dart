@@ -299,21 +299,21 @@ print('valores valores - ${_creditRequestGuarantee.length} - ${widget.requiredGu
   }
 
   Widget readySend(){
-    return const CardContainer(
+    return CardContainer(
         child:  Column(
           children: [
             Row(
-              children: [
+              children: const [
                 Text('Lista para Enviar',
                   style: TextStyle(color: Colors.black,fontSize: 17),
                 ),
               ],
             ),
-            SizedBox(height: 15,),
+            const SizedBox(height: 15,),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               mainAxisSize: MainAxisSize.max,
-              children: [
+              children: const [
                /* IconButton(
                   color: Colors.teal,
                   onPressed: (){},
@@ -340,21 +340,21 @@ print('valores valores - ${_creditRequestGuarantee.length} - ${widget.requiredGu
   }
 
   Widget statusRevision(){
-    return const CardContainer(
+    return CardContainer(
       child:  Column(
         children: [
           Row(
-            children: [
+            children: const [
               Text('En Revisión',
                 style: TextStyle(color: Colors.black,fontSize: 17),
               ),
             ],
           ),
-          SizedBox(height: 15,),
+          const SizedBox(height: 15,),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
-            children: [
+            children: const [
               /* IconButton(
                   color: Colors.teal,
                   onPressed: (){},
@@ -376,21 +376,21 @@ print('valores valores - ${_creditRequestGuarantee.length} - ${widget.requiredGu
   }
 
   Widget statusAuthorized(){
-    return const CardContainer(
+    return CardContainer(
       child:  Column(
         children: [
           Row(
-            children: [
+            children: const [
               Text('Aprobada',
                 style: TextStyle(color: Colors.black,fontSize: 17),
               ),
             ],
           ),
-          SizedBox(height: 15,),
+          const SizedBox(height: 15,),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
-            children: [
+            children: const [
               /* IconButton(
                   color: Colors.teal,
                   onPressed: (){},
@@ -413,21 +413,21 @@ print('valores valores - ${_creditRequestGuarantee.length} - ${widget.requiredGu
   }
 
   Widget statusCancelled(){
-    return const CardContainer(
+    return CardContainer(
       child:  Column(
         children: [
           Row(
-            children: [
+            children: const [
               Text('Rechazada',
                 style: TextStyle(color: Colors.black,fontSize: 17),
               ),
             ],
           ),
-          SizedBox(height: 15,),
+          const SizedBox(height: 15,),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
-            children: [
+            children: const [
               /* IconButton(
                   color: Colors.teal,
                   onPressed: (){},

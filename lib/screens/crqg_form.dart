@@ -1140,7 +1140,7 @@ class _CreditRequestGuarateeFormState extends State<CreditRequestGuarateeForm>{
 
     //datos guarantee
     soCreditRequestGuarantee.ciec = textCiecCntrll.text;
-    soCreditRequestGuarantee.verifiableIncome = textVerifiableIncomeCntrll.numberValue;
+    soCreditRequestGuarantee.income = textVerifiableIncomeCntrll.numberValue;
     soCreditRequestGuarantee.accountStatement = textAccountStatementCntrll.numberValue;
     soCreditRequestGuarantee.payrollReceipts = textPayrollReceiptsCntrll.numberValue;
     soCreditRequestGuarantee.heritage = textHeritageCntrll.text;

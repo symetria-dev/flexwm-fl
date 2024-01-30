@@ -28,11 +28,11 @@ class AutocompleteExampleApp extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<AutocompleteExampleApp> createState() => _AutocompleteBasicUserExample();
+  State<AutocompleteExampleApp> createState() => AutocompleteBasicUserExample();
 }
 
 
-class _AutocompleteBasicUserExample extends State<AutocompleteExampleApp> {
+class AutocompleteBasicUserExample extends State<AutocompleteExampleApp> {
   late Function _callback;
   late int _autoValue = -1;
   late List<Data> dataList = [];
@@ -100,6 +100,13 @@ class _AutocompleteBasicUserExample extends State<AutocompleteExampleApp> {
         debugPrint('You just selected ${_displayStringForOption(selection)}');
       },
     );
+  }
+
+  void updateLabel(String label){
+    setState(() {
+      initialTextValue = label;
+      print('value text autocomplete $initialTextValue');
+    });
   }
 
   Future getData() async {

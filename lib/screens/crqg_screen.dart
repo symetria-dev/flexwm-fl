@@ -97,7 +97,7 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
             _creditRequestGuarantee[index].creditAutomotive,
             _creditRequestGuarantee[index].creditFurniture,
             _creditRequestGuarantee[index].personalLoans,
-            _creditRequestGuarantee[index].verifiableIncome,
+            _creditRequestGuarantee[index].income,
             _creditRequestGuarantee[index].soCustomer,
             _creditRequestGuarantee[index].identification,
             _creditRequestGuarantee[index].proofIncome,
@@ -108,6 +108,9 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
             _creditRequestGuarantee[index].identityVideo,
             _creditRequestGuarantee[index].proofAddress,
             _creditRequestGuarantee[index].creditBureau,
+            _creditRequestGuarantee[index].occupationId,
+            _creditRequestGuarantee[index].occupationLabel,
+            _creditRequestGuarantee[index].otherIncome
           );
           return Slidable(
             endActionPane:
@@ -327,6 +330,7 @@ class _CreditRequestGuaranteeState extends State<CreditRequestGuarantee> {
                                     _soCustomerList[index].mobile,
                                     _soCustomerList[index].maritalRegimen,
                                     _soCustomerList[index].spouseName,
+                                    _soCustomerList[index].gender,
                               );
                               return Slidable(
                                 endActionPane: ActionPane(

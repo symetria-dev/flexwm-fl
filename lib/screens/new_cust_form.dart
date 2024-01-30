@@ -232,7 +232,7 @@ class _NewCustForm extends State<NewCustForm> {
                 });
               },
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 40,),
             MaterialButton(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),

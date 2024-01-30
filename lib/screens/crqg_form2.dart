@@ -8,6 +8,7 @@ import 'package:flexwm/screens/crqa_screen.dart';
 import 'package:flexwm/widgets/auth_formbackground.dart';
 import 'package:flexwm/widgets/auth_listbackground.dart';
 import 'package:flexwm/widgets/card_stepcontainer.dart';
+import 'package:flexwm/widgets/upload_id_video_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -73,7 +74,9 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
   final textStatusCntrll = TextEditingController();
   //Variables de campos cambiantes
   int cityId = 0;
+  int occupationId = 0;
   String cityText = '';
+  String occupationText = '';
   //key para subir archivo foto
   final GlobalKey<uploadFileIcon> _keyUploadPhoto = GlobalKey();
   //Objeto de tipo para manipular info
@@ -96,6 +99,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
   final textCurpCntrll = TextEditingController();
   late String maritalStatus = SoCustomer.MARITALSTATUS_SINGLE;
   late String regimenMarital = SoCustomer.REGIMEN_CONJUGAL_SOCIETY;
+  late String customerGender = SoCustomer.GENDER_FEMALE;
   String msjResponsServer = '';
 
   final textEconomicDepCntrll = TextEditingController();
@@ -111,6 +115,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
   final textAccountStatementCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
   final textPayrollReceiptsCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
   final textVerifiableIncomeCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
+  final textOtherIncomeCntrll = MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
   final textHeritageCntrll = TextEditingController();
   late String employmentStatus = SoCreditRequestGuarantee.STATUS_EMPLOYEE;
   final textCompanyCntrll = TextEditingController();
@@ -142,7 +147,8 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
   final GlobalKey<uploadFile> _keyUploadVerifiableIncome = GlobalKey();
   final GlobalKey<uploadFile> _keyUploadDeclaratory = GlobalKey();
   final GlobalKey<uploadFile> _keyUploadProofAddress = GlobalKey();
-  final GlobalKey<uploadFile> _keyUploadIdentityVideo = GlobalKey();
+  final GlobalKey<uploadIdVideo> _keyUploadIdentityVideo = GlobalKey();
+  final GlobalKey<AutocompleteBasicUserExample> _keyAutocompleteOccupation = GlobalKey();
   //indicador de aval creado
   bool avalCreated = false;
   //id aval
@@ -166,7 +172,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
 
   @override
   void initState(){
-    if(widget.requiredAcredited){
+    if(!widget.requiredAcredited){
       title = 'Acreditado Titular';
     }else{
       title = 'Coacreditado';
@@ -174,6 +180,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
 
     if(widget.soCreditRequestGuarantee.id > 0 ){
       customerId = widget.soCreditRequestGuarantee.soCustomer.id;
+      occupationText = widget.soCreditRequestGuarantee.occupationLabel;
 
         fetchCrqg(widget.soCreditRequestGuarantee.id.toString()).then((value) {
           avalCreated = true;
@@ -227,6 +234,11 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                 maritalStatus = soCreditRequestGuarantee.soCustomer.maritalStatus;
               });
             }
+            if(soCreditRequestGuarantee.soCustomer.gender != ''){
+              setState(() {
+                customerGender = soCreditRequestGuarantee.soCustomer.gender;
+              });
+            }
             if(soCreditRequestGuarantee.soCustomer.maritalRegimen != '') regimenMarital = soCreditRequestGuarantee.soCustomer.maritalRegimen;
             if(soCreditRequestGuarantee.soCustomer.spouseName != '') textSpouseNameCntrll.text = soCreditRequestGuarantee.soCustomer.spouseName;
             if(soCreditRequestGuarantee.accountStatement > 0.0) textAccountStatementCntrll.updateValue(soCreditRequestGuarantee.accountStatement);
@@ -246,6 +258,12 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
               //si este dato existe es que ya va en el paso 3 de la forma
               _activeStepIndex = 3;
             }
+            if(soCreditRequestGuarantee.occupationId > 0){
+              setState(() {
+                occupationId = soCreditRequestGuarantee.occupationId;
+                occupationText = soCreditRequestGuarantee.occupationLabel;
+              });
+            }
 
             if(soCreditRequestGuarantee.yearsEmployment > 0)textYearsEmploymentCntrll.text = soCreditRequestGuarantee.yearsEmployment.toString();
             if(soCreditRequestGuarantee.creditCards > 0.0)textCreditCardsCntrll.updateValue(soCreditRequestGuarantee.creditCards);
@@ -253,7 +271,8 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
             if(soCreditRequestGuarantee.creditAutomotive > 0.0)textCreditAutomotiveCntrll.updateValue(soCreditRequestGuarantee.creditAutomotive);
             if(soCreditRequestGuarantee.creditFurniture > 0.0)textCreditFurniturCntrll.updateValue(soCreditRequestGuarantee.creditFurniture);
             if(soCreditRequestGuarantee.personalLoans > 0.0)textPersonalLoansCntrll.updateValue(soCreditRequestGuarantee.personalLoans);
-            if(soCreditRequestGuarantee.verifiableIncome > 0.0)textVerifiableIncomeCntrll.updateValue(soCreditRequestGuarantee.verifiableIncome);
+            if(soCreditRequestGuarantee.income > 0.0)textVerifiableIncomeCntrll.updateValue(soCreditRequestGuarantee.income);
+            if(soCreditRequestGuarantee.otherIncome > 0.0)textOtherIncomeCntrll.updateValue(soCreditRequestGuarantee.otherIncome);
             if(soCreditRequestGuarantee.ciec != '') textCiecCntrll.text = soCreditRequestGuarantee.ciec;
 
           });
@@ -262,6 +281,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
       }else{
       maritalStatus = SoCreditRequestGuarantee.STATUS_SINGLE;
       regimenMarital = SoCreditRequestGuarantee.REGIMEN_CONJUGAL_SOCIETY;
+      customerGender = SoCustomer.GENDER_FEMALE;
       relation = SoCreditRequestGuarantee.RELATION_SELF;
       if(widget.requiredAcredited){
         role = SoCreditRequestGuarantee.ROLE_ACREDITED;
@@ -436,7 +456,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
         }
         break;
       case 2:
-        if(_formKeyTwo.currentState!.validate() ){
+        if(_formKeyTwo.currentState!.validate() && occupationId > 0){
           setState(() { sendingData = true;});
           //Se guardan datos de solicitud de crédito
           updateCreditRequestGuarantee().then((value) {
@@ -565,6 +585,35 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                       ? null
                       : 'Por favor ingrese un curp válido';
                 },
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Expanded(
+                      child: Text(
+                        "Genero*",
+                        style: TextStyle(color: Colors.grey, fontSize: 15),
+                      )),
+                  DropdownButtonHideUnderline(
+                    child: ButtonTheme(
+                      child: DropdownButton(
+                        value: customerGender,
+                        items: SoCustomer.getGenderCustomer
+                            .map((e) {
+                          return DropdownMenuItem(
+                            child: Text(e['label']),
+                            value: e['value'],
+                          );
+                        }).toList(),
+                        onChanged: (Object? value) {
+                          setState(() {
+                            customerGender = '$value';
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(
                 height: 10,
@@ -827,7 +876,6 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                       Switch(
                         value: isSwitched,
                         onChanged: (value) {
-                          print('quien procesa --- $whoProccess');
                           if(whoProccess || soCreditRequestGuarantee.customerId == params.idLoggedUser) {
                             if (!isSwitched ) {
                               _confirmPassword();
@@ -848,8 +896,8 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                   ),
                   if(!whoProccess && soCreditRequestGuarantee.role == SoCreditRequestGuarantee.ROLE_ACREDITED
                       && soCreditRequestGuarantee.customerId != params.idLoggedUser)
-                    const Row(
-                      children: [
+                    Row(
+                      children: const [
                         Expanded(
                             child: Text("Favor de revisar su correo, se envió una solicitud para su autorización de revisión en buro de crédito",
                               style: TextStyle(color: Colors.grey),
@@ -940,9 +988,23 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                   TextFormField(
                     keyboardType: TextInputType.number,
                     decoration: InputDecorations.authInputDecoration(
-                        labelText: 'Ingresos Comprobables',
+                        labelText: 'Ingresos',
                         prefixIcon: Icons.monetization_on_outlined),
                     controller: textVerifiableIncomeCntrll,
+                    validator: ( value ) {
+                      final intNumber = double.tryParse(value!.replaceAll(',', ''));
+                      return (intNumber != null && intNumber >= 0)
+                          ? null
+                          : 'Por favor ingrese un valor';
+                    },
+                  ),
+                  const SizedBox(height: 10,),
+                  TextFormField(
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecorations.authInputDecoration(
+                        labelText: 'Otros Ingresos',
+                        prefixIcon: Icons.monetization_on_outlined),
+                    controller: textOtherIncomeCntrll,
                     validator: ( value ) {
                       final intNumber = double.tryParse(value!.replaceAll(',', ''));
                       return (intNumber != null && intNumber >= 0)
@@ -979,6 +1041,18 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 10,),
+                  AutocompleteExampleApp(
+                    key: _keyAutocompleteOccupation,
+                      programCode: 'OCCU',
+                      label: 'Ocupación*',
+                      callback: (int id){
+                        occupationId = id;
+                      },
+                      autoValue: occupationId,
+                      textValue: occupationText,
+                      inValid: false
                   ),
                   const SizedBox(height: 10,),
                   TextFormField(
@@ -1318,7 +1392,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
                         updateDataCrqg();
                       },
                       idGuarantee: '',),
-                    UploadFile(
+                    UploadIdVideo(
                       key: _keyUploadIdentityVideo,
                       initialRuta: soCreditRequestGuarantee.identityVideo,
                       programCode: SoCreditRequestGuarantee.programCode,
@@ -1651,6 +1725,10 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
     );
   }
 
+  updateOccupationText(String label){
+    _keyAutocompleteOccupation.currentState?.updateLabel(label);
+  }
+
   //funcion para actualizar widget hijo mediante el callback (uploadfile)
   updateDataCrqg(){
     print('updatedatacrqg -----');
@@ -1711,6 +1789,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
       soCustomer.maritalRegimen = '';
       soCustomer.spouseName = '';
     }
+    soCustomer.gender = customerGender;
     soCustomer.recommendedBy = params.idLoggedUser;
     soCustomer.customerType = SoCustomer.TYPE_PERSON;
     // Envia la sesion como Cookie, con el nombre en UpperCase
@@ -1780,7 +1859,8 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
 
     //datos guarantee
     soCreditRequestGuarantee.ciec = textCiecCntrll.text;
-    soCreditRequestGuarantee.verifiableIncome = textVerifiableIncomeCntrll.numberValue;
+    soCreditRequestGuarantee.income = textVerifiableIncomeCntrll.numberValue;
+    soCreditRequestGuarantee.otherIncome = textOtherIncomeCntrll.numberValue;
     soCreditRequestGuarantee.accountStatement = textAccountStatementCntrll.numberValue;
     soCreditRequestGuarantee.payrollReceipts = textPayrollReceiptsCntrll.numberValue;
     soCreditRequestGuarantee.heritage = textHeritageCntrll.text;
@@ -1806,6 +1886,7 @@ class _CreditRequestGuarateeForm2State extends State<CreditRequestGuarateeForm2>
     }else{
       soCreditRequestGuarantee.sendMailBureau = 0;
     }
+    soCreditRequestGuarantee.occupationId = occupationId;
 
     final response = await http.post(
       Uri.parse(params.getAppUrl(params.instance) +

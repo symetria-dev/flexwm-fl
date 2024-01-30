@@ -208,9 +208,9 @@ class _CrqsFormState extends State<CrqsForm> {
       fetchSoOrderCreditItem(widget.creditRequest.id);
       fetchFinanceUtil(widget.creditRequest.id);
       fetchCrqg(widget.creditRequest.id).then((value) {
-        if (soCreditRequestGuarantee.verifiableIncome > 0) {
+        if (soCreditRequestGuarantee.income > 0) {
           textVerifiableIncomeCntrll
-              .updateValue(soCreditRequestGuarantee.verifiableIncome);
+              .updateValue(soCreditRequestGuarantee.income);
           checkWhoProcesses = true;
           checkIncome = true;
         }
@@ -776,8 +776,8 @@ class _CrqsFormState extends State<CrqsForm> {
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(children: [
         // const SizedBox(height: 10,),
-        const Row(
-          children: [
+        Row(
+          children: const [
             Text(
               "Contratación con:",
               style: TextStyle(color: Colors.grey, fontSize: 15),
@@ -854,8 +854,8 @@ class _CrqsFormState extends State<CrqsForm> {
           ],
         ),
         const SizedBox(height: 10),
-        const Row(
-          children: [
+        Row(
+          children: const [
             Text(
               "Seleccionar programa de estudios*",
               style: TextStyle(color: Colors.grey, fontSize: 15),
@@ -1100,14 +1100,14 @@ class _CrqsFormState extends State<CrqsForm> {
               ),
             ),
             const SizedBox(height: 10,),
-            const Row(
-              children: [
+            Row(
+              children: const [
                 Text("Importante.", style: TextStyle(fontSize: 17),),
               ],
             ),
             const SizedBox(height: 10,),
-            const Row(
-              children: [
+            Row(
+              children: const [
                 Text(
                 'Las condiciones* y su respectivo CAT (Costo Anual Total) sin IVA de la presente tabla'
                 ' de amortización se calculan conforme a las políticas vigentes de Edupass y '
@@ -1122,15 +1122,15 @@ class _CrqsFormState extends State<CrqsForm> {
                     style: const TextStyle(color: Colors.grey, fontSize: 15)),
               ],
             ),
-            const Row(
-              children: [
+            Row(
+              children: const [
                 Text(
                     "Consulta requisitos y condiciones del financiamiento al teléfono 55 5989 6338 o en el sitio web https://www.edupass.mx/.",
                     style: TextStyle(color: Colors.grey, fontSize: 15)),
               ],
             ),
-            const Row(
-              children: [
+            Row(
+              children: const [
                 Text(
                     '*Las comisiones, mensualidades, plazos y tasas.',
                     style: TextStyle(color: Colors.grey, fontSize: 10)),
@@ -2121,10 +2121,10 @@ class _CrqsFormState extends State<CrqsForm> {
   // Actualiza la solicitud de credito sponsor preliminar en el servidor
   Future<bool> addCreditRequestGuarantee() async {
     if (checkIncome) {
-      soCreditRequestGuarantee.verifiableIncome =
+      soCreditRequestGuarantee.income =
           textVerifiableIncomeCntrll.numberValue;
     } else {
-      soCreditRequestGuarantee.verifiableIncome = 0;
+      soCreditRequestGuarantee.income = 0;
     }
 
     // Envia la sesion como Cookie, con el nombre en UpperCase
@@ -2298,7 +2298,7 @@ class _CrqsFormState extends State<CrqsForm> {
                 soCreditRequestDetail.monthStay > soCreditType.maxMonthStay)) ||
             (soGuarantee.role == SoCreditRequestGuarantee.ROLE_ACREDITED &&
                 soGuarantee.relation == SoCreditRequestGuarantee.RELATION_SELF &&
-                soGuarantee.verifiableIncome < soCreditType.minIncome) ) {
+                soGuarantee.income < soCreditType.minIncome) ) {
           setState(() {
             requiredAcredited = true;
           });

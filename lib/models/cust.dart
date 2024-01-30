@@ -21,6 +21,9 @@ class SoCustomer {
   static const String MARITALSTATUS_MARRIED = 'M';
   static const String MARITALSTATUS_FREEUNION = 'U';
 
+  static const String GENDER_FEMALE = 'F';
+  static const String GENDER_MALE = 'M';
+
   int id = -1;
   String code = '';
   String displayName = '';
@@ -51,6 +54,7 @@ class SoCustomer {
   String mobile = "";
   String maritalRegimen = '';
   String spouseName = '';
+  String gender = '';
 
   static List getTypeCustomer = [
     {"value": TYPE_PERSON, "label": "Persona"},
@@ -71,6 +75,11 @@ class SoCustomer {
     {"value": REGIMEN_CONJUGAL_SOCIETY, "label":"Comunidad"},
     {"value": REGIMEN_SEPARATION_PROPERTY, "label":"Bienes Separados"},
     {"value": REGIMEN_MIXED_REGIMEN, "label":"Mixto"},
+  ];
+
+  static List getGenderCustomer = [
+    {"value": GENDER_FEMALE, "label": "Femenino"},
+    {"value": GENDER_MALE, "label": "Masculino"},
   ];
 
   static String getLabelStatus(String value){
@@ -102,7 +111,8 @@ class SoCustomer {
       ,this.customerType,this.rfc,this.firstName,this.fatherLastName,
       this.salesManId,this.nss,this.stablishMentDate, this.birthdate
       ,this.passw, this.passwconf, this.curp,this.recommendedBy,this.motherlastname,
-      this.maritalStatus,this.mobile, this.maritalRegimen, this.spouseName);
+      this.maritalStatus,this.mobile, this.maritalRegimen, this.spouseName,
+      this.gender);
 
   factory SoCustomer.fromJson(Map<String, dynamic> json) {
     return SoCustomer(json['id'] as int,
@@ -133,6 +143,7 @@ class SoCustomer {
         json['mobile'] as String,
       json['maritalRegime'] as String,
       json['spouseName'] as String,
+      json['gender'] as String,
     );
   }
 
@@ -164,6 +175,7 @@ class SoCustomer {
       'mobile' : mobile,
       'maritalRegime' : maritalRegimen,
       'spouseName' : spouseName,
+      'gender' : gender,
     };
   }
 }
